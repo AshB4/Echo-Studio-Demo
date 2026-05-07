@@ -171,6 +171,13 @@ function getDefaultChromeUserDataDir() {
 	);
 }
 
+function shouldForceHeadlessForServer() {
+	if (process.platform !== "linux") return false;
+	const display = String(process.env.DISPLAY || "").trim();
+	const waylandDisplay = String(process.env.WAYLAND_DISPLAY || "").trim();
+	return !display && !waylandDisplay;
+}
+
 function getPinterestBrowserOptions() {
 	const channel = process.env.PINTEREST_BROWSER_CHANNEL || "chrome";
 	const executablePath = process.env.PINTEREST_EXECUTABLE_PATH || undefined;
@@ -1039,9 +1046,11 @@ export default async function postToPinterest(post, _context = {}) {
 			`Resolved Pinterest board "${board}" is not in config/pinterest-boards.json allow-list.`,
 		);
 	}
-	const headless =
+	const configuredHeadless =
 		boolFromEnv("PINTEREST_HEADLESS", false) &&
 		boolFromEnv("PINTEREST_ALLOW_HEADLESS", false);
+	const forcedHeadless = shouldForceHeadlessForServer();
+	const headless = configuredHeadless || forcedHeadless;
 	const debug = createDebugRecorder(boolFromEnv("PINTEREST_DEBUG", false));
 	const statePath =
 		process.env.PINTEREST_SESSION_STATE_PATH || DEFAULT_STATE_PATH;
@@ -1077,6 +1086,8 @@ export default async function postToPinterest(post, _context = {}) {
 	try {
 		await debug.log("start", {
 			headless,
+			configuredHeadless,
+			forcedHeadless,
 			channel,
 			executablePath: executablePath || null,
 			profileDir: preparedProfile.launchUserDataDir,
