@@ -157,15 +157,21 @@ export const platformProfiles = {
   },
   kofi: {
     label: "Ko-fi",
-    audienceExpectation: "supporter relationship, creator warmth",
-    voice: "personal, grateful, gently promotional",
+    audienceExpectation: "supporter relationship, world continuity, intimate creator mythology",
+    voice: "personal, atmospheric, intimate, world-aware, gently invitational",
     structureRules: [
-      "Explain what supporters get.",
-      "Make the relationship obvious.",
-      "Reward directness over funnel-speak.",
+      "Treat the post like a fragment from a living universe, not a standard promo update.",
+      "Keep support language world-connected and optional rather than transactional.",
+      "Preserve atmosphere and mystery instead of explaining everything.",
     ],
-    ctaStyle: "Support, commission, follow, unlock.",
-    avoid: ["aggressive funnel-speak"],
+    ctaStyle: "Join the archive, support the church, keep the candles lit, preserve forbidden texts.",
+    avoid: [
+      "aggressive funnel-speak",
+      "generic creator economy language",
+      "corporate polish",
+      "onlyfans-style hard sell",
+      "breaking the mood with modern marketing speak",
+    ],
   },
   amazon: {
     label: "Amazon",

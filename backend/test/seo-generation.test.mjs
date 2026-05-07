@@ -1,6 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { buildChunkedPromptStages, buildSeoPrompt } from "../utils/GptPromptBuilder.js";
+import { getPlatformPromptProfiles } from "../utils/platformProfiles.mjs";
+import { getProductProfile } from "../utils/productProfiles.mjs";
 import {
   extractJsonObject,
   getDryRunPayload,
@@ -169,4 +171,22 @@ test("dry run for openai keeps monolithic prompt", () => {
   assert.equal(payload.model, "gpt-4o-mini");
   assert.equal(payload.stages, undefined);
   assert.match(payload.prompt, /Target platforms: x, linkedin/);
+});
+
+test("Ko-fi plus Amara profile carries fictional-universe guidance into prompts", () => {
+  const prompt = buildSeoPrompt(
+    "Church Archive Fragment",
+    "Dark romantic mythos and serialized gothic universe for Ko-fi",
+    "followers drawn to theatrical devotion and gothic intimacy",
+    {
+      platformIds: ["kofi"],
+      selectedPlatforms: getPlatformPromptProfiles(["kofi"]),
+      productProfile: getProductProfile("amara-universe-kofi"),
+    },
+  );
+
+  assert.match(prompt, /Honor fictional universe tone/);
+  assert.match(prompt, /Join the archive, support the church, keep the candles lit, preserve forbidden texts/i);
+  assert.match(prompt, /forbidden journal entries/i);
+  assert.match(prompt, /Do not flatten everything into generic marketing copy/i);
 });

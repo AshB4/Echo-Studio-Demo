@@ -1,5 +1,6 @@
 import prismaPkg from "@prisma/client";
 import { getPrismaClient } from "../../utils/prisma.js";
+import { serializeContentItem } from "./serializers.js";
 import { validateContentPayload } from "./validators.js";
 
 const { Prisma } = prismaPkg;
@@ -50,7 +51,7 @@ export default async function updateContent(req, res) {
 			},
 		});
 
-		return res.json({ data: updated });
+		return res.json({ data: serializeContentItem(updated) });
 	} catch (error) {
 		if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2025") {
 			return res.status(404).json({ message: "Content item not found" });

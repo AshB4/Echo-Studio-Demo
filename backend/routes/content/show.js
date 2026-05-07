@@ -1,15 +1,7 @@
 import { getPrismaClient } from "../../utils/prisma.js";
+import { serializeContentItem } from "./serializers.js";
 
 const prisma = getPrismaClient();
-
-function parseTargetMetadata(target) {
-	if (!target || typeof target.metadata !== "string") return target;
-	try {
-		return { ...target, metadata: JSON.parse(target.metadata) };
-	} catch {
-		return target;
-	}
-}
 
 export default async function showContent(req, res) {
 	const id = Number.parseInt(req.params.id, 10);
@@ -32,12 +24,7 @@ export default async function showContent(req, res) {
 		}
 
 		return res.json({
-			data: {
-				...contentItem,
-				platformTargets: Array.isArray(contentItem.platformTargets)
-					? contentItem.platformTargets.map(parseTargetMetadata)
-					: contentItem.platformTargets,
-			},
+			data: serializeContentItem(contentItem),
 		});
 	} catch (error) {
 		console.error("Failed to load content item", error);

@@ -10,6 +10,17 @@ const VALID_CONTENT_STATUSES = new Set([
 	"paused",
 ]);
 
+const VALID_LIFECYCLE_STATES = new Set([
+	"seed",
+	"fragment",
+	"note",
+	"experiment",
+	"article",
+	"syndicated",
+	"refreshed",
+	"archived",
+]);
+
 const VALID_TARGET_STATUSES = new Set([
 	"pending",
 	"approved",
@@ -160,6 +171,15 @@ function validateTargets(targets, errors) {
 		.filter(Boolean);
 }
 
+function validateObjectField(value, field, errors) {
+	if (value === null) return null;
+	if (typeof value !== "object" || Array.isArray(value)) {
+		errors.push({ field, message: `${field} must be an object if provided` });
+		return undefined;
+	}
+	return value;
+}
+
 export function validateContentPayload(payload = {}, { partial = false } = {}) {
 	const errors = [];
 	const data = {};
@@ -197,6 +217,27 @@ export function validateContentPayload(payload = {}, { partial = false } = {}) {
 		}
 	}
 
+	if (Object.prototype.hasOwnProperty.call(payload, "lifecycleState")) {
+		if (payload.lifecycleState === null || payload.lifecycleState === undefined) {
+			errors.push({ field: "lifecycleState", message: "lifecycleState cannot be null" });
+		} else if (
+			typeof payload.lifecycleState !== "string" ||
+			payload.lifecycleState.trim().length === 0
+		) {
+			errors.push({
+				field: "lifecycleState",
+				message: "lifecycleState must be a non-empty string",
+			});
+		} else if (!VALID_LIFECYCLE_STATES.has(payload.lifecycleState.trim())) {
+			errors.push({
+				field: "lifecycleState",
+				message: `lifecycleState must be one of: ${Array.from(VALID_LIFECYCLE_STATES).join(", ")}`,
+			});
+		} else {
+			data.lifecycleState = payload.lifecycleState.trim();
+		}
+	}
+
 	if (Object.prototype.hasOwnProperty.call(payload, "scheduledAt")) {
 		if (payload.scheduledAt === null || payload.scheduledAt === undefined) {
 			data.scheduledAt = null;
@@ -223,6 +264,35 @@ export function validateContentPayload(payload = {}, { partial = false } = {}) {
 			data.userId = Number(payload.userId);
 		} else {
 			errors.push({ field: "userId", message: "userId must be an integer if provided" });
+		}
+	}
+
+	if (Object.prototype.hasOwnProperty.call(payload, "canonicalSource")) {
+		if (
+			payload.canonicalSource !== null &&
+			payload.canonicalSource !== undefined &&
+			typeof payload.canonicalSource !== "string"
+		) {
+			errors.push({
+				field: "canonicalSource",
+				message: "canonicalSource must be a string if provided",
+			});
+		} else {
+			data.canonicalSource = payload.canonicalSource ?? null;
+		}
+	}
+
+	if (Object.prototype.hasOwnProperty.call(payload, "metadata")) {
+		const metadata = validateObjectField(payload.metadata, "metadata", errors);
+		if (metadata !== undefined) {
+			data.metadata = metadata === null ? null : JSON.stringify(metadata);
+		}
+	}
+
+	if (Object.prototype.hasOwnProperty.call(payload, "lineage")) {
+		const lineage = validateObjectField(payload.lineage, "lineage", errors);
+		if (lineage !== undefined) {
+			data.lineage = lineage === null ? null : JSON.stringify(lineage);
 		}
 	}
 

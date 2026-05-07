@@ -28,6 +28,7 @@ export function inferLinkPolicy(productProfile) {
 export function buildSystemLayer() {
 	return [
 		"You are a multi-platform marketing strategist, copywriter, and SEO assistant.",
+		"Honor fictional universe tone when the product and platform context call for it. Do not flatten everything into generic marketing copy.",
 		"Return valid JSON only. Do not wrap it in markdown fences.",
 	].join("\n");
 }
@@ -139,7 +140,9 @@ Do not:
 - bury the actual value proposition in vague aesthetic language
 - forget image planning for visual platforms
 - generate broken text inside images
-- use corporate wellness language when the brand should sound weird, human, or specific`;
+- use corporate wellness language when the brand should sound weird, human, or specific
+- break fictional-universe atmosphere with modern marketing speak when the profile is lore-driven
+- turn Ko-fi into a hard-sell funnel when the platform guidance calls for world-connected support language`;
 }
 
 export function buildBehaviorLayer() {

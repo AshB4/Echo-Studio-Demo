@@ -1,0 +1,585 @@
+{
+  "productLink": "https://www.amazon.com/Scary-Kawaii-Halloween-Coloring-Book/dp/B0DHDNTW87",
+  "platforms": [
+    "pinterest"
+  ],
+  "board": "Kawaii Coloring",
+  "campaign": "kawaii-halloween-evergreen",
+  "items": [
+    {
+      "cluster": "stress_relief",
+      "variantId": "stress-relief-01",
+      "keyword": "stress relief coloring pages",
+      "angle": "cozy burnout recovery",
+      "title": "Color Your Stress Away With Cute Spooky Coloring",
+      "description": "Relax with adorable spooky coloring pages perfect for cozy nights, stress relief, and calming creative downtime.",
+      "image": "frontend/assets/kawaiiHalloween/ColorURStressAway.png",
+      "board": "Home spa",
+      "boards": [
+        "Home spa",
+        "Beautiful me.",
+        "Halloween",
+        "Kawaii Coloring"
+      ],
+      "tags": [
+        "stress relief coloring",
+        "cozy halloween",
+        "anxiety relief",
+        "cute spooky",
+        "self care hobby"
+      ]
+    },
+    {
+      "cluster": "stress_relief",
+      "variantId": "stress-relief-02",
+      "keyword": "anxiety relief coloring book",
+      "angle": "calming halloween activity",
+      "title": "Cute Spooky Coloring For Anxiety Relief",
+      "description": "Cute Halloween coloring pages designed for relaxing evenings, creative self care, and spooky cozy vibes.",
+      "image": "frontend/assets/kawaiiHalloween/ColorURStressAway.png",
+      "board": "Beautiful me.",
+      "boards": [
+        "Beautiful me.",
+        "Home spa",
+        "Halloween",
+        "Kawaii Coloring"
+      ],
+      "tags": [
+        "anxiety relief",
+        "cute halloween",
+        "relaxing hobby",
+        "coloring book",
+        "cozy vibes"
+      ]
+    },
+    {
+      "cluster": "stress_relief",
+      "variantId": "stress-relief-03",
+      "keyword": "cozy halloween coloring",
+      "angle": "nighttime self care",
+      "title": "Cozy Halloween Coloring Pages For Relaxing Nights",
+      "description": "Wind down with spooky cute coloring pages and soft Halloween vibes perfect for peaceful nights in.",
+      "image": "frontend/assets/kawaiiHalloween/ColorURStressAway.png",
+      "board": "Halloween",
+      "boards": [
+        "Halloween",
+        "Home spa",
+        "Beautiful me.",
+        "Kawaii Coloring"
+      ],
+      "tags": [
+        "cozy halloween",
+        "spooky cute",
+        "cute coloring",
+        "halloween aesthetic",
+        "creative relaxation"
+      ]
+    },
+    {
+      "cluster": "stress_relief",
+      "variantId": "stress-relief-04",
+      "keyword": "cute spooky self care",
+      "angle": "mental recharge",
+      "title": "Cute Spooky Coloring To Recharge Your Brain",
+      "description": "Take a break from stress with adorable spooky coloring pages full of cute Halloween energy.",
+      "image": "frontend/assets/kawaiiHalloween/ColorURStressAway.png",
+      "board": "Kawaii Coloring",
+      "boards": [
+        "Kawaii Coloring",
+        "Home spa",
+        "Beautiful me.",
+        "Halloween"
+      ],
+      "tags": [
+        "mental health",
+        "cute spooky",
+        "coloring therapy",
+        "self care",
+        "halloween coloring"
+      ]
+    },
+    {
+      "cluster": "stress_relief",
+      "variantId": "stress-relief-05",
+      "keyword": "relaxing halloween coloring pages",
+      "angle": "creative comfort",
+      "title": "Relaxing Halloween Coloring Pages For Cozy Comfort",
+      "description": "Cute spooky coloring pages that turn Halloween into a relaxing, comforting creative ritual.",
+      "image": "frontend/assets/kawaiiHalloween/ColorURStressAway.png",
+      "board": "Home spa",
+      "boards": [
+        "Home spa",
+        "Beautiful me.",
+        "Halloween",
+        "Kawaii Coloring"
+      ],
+      "tags": [
+        "relaxation",
+        "halloween coloring",
+        "cozy hobby",
+        "cute art",
+        "stress relief"
+      ]
+    },
+    {
+      "cluster": "cute_spooky",
+      "variantId": "cute-spooky-01",
+      "keyword": "cute bat coloring pages",
+      "angle": "kawaii halloween",
+      "title": "Cute Bat Coloring Pages For Spooky Fun",
+      "description": "Adorable kawaii bat coloring pages perfect for Halloween lovers, spooky season, and cozy creative fun.",
+      "image": "frontend/assets/kawaiiHalloween/CuteandSpookyBat.png",
+      "board": "Kawaii Coloring",
+      "boards": [
+        "Kawaii Coloring",
+        "Epic cuteness",
+        "coloring pages",
+        "Halloween"
+      ],
+      "tags": [
+        "cute bat",
+        "kawaii halloween",
+        "spooky cute",
+        "coloring pages",
+        "halloween fun"
+      ]
+    },
+    {
+      "cluster": "cute_spooky",
+      "variantId": "cute-spooky-02",
+      "keyword": "kawaii halloween coloring",
+      "angle": "pastel goth vibes",
+      "title": "Kawaii Halloween Coloring Pages With Cute Spooky Vibes",
+      "description": "Soft spooky Halloween coloring pages featuring adorable bats, pumpkins, and cozy gothic vibes.",
+      "image": "frontend/assets/kawaiiHalloween/CuteandSpookyBat.png",
+      "board": "Epic cuteness",
+      "boards": [
+        "Epic cuteness",
+        "Kawaii Coloring",
+        "Halloween",
+        "coloring pages"
+      ],
+      "tags": [
+        "pastel goth",
+        "cute spooky",
+        "kawaii art",
+        "halloween aesthetic",
+        "bat coloring"
+      ]
+    },
+    {
+      "cluster": "cute_spooky",
+      "variantId": "cute-spooky-03",
+      "keyword": "printable halloween coloring pages",
+      "angle": "family activity",
+      "title": "Printable Cute Halloween Coloring Pages",
+      "description": "Fun printable Halloween coloring pages with adorable spooky characters for cozy family activities.",
+      "image": "frontend/assets/kawaiiHalloween/CuteandSpookyBat.png",
+      "board": "coloring pages",
+      "boards": [
+        "coloring pages",
+        "Kawaii Coloring",
+        "Halloween",
+        "Fun Ideas"
+      ],
+      "tags": [
+        "printable coloring",
+        "halloween printable",
+        "cute halloween",
+        "family fun",
+        "bat art"
+      ]
+    },
+    {
+      "cluster": "cute_spooky",
+      "variantId": "cute-spooky-04",
+      "keyword": "spooky cute coloring book",
+      "angle": "cozy creativity",
+      "title": "Spooky Cute Coloring Pages For Cozy Creativity",
+      "description": "Cute spooky bat coloring pages designed for relaxing creative time and adorable Halloween fun.",
+      "image": "frontend/assets/kawaiiHalloween/CuteandSpookyBat.png",
+      "board": "Halloween",
+      "boards": [
+        "Halloween",
+        "Kawaii Coloring",
+        "Epic cuteness",
+        "coloring pages"
+      ],
+      "tags": [
+        "spooky cute",
+        "cozy coloring",
+        "cute bat art",
+        "creative hobby",
+        "kawaii vibes"
+      ]
+    },
+    {
+      "cluster": "cute_spooky",
+      "variantId": "cute-spooky-05",
+      "keyword": "cute halloween printable",
+      "angle": "adorable spooky activity",
+      "title": "Cute Halloween Coloring Fun With Kawaii Bats",
+      "description": "Adorable Halloween coloring pages filled with bats, stars, pumpkins, and cozy spooky energy.",
+      "image": "frontend/assets/kawaiiHalloween/CuteandSpookyBat.png",
+      "board": "Epic cuteness",
+      "boards": [
+        "Epic cuteness",
+        "Kawaii Coloring",
+        "Halloween",
+        "coloring pages"
+      ],
+      "tags": [
+        "cute halloween",
+        "bat coloring",
+        "adorable art",
+        "spooky vibes",
+        "kawaii printable"
+      ]
+    },
+    {
+      "cluster": "evergreen_halloween",
+      "variantId": "evergreen-halloween-01",
+      "keyword": "halloween coloring pages",
+      "angle": "seasonal fun",
+      "title": "Perfect Halloween Coloring Pages For Cozy Nights",
+      "description": "Cute spooky coloring pages perfect for relaxing Halloween nights and adorable seasonal creativity.",
+      "image": "frontend/assets/kawaiiHalloween/PerfectforHalloween.png",
+      "board": "Halloween",
+      "boards": [
+        "Halloween",
+        "Fun Ideas",
+        "Beautiful me.",
+        "coloring pages"
+      ],
+      "tags": [
+        "halloween coloring",
+        "cozy spooky",
+        "cute art",
+        "seasonal fun",
+        "fall activity"
+      ]
+    },
+    {
+      "cluster": "evergreen_halloween",
+      "variantId": "evergreen-halloween-02",
+      "keyword": "cute halloween activity",
+      "angle": "family friendly",
+      "title": "Cute Halloween Coloring Pages For All Ages",
+      "description": "Easy spooky cute coloring pages that make Halloween fun relaxing and creative for everyone.",
+      "image": "frontend/assets/kawaiiHalloween/PerfectforHalloween.png",
+      "board": "Fun Ideas",
+      "boards": [
+        "Fun Ideas",
+        "Halloween",
+        "coloring pages",
+        "Beautiful me."
+      ],
+      "tags": [
+        "family activity",
+        "cute halloween",
+        "all ages",
+        "cozy hobby",
+        "creative fun"
+      ]
+    },
+    {
+      "cluster": "evergreen_halloween",
+      "variantId": "evergreen-halloween-03",
+      "keyword": "fall coloring book",
+      "angle": "autumn cozy",
+      "title": "Cozy Fall Coloring Pages With Spooky Cute Vibes",
+      "description": "Relax with adorable spooky coloring pages perfect for crisp autumn evenings and cozy creative time.",
+      "image": "frontend/assets/kawaiiHalloween/PerfectforHalloween.png",
+      "board": "Beautiful me.",
+      "boards": [
+        "Beautiful me.",
+        "Halloween",
+        "Fun Ideas",
+        "coloring pages"
+      ],
+      "tags": [
+        "fall aesthetic",
+        "autumn vibes",
+        "cute spooky",
+        "cozy coloring",
+        "pumpkin art"
+      ]
+    },
+    {
+      "cluster": "evergreen_halloween",
+      "variantId": "evergreen-halloween-04",
+      "keyword": "halloween gift idea",
+      "angle": "giftable cozy hobby",
+      "title": "Cute Halloween Coloring Book Gift Idea",
+      "description": "A spooky cute coloring book perfect for Halloween lovers, cozy gift baskets, and relaxing fun.",
+      "image": "frontend/assets/kawaiiHalloween/PerfectforHalloween.png",
+      "board": "Fun Ideas",
+      "boards": [
+        "Fun Ideas",
+        "Halloween",
+        "Beautiful me.",
+        "coloring pages"
+      ],
+      "tags": [
+        "gift idea",
+        "halloween gift",
+        "cute spooky",
+        "creative hobby",
+        "fall fun"
+      ]
+    },
+    {
+      "cluster": "evergreen_halloween",
+      "variantId": "evergreen-halloween-05",
+      "keyword": "easy halloween coloring",
+      "angle": "beginner friendly",
+      "title": "Easy Cute Halloween Coloring Pages",
+      "description": "Simple adorable Halloween coloring pages designed for cozy creative breaks and relaxing fun.",
+      "image": "frontend/assets/kawaiiHalloween/PerfectforHalloween.png",
+      "board": "coloring pages",
+      "boards": [
+        "coloring pages",
+        "Halloween",
+        "Fun Ideas",
+        "Beautiful me."
+      ],
+      "tags": [
+        "easy coloring",
+        "cute halloween",
+        "beginner coloring",
+        "relaxing hobby",
+        "spooky cute"
+      ]
+    },
+    {
+      "cluster": "mascot_characters",
+      "variantId": "mascot-characters-01",
+      "keyword": "spooky cute characters",
+      "angle": "tiny grim reaper mascots",
+      "title": "Meet These Tiny Spooky Cute Friends",
+      "description": "Adorable spooky mascots and kawaii Halloween creatures perfect for cozy coloring fun.",
+      "image": "frontend/assets/kawaiiHalloween/SpookyCuteColorlingFun.png",
+      "board": "Epic cuteness",
+      "boards": [
+        "Epic cuteness",
+        "Halloween",
+        "Kawaii Coloring",
+        "Freaking Weird or mild..."
+      ],
+      "tags": [
+        "cute mascots",
+        "grim reaper",
+        "spooky cute",
+        "kawaii halloween",
+        "cute creatures"
+      ]
+    },
+    {
+      "cluster": "mascot_characters",
+      "variantId": "mascot-characters-02",
+      "keyword": "cute grim reaper art",
+      "angle": "soft spooky characters",
+      "title": "Cute Grim Reaper Coloring Fun",
+      "description": "Soft spooky Halloween coloring pages featuring adorable grim reaper and kawaii pumpkin friends.",
+      "image": "frontend/assets/kawaiiHalloween/SpookyCuteColorlingFun.png",
+      "board": "Halloween",
+      "boards": [
+        "Halloween",
+        "Epic cuteness",
+        "Kawaii Coloring",
+        "Freaking Weird or mild..."
+      ],
+      "tags": [
+        "grim reaper",
+        "cute spooky",
+        "halloween coloring",
+        "kawaii art",
+        "pumpkin friends"
+      ]
+    },
+    {
+      "cluster": "mascot_characters",
+      "variantId": "mascot-characters-03",
+      "keyword": "kawaii halloween friends",
+      "angle": "character collection",
+      "title": "Kawaii Halloween Friends To Color",
+      "description": "Cute spooky characters and cozy Halloween creatures perfect for relaxing creative nights.",
+      "image": "frontend/assets/kawaiiHalloween/SpookyCuteColorlingFun.png",
+      "board": "Kawaii Coloring",
+      "boards": [
+        "Kawaii Coloring",
+        "Epic cuteness",
+        "Halloween",
+        "Freaking Weird or mild..."
+      ],
+      "tags": [
+        "cute characters",
+        "kawaii halloween",
+        "spooky friends",
+        "cozy hobby",
+        "cute art"
+      ]
+    },
+    {
+      "cluster": "mascot_characters",
+      "variantId": "mascot-characters-04",
+      "keyword": "soft spooky coloring pages",
+      "angle": "not too scary",
+      "title": "Soft Spooky Coloring Fun For Cozy Nights",
+      "description": "Adorable spooky coloring pages with cute Halloween mascots and cozy magical vibes.",
+      "image": "frontend/assets/kawaiiHalloween/SpookyCuteColorlingFun.png",
+      "board": "Epic cuteness",
+      "boards": [
+        "Epic cuteness",
+        "Halloween",
+        "Kawaii Coloring",
+        "Freaking Weird or mild..."
+      ],
+      "tags": [
+        "soft spooky",
+        "cute halloween",
+        "cozy vibes",
+        "adorable art",
+        "cute mascots"
+      ]
+    },
+    {
+      "cluster": "mascot_characters",
+      "variantId": "mascot-characters-05",
+      "keyword": "cute halloween creatures",
+      "angle": "adorable spooky world",
+      "title": "Cute Halloween Creatures You’ll Want To Color",
+      "description": "A cozy spooky world full of adorable Halloween creatures pumpkins and magical night vibes.",
+      "image": "frontend/assets/kawaiiHalloween/SpookyCuteColorlingFun.png",
+      "board": "Freaking Weird or mild...",
+      "boards": [
+        "Freaking Weird or mild...",
+        "Epic cuteness",
+        "Halloween",
+        "Kawaii Coloring"
+      ],
+      "tags": [
+        "cute creatures",
+        "spooky cute",
+        "adorable halloween",
+        "creative fun",
+        "cozy spooky"
+      ]
+    },
+    {
+      "cluster": "aesthetic_vibes",
+      "variantId": "aesthetic-vibes-01",
+      "keyword": "spooky cute aesthetic",
+      "angle": "witchy cozy vibes",
+      "title": "Spooky Cute Vibes For Cozy Halloween Nights",
+      "description": "Cute spooky aesthetic coloring vibes with cozy candles pumpkins bats and magical Halloween energy.",
+      "image": "frontend/assets/kawaiiHalloween/SpookyCuteVibes.png",
+      "board": "Art & quotes",
+      "boards": [
+        "Art & quotes",
+        "The Queen in me.",
+        "Beautiful me.",
+        "Halloween"
+      ],
+      "tags": [
+        "spooky aesthetic",
+        "witchy vibes",
+        "cute spooky",
+        "cozy halloween",
+        "pastel goth"
+      ]
+    },
+    {
+      "cluster": "aesthetic_vibes",
+      "variantId": "aesthetic-vibes-02",
+      "keyword": "pastel goth halloween",
+      "angle": "aesthetic moodboard",
+      "title": "Pastel Goth Spooky Cute Coloring Vibes",
+      "description": "A dreamy spooky cute Halloween aesthetic perfect for cozy coloring nights and soft gothic moods.",
+      "image": "frontend/assets/kawaiiHalloween/SpookyCuteVibes.png",
+      "board": "The Queen in me.",
+      "boards": [
+        "The Queen in me.",
+        "Art & quotes",
+        "Beautiful me.",
+        "Halloween"
+      ],
+      "tags": [
+        "pastel goth",
+        "cute spooky",
+        "halloween mood",
+        "witchy aesthetic",
+        "purple vibes"
+      ]
+    },
+    {
+      "cluster": "aesthetic_vibes",
+      "variantId": "aesthetic-vibes-03",
+      "keyword": "cozy spooky season",
+      "angle": "autumn aesthetic",
+      "title": "Cozy Spooky Season Coloring Inspiration",
+      "description": "Cute spooky Halloween vibes with candles bats pumpkins and magical cozy night energy.",
+      "image": "frontend/assets/kawaiiHalloween/SpookyCuteVibes.png",
+      "board": "Beautiful me.",
+      "boards": [
+        "Beautiful me.",
+        "Art & quotes",
+        "Halloween",
+        "The Queen in me."
+      ],
+      "tags": [
+        "spooky season",
+        "cozy aesthetic",
+        "cute halloween",
+        "fall vibes",
+        "witchy mood"
+      ]
+    },
+    {
+      "cluster": "aesthetic_vibes",
+      "variantId": "aesthetic-vibes-04",
+      "keyword": "witchy halloween coloring",
+      "angle": "moonlit halloween",
+      "title": "Moonlit Spooky Cute Coloring Vibes",
+      "description": "Cute spooky coloring inspiration for magical Halloween nights and cozy witchy aesthetics.",
+      "image": "frontend/assets/kawaiiHalloween/SpookyCuteVibes.png",
+      "board": "Halloween",
+      "boards": [
+        "Halloween",
+        "Art & quotes",
+        "Beautiful me.",
+        "The Queen in me."
+      ],
+      "tags": [
+        "witchy halloween",
+        "moon aesthetic",
+        "cute spooky",
+        "halloween vibes",
+        "purple halloween"
+      ]
+    },
+    {
+      "cluster": "aesthetic_vibes",
+      "variantId": "aesthetic-vibes-05",
+      "keyword": "purple halloween aesthetic",
+      "angle": "saveable mood pin",
+      "title": "Purple Halloween Aesthetic With Cute Spooky Energy",
+      "description": "A dreamy spooky cute Halloween aesthetic full of candles moons bats pumpkins and cozy magic.",
+      "image": "frontend/assets/kawaiiHalloween/SpookyCuteVibes.png",
+      "board": "Art & quotes",
+      "boards": [
+        "Art & quotes",
+        "The Queen in me.",
+        "Beautiful me.",
+        "Halloween"
+      ],
+      "tags": [
+        "purple aesthetic",
+        "cute spooky",
+        "halloween inspiration",
+        "cozy halloween",
+        "witchy vibes"
+      ]
+    }
+  ]
+}

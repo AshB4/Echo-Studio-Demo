@@ -255,6 +255,7 @@ Use it before adding features so we do not recreate logic, duplicate helpers, or
 - Default affiliate cadence in the builder is `3/day`, with date-range overrides for sale windows such as `25th-30th -> 6/day`
 - The builder supports one immediate `board` plus optional per-row `boards` for future reposting to niche-fit boards on different days
 - The builder does not export paid Pinterest bulk CSV workflows; it prepares and queues rows into PostPunk instead
+- `backend/scripts/import-affiliate-batch.mjs` is the headless equivalent for remote hosts. It reads the same repo-native batch JSON, mixes rows across batches, and schedules them directly into SQLite/queue storage.
 
 ### JSON shapes to reuse
 
@@ -263,10 +264,13 @@ Use it before adding features so we do not recreate logic, duplicate helpers, or
 ```json
 {
   "productLink": "https://www.amazon.com/your-affiliate-link",
+  "platforms": ["pinterest"],
   "board": "Fun Ideas",
-  "publishAt": "",
+  "campaign": "campaign-slug",
   "items": [
     {
+      "cluster": "cluster_name",
+      "variantId": "cluster-01",
       "keyword": "",
       "angle": "",
       "title": "",
@@ -308,6 +312,7 @@ Use it before adding features so we do not recreate logic, duplicate helpers, or
 - Distinction that matters:
   - builder-import JSON is what you copy/paste into `/affiliate/builder`
   - queued-post JSON is the internal shape PostPunk stores in SQLite and hands to the platform posters
+  - the remote importer consumes the same builder-import JSON, so repo-native batch files can be loaded over `ssh` without opening the HP UI
 
 ## AI And Prompting
 

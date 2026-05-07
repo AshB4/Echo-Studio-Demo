@@ -1,5 +1,6 @@
 import prismaPkg from "@prisma/client";
 import { getPrismaClient } from "../../utils/prisma.js";
+import { serializeContentItem } from "./serializers.js";
 import { validateContentPayload } from "./validators.js";
 
 const { Prisma } = prismaPkg;
@@ -27,7 +28,7 @@ export default async function createContent(req, res) {
 			},
 		});
 
-		return res.status(201).json({ data: created });
+		return res.status(201).json({ data: serializeContentItem(created) });
 	} catch (error) {
 		if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2003") {
 			return res.status(400).json({ message: "Related records not found" });

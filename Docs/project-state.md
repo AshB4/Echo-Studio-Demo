@@ -133,6 +133,7 @@ These pieces are built and in active use:
 - `Pinterest` posting has been proven live for single pins through Playwright + saved session
 - affiliate builder rows can now be queued into the main PostPunk schedule with default `3/day` cadence and sale-window overrides
 - affiliate builder now understands a primary board plus alternate boards per row and suggests saved Pinterest board names from config
+- affiliate batch JSON can now be imported headlessly on remote machines with `backend/scripts/import-affiliate-batch.mjs`, including mixed-batch scheduling at `4-6/day`
 - Product profile lifecycle status is now tracked. The shipped Gumroad/Amazon products are marked `live`, while `PostPunk Core` is `in-progress` and the memoir/Reddit product remain `planned`.
 - Telegram alerts fire for both success and failure
 - the worker now emits inventory and schedule-gap alerts when the queue has empty near-term days
@@ -152,7 +153,7 @@ These pieces are built and in active use:
 - `Amazon` now has a usable planning/builder workflow, but it is not a proven unattended posting lane yet
 - built-in AI generation is not a trusted daily workflow yet; external GPT output + `/batch` import is the practical path
 - `Facebook Stories` and `Facebook video` are not wired yet; they are a future Meta lane worth adding because Stories likely matter for reach, but current focus should remain on regular image posts first
-- Astro markdown/content export from PostPunk is not wired yet
+- Astro export helpers exist in the codebase, but the Astro site is not online yet and Astro is not a live publishing lane yet
 - schedule integrity is still not fully trustworthy; the worker can be healthy while the queue itself is missing expected days or was rewritten incorrectly
 
 ## Current Operating Model
@@ -178,6 +179,7 @@ Use the system like this:
 - Scheduling defaults are conservative in some UI flows, but live usage is mixed. Affiliate and Pinterest scheduling often run at `3/day`, and specific windows can be denser.
 - Product mixing is now supported so batches from multiple products can be interleaved across days.
 - Pinterest queue remixing is now available from the calendar. It calls the backend rebalance route and refreshes the queue after it runs.
+- Remote Pinterest affiliate queue loading now has a no-UI path: copy repo-native batch files to the target host, then run `backend/scripts/import-affiliate-batch.mjs` over SSH.
 - The active Pinterest rebalance plan is `amazon-a`, `amazon-b`, `digital`, `wildcard`. The two Amazon slots are flexible labels and can pull from any `amazon-*` category, not only beauty/kids.
 - The Montessori egg / Easter-stuffer product was removed from the future approved Pinterest queue. Future approved Easter/stuffer/Montessori egg matches were verified at `0` after cleanup.
 - `/archive` is the single posted-history surface now; `/lib` was removed to avoid duplicate navigation.

@@ -66,6 +66,14 @@ export default function PostComposer() {
     setCampaignAngle,
     visualHook,
     setVisualHook,
+    redditSubreddit,
+    setRedditSubreddit,
+    redditCommunityReason,
+    setRedditCommunityReason,
+    redditPostType,
+    setRedditPostType,
+    redditLinkMode,
+    setRedditLinkMode,
     selectedProductProfile,
     useAutoHashtags,
     setUseAutoHashtags,
@@ -367,6 +375,7 @@ export default function PostComposer() {
   const activeProfiles = selectedPlatforms
     .map((platform) => getPlatformProfile(platform))
     .filter(Boolean);
+  const redditSelected = selectedPlatforms.includes("reddit");
 
   return (
     <div className="p-4 max-w-4xl mx-auto">
@@ -518,6 +527,78 @@ export default function PostComposer() {
           onChange={(e) => setBody(e.target.value)}
         />
       </section>
+
+      {redditSelected && (
+        <section className="mb-6 rounded border border-amber-700 bg-black/70 p-4">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <h2 className="text-lg font-semibold text-amber-300">Reddit Safeguards</h2>
+              <p className="mt-1 max-w-2xl text-sm text-amber-100/80">
+                Reddit is treated as a manual, trust-sensitive lane. This system should slow you
+                down on purpose.
+              </p>
+            </div>
+            <div className="rounded border border-amber-500/60 bg-amber-950/30 px-3 py-2 text-xs text-amber-200">
+              Manual review only. No hard-sell behavior.
+            </div>
+          </div>
+
+          <div className="mt-4 grid gap-4 md:grid-cols-2">
+            <label className="block">
+              <span className="text-sm font-medium text-amber-300">Subreddit</span>
+              <input
+                className="mt-2 w-full rounded border border-amber-500 bg-black p-2 text-amber-100"
+                value={redditSubreddit}
+                onChange={(e) => setRedditSubreddit(e.target.value)}
+                placeholder="r/goblincore or another specific community"
+              />
+            </label>
+            <label className="block">
+              <span className="text-sm font-medium text-amber-300">Post Type</span>
+              <select
+                className="mt-2 w-full rounded border border-amber-500 bg-black p-2 text-amber-100"
+                value={redditPostType}
+                onChange={(e) => setRedditPostType(e.target.value)}
+              >
+                <option value="discussion">Discussion</option>
+                <option value="useful-content">Useful Content</option>
+                <option value="humor">Humor</option>
+                <option value="community">Community</option>
+                <option value="product-adjacent">Product Adjacent</option>
+                <option value="hard-sell">Hard Sell</option>
+              </select>
+            </label>
+          </div>
+
+          <div className="mt-4 grid gap-4 md:grid-cols-2">
+            <label className="block md:col-span-2">
+              <span className="text-sm font-medium text-amber-300">Why Would This Subreddit Care?</span>
+              <textarea
+                className="mt-2 min-h-[90px] w-full rounded border border-amber-500 bg-black p-2 text-amber-100"
+                value={redditCommunityReason}
+                onChange={(e) => setRedditCommunityReason(e.target.value)}
+                placeholder="What is the native reason this community would care even if there were no product link?"
+              />
+            </label>
+            <label className="block">
+              <span className="text-sm font-medium text-amber-300">Link Mode</span>
+              <select
+                className="mt-2 w-full rounded border border-amber-500 bg-black p-2 text-amber-100"
+                value={redditLinkMode}
+                onChange={(e) => setRedditLinkMode(e.target.value)}
+              >
+                <option value="no-link">No Link</option>
+                <option value="soft-redirect">Soft Redirect</option>
+                <option value="direct-link">Direct Link</option>
+              </select>
+            </label>
+            <div className="rounded border border-zinc-700 bg-zinc-950/50 p-3 text-sm text-zinc-300">
+              Goblin-specific note: humor-first, identity-first, product-adjacent is safer than
+              overt product pressure. Treat Reddit like a trust lane, not a funnel lane.
+            </div>
+          </div>
+        </section>
+      )}
 
       <section className="mb-6 rounded border border-teal-700 bg-black/60 p-4">
         <h2 className="mb-3 text-lg font-semibold text-pink-400">AI SEO Suggestions</h2>

@@ -354,21 +354,55 @@ where the official material is more operational than stylistic.
 
 ### Ko-fi
 
-- Audience expectation: supporter relationship, creator warmth, direct support context.
-- Voice: personal, grateful, gently promotional.
+- Audience expectation: supporter relationship, world continuity, intimate creator mythology.
+- Voice: personal, atmospheric, intimate, world-aware, gently invitational.
 - Best formats:
-  - update notes
-  - supporter offers
-  - commissions/promos
-  - behind-the-scenes posts
+  - lore fragments
+  - church announcements
+  - ritual notes
+  - diary fragments
 - Structure rules:
-  - explain what supporters get
-  - make the relationship obvious
-- CTA style: support, commission, follow, unlock.
+  - treat the post like a fragment from a living universe, not a standard promo update
+  - keep support language world-connected and optional rather than transactional
+  - preserve atmosphere and mystery instead of explaining everything
+- CTA style: join the archive, support the church, keep the candles lit, preserve forbidden texts.
 - Avoid:
   - aggressive funnel-speak
+  - generic creator economy language
+  - corporate polish
+  - onlyfans-style hard sell
+  - breaking the mood with modern marketing speak
 - Source notes:
   - Creator-support products tend to reward direct relationship language over growth-hack framing.
+
+### Ko-fi Universe Overlay: Amara
+
+- Tone:
+  - mysterious
+  - emotionally intense
+  - theatrical
+  - darkly affectionate
+  - self-aware
+  - atmospheric
+- Energy references:
+  - forbidden journal entries
+  - whispered cult invitations
+  - dark romance fragments
+  - ominous affection
+  - fake rituals
+  - Tumblr-era gothic romance energy
+- Support language:
+  - joining the archive
+  - supporting the church
+  - preserving forbidden texts
+  - funding rituals
+  - keeping the candles lit
+- Never sound like:
+  - SaaS marketing
+  - productivity software
+  - generic influencer content
+  - horny bait
+  - polished corporate fantasy branding
 
 ### Amazon
 

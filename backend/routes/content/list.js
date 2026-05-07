@@ -1,15 +1,7 @@
 import { getPrismaClient } from "../../utils/prisma.js";
+import { serializeContentItem } from "./serializers.js";
 
 const prisma = getPrismaClient();
-
-function parseTargetMetadata(target) {
-	if (!target || typeof target.metadata !== "string") return target;
-	try {
-		return { ...target, metadata: JSON.parse(target.metadata) };
-	} catch {
-		return target;
-	}
-}
 
 export default async function listContent(req, res) {
 	const statusFilter =
@@ -46,12 +38,7 @@ export default async function listContent(req, res) {
 		const filteredItems = (platformFilter
 			? items.filter((item) => item.platformTargets.length > 0)
 			: items
-		).map((item) => ({
-			...item,
-			platformTargets: Array.isArray(item.platformTargets)
-				? item.platformTargets.map(parseTargetMetadata)
-				: item.platformTargets,
-		}));
+		).map(serializeContentItem);
 
 		return res.json({ data: filteredItems });
 	} catch (error) {

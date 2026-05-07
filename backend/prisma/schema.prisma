@@ -27,7 +27,11 @@ model ContentItem {
   title           String
   body            String?
   status          String           @default("draft")
+  lifecycleState  String           @default("seed") @map("lifecycle_state")
   scheduledAt     DateTime?        @map("scheduled_at")
+  metadata        String?
+  lineage         String?
+  canonicalSource String?          @map("canonical_source")
   createdAt       DateTime         @default(now()) @map("created_at")
   updatedAt       DateTime         @updatedAt @map("updated_at")
   user            User?            @relation(fields: [userId], references: [id])

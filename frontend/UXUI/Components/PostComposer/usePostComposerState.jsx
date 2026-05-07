@@ -127,6 +127,18 @@ const usePostComposerState = (initialDraft = null) => {
 	const [visualHook, setVisualHook] = useState(
 		initialDraft?.metadata?.visualHook || ""
 	);
+	const [redditSubreddit, setRedditSubreddit] = useState(
+		initialDraft?.metadata?.redditSubreddit || ""
+	);
+	const [redditCommunityReason, setRedditCommunityReason] = useState(
+		initialDraft?.metadata?.redditCommunityReason || ""
+	);
+	const [redditPostType, setRedditPostType] = useState(
+		initialDraft?.metadata?.redditPostType || "discussion"
+	);
+	const [redditLinkMode, setRedditLinkMode] = useState(
+		initialDraft?.metadata?.redditLinkMode || "no-link"
+	);
 
 	const [useAutoHashtags, setUseAutoHashtags] = useState(
 		!normalizeHashtags(initialDraft?.hashtags)
@@ -257,6 +269,10 @@ const usePostComposerState = (initialDraft = null) => {
 		setCampaignPhase(initialDraft.metadata?.campaignPhase || DEFAULT_CAMPAIGN_PHASE);
 		setCampaignAngle(initialDraft.metadata?.campaignAngle || "");
 		setVisualHook(initialDraft.metadata?.visualHook || "");
+		setRedditSubreddit(initialDraft.metadata?.redditSubreddit || "");
+		setRedditCommunityReason(initialDraft.metadata?.redditCommunityReason || "");
+		setRedditPostType(initialDraft.metadata?.redditPostType || "discussion");
+		setRedditLinkMode(initialDraft.metadata?.redditLinkMode || "no-link");
 	}, [initialDraft]);
 
 	const toggleTarget = (platform, accountId = null) => {
@@ -308,11 +324,25 @@ const usePostComposerState = (initialDraft = null) => {
 
 		const platformViolations = validatePostAgainstRules({
 			body,
+			title,
 			customText,
 			useAutoPlatformText,
 			targets: selectedTargets,
 			mediaType,
 			hasMedia: Boolean(mediaPath || image),
+			metadata: {
+				...(initialDraft?.metadata || {}),
+				contentTags: normalizeTagList(contentTags),
+				distributionTags: normalizeTagList(distributionTags),
+				redditSubreddit: redditSubreddit.trim(),
+				redditCommunityReason: redditCommunityReason.trim(),
+				redditPostType,
+				redditLinkMode,
+			},
+			intendedStatus: overrides.status || (saveAsDraft || !approveForSchedule ? "draft" : "approved"),
+			postIntent,
+			includeProductLink,
+			tags: normalizeTagList(contentTags),
 		});
 		if (platformViolations.length > 0) {
 			const error = new Error(platformViolations[0].message);
@@ -345,6 +375,10 @@ const usePostComposerState = (initialDraft = null) => {
 				campaignPhase,
 				campaignAngle: campaignAngle.trim(),
 				visualHook: visualHook.trim(),
+				redditSubreddit: redditSubreddit.trim(),
+				redditCommunityReason: redditCommunityReason.trim(),
+				redditPostType,
+				redditLinkMode,
 				productProfileId: selectedProductProfile?.id || null,
 				productProfileLabel: selectedProductProfile?.label || "",
 				productCategory: selectedProductProfile?.category || "",
@@ -487,6 +521,14 @@ const usePostComposerState = (initialDraft = null) => {
 		setCampaignAngle,
 		visualHook,
 		setVisualHook,
+		redditSubreddit,
+		setRedditSubreddit,
+		redditCommunityReason,
+		setRedditCommunityReason,
+		redditPostType,
+		setRedditPostType,
+		redditLinkMode,
+		setRedditLinkMode,
 		selectedProductProfile,
 		useAutoHashtags,
 		setUseAutoHashtags,

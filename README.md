@@ -3,24 +3,24 @@
 ## PostPunk is not open source. 
 It is licensed under BSD 2-Clause for private, non-commercial use only. Commercial use requires a paid license.
 
-PostPunk is your feral-but-focused automation system for scheduling, remixing, and tracking content posts across multiple platforms — complete with UTM insights, drag-and-drop frontend tools, optional notification systems, and a killer local dev setup.
+PostPunk is a discoverability-oriented publishing operations system. It manages workflows, metadata intelligence, lifecycle tracking, syndication decisions, and evergreen resurfacing while Astro remains the canonical publishing layer for rendering, SEO presentation, and archive structure.
 
-For a deep dive into the guiding vision and the 4WD framework, see [PostPunk Core Vision](./Docs/PostPunk_Core_Vision.md).
+For the guiding product boundary and discoverability operating model, see [PostPunk Core Vision](./Docs/PostPunk_Core_Vision.md).
 
 ---
 
 ## 🚀 What It Does
 | Feature                     | Purpose                                                |
 |----------------------------|--------------------------------------------------------|
-| ✅ Post Queue              | Schedule and track content across platforms           |
-| 🔁 Creative Recycling       | Remix past posts, keep evergreen content alive         |
-| 📊 Funnel Analytics         | Review queue health, campaign metrics, and tracked funnel events |
-| 📲 Telegram Alerts          | Success/failure/crash notifications from worker       |
-| 🖼️ Media Library            | Local image/GIF/video uploads stored per post         |
-| 💸 Affiliate Tagging        | Optional auto-tagging of Amazon links                |
-| 🤖 Product Finder           | Scored product candidate generation (seed/Creators source) |
+| 🧭 Lifecycle Tracking       | Model content as seed, fragment, note, experiment, article, syndicated, refreshed, archived |
+| 🧠 Metadata Intelligence    | Track discoverability metadata, canonical source, related content, and repurpose priority |
+| 🔁 Syndication Operations   | Coordinate platform-aware derivatives without confusing them with canonical ownership |
+| ♻️ Evergreen Systems        | Support resurfacing, refresh reminders, and content decay awareness |
+| 🧩 Platform-Aware Lanes     | Treat Pinterest, Reddit, Dev.to, Facebook, Ko-fi, and similar lanes by behavior, not as interchangeable outputs |
+| 📊 Operational Analytics    | Review queue health, campaign metrics, and tracked funnel events |
+| 🖼️ Media + Asset Support    | Store supporting assets, alt text, and platform-specific payload metadata |
+| 🧾 Astro Export Readiness   | Generate Astro-compatible markdown/frontmatter from PostPunk content records |
 | 🧠 Local First Design       | Runs from terminal or always-on service (launchd/systemd) |
-| 🧾 BSD Licensing            | Safe for personal use, commercial use via license      |
 
 ---
 
@@ -35,11 +35,20 @@ For a deep dive into the guiding vision and the 4WD framework, see [PostPunk Cor
 ---
 
 ## 🧠 Core Concepts
-### Poster Monster Queue Rules
+### Responsibility Split
+Astro owns canonical publishing, rendering, SEO presentation, and archive structure.
+
+PostPunk owns workflows, metadata intelligence, lifecycle tracking, syndication, publishing operations, and discoverability systems.
+
+### Queue Rules
 Only posts with `"status": "approved"` in the `postQueue.json` are eligible for publishing.
 - Platforms must match `active_platforms` in `settings.json`
 - After posting, system updates `status` to `"posted"`
 - Posts can be rejected or recycled via logs
+
+Publishing `status` is not the same thing as content `lifecycleState`.
+`status` answers "can this target publish now?"
+`lifecycleState` answers "what stage of evolution is this content artifact in?"
 
 ---
 
@@ -57,9 +66,22 @@ For full runbooks (macOS launchd, Linux systemd, queue/worker ops, backups, heal
 
 ---
 
-## 🧠 Creative Recycling
-Use `recycle.js` to store evergreen templates, asset combos, and platform-tailored content.
-📄 See [Recycling Templates](./Docs/recycle-templates.md)
+## 🧠 Discoverability Model
+PostPunk is not:
+- a generic social media scheduler
+- a giant CMS
+- an AI spam engine
+- a productivity app
+- an all-platform autoposter
+
+PostPunk is:
+- discoverability infrastructure
+- metadata-aware publishing operations
+- evergreen content workflow tooling
+- canonical-aware syndication infrastructure
+- operational publishing intelligence
+
+See [PostPunk Core Vision](./Docs/PostPunk_Core_Vision.md) for the full operating model.
 
 ---
 
