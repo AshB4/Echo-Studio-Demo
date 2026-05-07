@@ -4,6 +4,14 @@ This file explains what owns what in PostPunk/N8tiveFlow.
 
 Use it before adding features so we do not recreate logic, duplicate helpers, or split the source of truth.
 
+## Current Strategic Stack
+
+- Canonical publishing lives outside PostPunk in `AshB4 Studio`
+- Astro is the canonical SEO and authority layer
+- PostPunk is the workflow, metadata, scheduling, and syndication layer
+- The primary active distribution lanes are `Facebook`, `Dev.to`, `Pinterest`, and `Reddit`
+- Other adapter files may exist, but they should not be mistaken for the current strategic focus
+
 ## Core Flow
 
 - Frontend entrypoint and route source of truth: `frontend/main.jsx`
@@ -153,6 +161,27 @@ Use it before adding features so we do not recreate logic, duplicate helpers, or
 - Amazon: `backend/scripts/platforms/marketplaces/post-to-amazon.js`
 - Pinterest session bootstrap helper: `backend/scripts/platforms/social/capture-pinterest-state.js`
 
+### Current primary lane focus
+
+- `Dev.to`: trusted canonical-article syndication lane
+- `Facebook`: trusted social distribution lane
+- `Pinterest`: trusted evergreen visual discovery lane
+- `Reddit`: active strategic target, but still needs operational proving
+
+### Present in code but not current strategic focus
+
+- `X`
+- `LinkedIn`
+- `Instagram`
+- `Threads`
+- `Substack`
+- `Hashnode`
+- `Product Hunt`
+- `Tumblr`
+- `Ko-fi`
+- `Discord`
+- `Amazon` as an unattended posting lane
+
 ### Adapter files present but not currently dispatched in `post-to-all.js`
 
 - TikTok adapter file exists: `backend/scripts/platforms/social/post-to-tiktok.js`
@@ -211,6 +240,12 @@ Use it before adding features so we do not recreate logic, duplicate helpers, or
   - the next resume step is to sign in once inside the dedicated Substack automation browser profile, then rerun the editor flow
 - Helper test harness:
   - `backend/test-substack.js`
+
+### Canonical publishing note
+
+- PostPunk is not the canonical publishing home for long-form authority content
+- the intended future direction is for PostPunk content metadata and derivatives to feed Astro / `AshB4 Studio`
+- markdown/content export is still a future integration point, not a completed path
 
 ### Affiliate workflow notes
 

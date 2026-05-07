@@ -4,6 +4,67 @@ This file is the handoff doc for the current working state of PostPunk/N8tiveFlo
 
 If you come back later, this is the file to read first.
 
+## Current Strategic Focus
+
+Canonical publishing layer:
+
+- `AshB4 Studio`
+- Astro-based static publishing site
+- markdown-first publishing
+- SEO-first publishing
+- canonical authority source
+- searchable engineering notebook
+
+PostPunk role:
+
+- queue
+- scheduler
+- syndication system
+- metadata system
+- discoverability operations layer
+- evergreen content infrastructure
+
+Primary publishing/distribution platforms:
+
+- `Facebook`
+- `Dev.to`
+- `Pinterest`
+- `Reddit`
+
+De-prioritized / non-core platforms right now:
+
+- `X`
+- `LinkedIn`
+- `Instagram`
+- `Threads`
+- `Substack`
+- broad all-platform autoposting
+
+Architecture philosophy:
+
+- Astro owns canonical publishing and SEO authority
+- PostPunk owns workflows, metadata, lineage, syndication, and scheduling
+- PostPunk should feed the Astro site later through markdown/content export
+- keep the systems loosely coupled and maintainable
+
+Content philosophy:
+
+- build logs
+- operational lessons
+- automation observations
+- SEO/discoverability insights
+- engineering notebook style
+- searchable problem-solving content
+
+Avoid:
+
+- corporate thought leadership
+- generic SaaS blogging
+- empty productivity fluff
+- AI spam tooling
+- trend-chasing systems
+- video-first systems
+
 ## What This App Is Right Now
 
 PostPunk is currently:
@@ -19,6 +80,7 @@ PostPunk is currently:
 - a local-first app using SQLite as the real store
 - a JSON-mirrored system where `backend/queue/*.json` exists for compatibility, not as the primary source of truth
 - an import-first workflow for AI-written content via `/batch`
+- a workflow/distribution layer, not the canonical publishing home
 
 It is not yet a fully automatic multi-platform autoposter.
 
@@ -79,32 +141,37 @@ These pieces are built and in active use:
 
 ## What Is Not Reliable Yet
 
-- `X` is not a trusted posting lane
+- `Reddit` is wired in code, but it is not yet a proven live posting lane in the same way `Facebook`, `Dev.to`, and `Pinterest` have been proven
+- `X` is not a trusted posting lane and is not a current focus
+- `LinkedIn` is not a current focus
 - `Facebook` token expiry is still an operational risk, but the lane itself is working
 - the proven Facebook posting path is now browser-only and does not rely on daily token refreshes
-- `Instagram` token state has been a blocker
-- `Threads` is incomplete
+- `Instagram` token state has been a blocker and Instagram is not a current focus
+- `Threads` is incomplete and not a current focus
 - `Pinterest` works for single live pins, but batch posting, topics/tags, alt text, and publish-later are not wired yet
 - `Amazon` now has a usable planning/builder workflow, but it is not a proven unattended posting lane yet
 - built-in AI generation is not a trusted daily workflow yet; external GPT output + `/batch` import is the practical path
 - `Facebook Stories` and `Facebook video` are not wired yet; they are a future Meta lane worth adding because Stories likely matter for reach, but current focus should remain on regular image posts first
+- Astro markdown/content export from PostPunk is not wired yet
 - schedule integrity is still not fully trustworthy; the worker can be healthy while the queue itself is missing expected days or was rewritten incorrectly
 
 ## Current Operating Model
 
 Use the system like this:
 
-1. Generate content externally or in-app, then bring batches into `/batch`.
-2. Save selected items into the queue.
-3. Approve and schedule from `/batch`.
-4. Let `Dev.to` auto-post when due.
-5. Let `Facebook` auto-post when due through the browser-only lane.
-6. Use `/today` for manual posting or manual confirmation on the other platforms.
-7. Use the Pinterest Playwright lane for single-pin posting when needed.
-8. Use `/affiliate` to keep the affiliate rules and research prompts visible while planning.
-9. Use `/affiliate/builder` to import/build affiliate rows, mix them, and queue them into the main schedule.
-10. Review posted items in `/archive` and log metrics from `/charts`.
-11. Mark posts `posted` or `failed` as needed.
+1. Publish canonical markdown-first content in Astro / `AshB4 Studio`.
+2. Adapt that source material into PostPunk distribution variants where needed.
+3. Generate content externally or in-app, then bring batches into `/batch`.
+4. Save selected items into the queue.
+5. Approve and schedule from `/batch`.
+6. Let `Dev.to` auto-post when due.
+7. Let `Facebook` auto-post when due through the browser-only lane.
+8. Use the Pinterest Playwright lane for single-pin posting when needed.
+9. Use `/today` for manual posting, retries, and Reddit/manual-assist workflows until Reddit is proven.
+10. Use `/affiliate` to keep the affiliate rules and research prompts visible while planning.
+11. Use `/affiliate/builder` to import/build affiliate rows, mix them, and queue them into the main schedule.
+12. Review posted items in `/archive` and log metrics from `/charts`.
+13. Mark posts `posted` or `failed` as needed.
 
 ## Current System Notes
 
@@ -123,6 +190,7 @@ Use the system like this:
   - the personal profile (`SanguineQueen`)
   - the `Color With Ash` page
 - Facebook page posting for `Color With Ash` now uses a two-step composer flow where the page submit path is `Next -> Post`.
+- Reddit has an adapter file and routing through `post-to-all.js`, but it should still be treated as a lane to prove operationally rather than an already-proven automation lane.
 - Pinterest Playwright posting is now proven for single live pins using the saved Pinterest session/profile.
 - Pinterest queueing is now actively used for multi-day scheduled runs, but publish-later inside Pinterest itself is still not wired.
 - `backend/scripts/queue/rebalance-pinterest-mix.mjs` owns the current Pinterest queue remix logic.
@@ -150,6 +218,10 @@ Use the system like this:
   - add Facebook Stories support
   - add Facebook video support
   - then revisit Instagram/Threads once the credential flow is clearer
+- Reddit near-term next step:
+  - decide the operational model first: fully automated posting vs manual-assist posting with subreddit-aware variants
+  - prove one or two subreddit-safe posting workflows before treating Reddit as a trusted lane
+  - keep Reddit value-first and context-aware rather than generic promo distribution
 - Substack current state:
   - platform wiring is in place across backend and frontend
   - posting is browser-only through Playwright with a dedicated persistent profile
