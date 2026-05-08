@@ -139,6 +139,7 @@ These pieces are built and in active use:
 - the worker now emits inventory and schedule-gap alerts when the queue has empty near-term days
 - Pinterest queue remixing has been proven through the backend route and calendar button path
 - current Pinterest queue mix supports `amazon-a`, `amazon-b`, `digital`, and `wildcard` daily slots, with a max of 2 posts from the same product group per day
+- headless Linux fallback is now wired for the browser-based Pinterest and Facebook posting lanes so HP-style no-`DISPLAY` servers do not die at Chrome launch
 
 ## What Is Not Reliable Yet
 
@@ -155,6 +156,7 @@ These pieces are built and in active use:
 - `Facebook Stories` and `Facebook video` are not wired yet; they are a future Meta lane worth adding because Stories likely matter for reach, but current focus should remain on regular image posts first
 - Astro export helpers exist in the codebase, but the Astro site is not online yet and Astro is not a live publishing lane yet
 - schedule integrity is still not fully trustworthy; the worker can be healthy while the queue itself is missing expected days or was rewritten incorrectly
+- Chrome profile cloning can still be operationally fragile on Linux if session data is being mutated underneath the clone, but transient WAL/lock files are now treated as ignorable instead of hard-failing the lane
 
 ## Current Operating Model
 

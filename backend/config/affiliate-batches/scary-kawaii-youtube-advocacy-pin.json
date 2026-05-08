@@ -1,0 +1,33 @@
+{
+  "productLink": "https://youtu.be/PEr75CBXLls",
+  "platforms": [
+    "pinterest"
+  ],
+  "board": "Kawaii Coloring",
+  "campaign": "kawaii-halloween-youtube-advocacy",
+  "items": [
+    {
+      "cluster": "flipthrough_video",
+      "variantId": "flipthrough-video-advocacy-01",
+      "keyword": "halloween coloring book flip through",
+      "angle": "brain break chaos therapy",
+      "title": "Need a Brain Break That Doesn’t Involve Doomscrolling?",
+      "description": "This spooky cute coloring book flip-through is full of cozy pages, weird little creatures, and stress relief without pretending to become a yoga monk. Save this for later chaos therapy.",
+      "image": "frontend/assets/kawaiiHalloween/SpookyCuteVibes.png",
+      "board": "Kawaii Coloring",
+      "boards": [
+        "Kawaii Coloring",
+        "Halloween",
+        "coloring pages",
+        "Epic cuteness"
+      ],
+      "tags": [
+        "halloween coloring book",
+        "flip through video",
+        "spooky cute",
+        "brain break",
+        "stress relief"
+      ]
+    }
+  ]
+}

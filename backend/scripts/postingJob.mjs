@@ -25,6 +25,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const WORKSPACE_ROOT = path.join(__dirname, "..", "..");
 const BACKEND_ROOT = path.join(__dirname, "..");
+const WORKER_LOCK_PATH = path.join(BACKEND_ROOT, "data", "posting-job.lock");
 const PRODUCT_MEDIA_POOL_PATH = path.join(
 	BACKEND_ROOT,
 	"config",
@@ -92,6 +93,55 @@ const SUPPORTED_PLATFORMS = new Set([
 	"threads",
 	"instagram",
 ]);
+
+function processIsRunning(pid) {
+	if (!Number.isFinite(pid) || pid <= 0) return false;
+	try {
+		process.kill(pid, 0);
+		return true;
+	} catch {
+		return false;
+	}
+}
+
+async function acquireWorkerLock() {
+	await mkdir(path.dirname(WORKER_LOCK_PATH), { recursive: true });
+	const payload = JSON.stringify(
+		{
+			pid: process.pid,
+			startedAt: new Date().toISOString(),
+		},
+		null,
+		2,
+	);
+	try {
+		await writeFile(WORKER_LOCK_PATH, payload, { flag: "wx" });
+		return;
+	} catch (error) {
+		if (error?.code !== "EEXIST") throw error;
+	}
+
+	let existing = null;
+	try {
+		existing = JSON.parse(await readFile(WORKER_LOCK_PATH, "utf8"));
+	} catch {
+		existing = null;
+	}
+
+	if (existing?.pid && processIsRunning(Number(existing.pid))) {
+		console.log(
+			`Another posting worker is already running (pid ${existing.pid}). Exiting.`,
+		);
+		process.exit(0);
+	}
+
+	await fs.promises.rm(WORKER_LOCK_PATH, { force: true });
+	await writeFile(WORKER_LOCK_PATH, payload, { flag: "wx" });
+}
+
+async function releaseWorkerLock() {
+	await fs.promises.rm(WORKER_LOCK_PATH, { force: true });
+}
 
 const PLATFORM_ALIASES = {
 	twitter: "x",
@@ -970,6 +1020,8 @@ export async function rebalanceQueueMediaOnly() {
 }
 
 export async function processQueue() {
+	await acquireWorkerLock();
+	try {
 	await initLocalDb();
 	console.log("ACTIVE_PLATFORMS:", ACTIVE_PLATFORM_LIST);
 	const snapshot = await readStoreSnapshot();
@@ -1298,6 +1350,9 @@ export async function processQueue() {
 	console.log(
 		`Worker finished: ${processedIds.size} processed, ${remainingQueue.length} remaining.`,
 	);
+	} finally {
+		await releaseWorkerLock();
+	}
 }
 
 const entryScript = process.argv[1]

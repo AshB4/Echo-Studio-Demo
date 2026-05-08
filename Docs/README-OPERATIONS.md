@@ -14,6 +14,7 @@
 - Worker script publishes approved posts when scheduled.
 - Telegram alerts notify success/failure.
 - Optional affiliate Amazon tagging and media uploads are supported.
+- On Linux servers without `DISPLAY`, Playwright browser lanes should run headless automatically rather than trying to open a headed Chrome window.
 
 ## Required setup
 1. Clone repo and install dependencies:
@@ -202,6 +203,8 @@ tail -f /opt/postpunk/backend/backup.log
 - Telegram alerts should stay enabled for immediate failure visibility.
 - Run `npm run health:tokens` regularly to catch expired/missing credentials.
 - The worker can be installed and still miss expected output if the machine sleeps, a lane crashes, or the queue itself has been rewritten incorrectly. Treat `worker.log`, `worker.err.log`, and the SQLite-backed queue as the operational truth.
+- The worker now uses a local lock file so overlapping `npm run worker` launches do not process the same queue item twice.
+- Chrome profile clones on Linux can surface transient files such as `DIPS-wal`; browser profile copy logic should ignore those ephemeral files instead of treating them as hard failures.
 - Use `npm run summary:daily -- --send` and `npm run queue:dry-run` as active checks instead of assuming scheduled days are populated.
 - Amazon Creators migration flag:
   - `AMAZON_USE_CREATORS_API=true` enables Creators API for Amazon lookup in posting flow.

@@ -5,7 +5,7 @@ import os from "os";
 import path from "path";
 import { fileURLToPath } from "url";
 import fs from "fs";
-import { cp, mkdir } from "fs/promises";
+import { copyFile, lstat, mkdir, readdir } from "fs/promises";
 import { chromium } from "playwright";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -43,13 +43,24 @@ function defaultChromeUserDataDir() {
 	return path.join(os.homedir(), ".config", "google-chrome");
 }
 
+function shouldForceHeadlessForServer() {
+	if (process.platform !== "linux") return false;
+	const display = String(process.env.DISPLAY || "").trim();
+	const waylandDisplay = String(process.env.WAYLAND_DISPLAY || "").trim();
+	return !display && !waylandDisplay;
+}
+
 function resolveProfileConfig() {
+	const configuredHeadless = boolFromEnv("FACEBOOK_HEADLESS", false);
+	const forcedHeadless = shouldForceHeadlessForServer();
 	return {
 		useCdp: boolFromEnv("FACEBOOK_USE_CDP", false),
 		cdpUrl: process.env.FACEBOOK_CDP_URL || "http://127.0.0.1:9222",
 		channel: process.env.FACEBOOK_BROWSER_CHANNEL || "chrome",
 		executablePath: process.env.FACEBOOK_EXECUTABLE_PATH || undefined,
-		headless: boolFromEnv("FACEBOOK_HEADLESS", false),
+		headless: configuredHeadless || forcedHeadless,
+		configuredHeadless,
+		forcedHeadless,
 		sourceUserDataDir:
 			process.env.FACEBOOK_CHROME_USER_DATA_DIR || DEFAULT_CLONED_PROFILE_DIR,
 		profileDirectory: process.env.FACEBOOK_CHROME_PROFILE_DIRECTORY || "Default",
@@ -87,6 +98,20 @@ function isBrowserLaunchAbortError(error) {
 function isProfileSingletonLockError(error) {
 	const message = String(error?.message || error || "");
 	return /singletonlock|processsingleton/i.test(message);
+}
+
+function shouldSkipTransientChromePath(filePath) {
+	const name = path.basename(String(filePath || "")).toLowerCase();
+	return (
+		name === "singletonlock" ||
+		name === "singletonsocket" ||
+		name === "singletoncookie" ||
+		name.endsWith("-wal") ||
+		name.endsWith("-shm") ||
+		name.endsWith(".tmp") ||
+		name === "lock" ||
+		name.endsWith(".lock")
+	);
 }
 
 async function launchFacebookContextWithFallback(profile, config) {
@@ -179,7 +204,36 @@ async function connectViaCdp(config) {
 async function copyDirectory(source, destination) {
 	await mkdir(path.dirname(destination), { recursive: true });
 	await fs.promises.rm(destination, { recursive: true, force: true });
-	await cp(source, destination, { recursive: true });
+	await mkdir(destination, { recursive: true });
+	const entries = await readdir(source, { withFileTypes: true });
+	for (const entry of entries) {
+		const sourcePath = path.join(source, entry.name);
+		const destinationPath = path.join(destination, entry.name);
+		if (shouldSkipTransientChromePath(sourcePath)) {
+			continue;
+		}
+		let stats;
+		try {
+			stats = await lstat(sourcePath);
+		} catch (error) {
+			if (error?.code === "ENOENT") continue;
+			throw error;
+		}
+		if (stats.isDirectory()) {
+			await copyDirectory(sourcePath, destinationPath);
+			continue;
+		}
+		if (stats.isSymbolicLink()) {
+			continue;
+		}
+		try {
+			await mkdir(path.dirname(destinationPath), { recursive: true });
+			await copyFile(sourcePath, destinationPath);
+		} catch (error) {
+			if (error?.code === "ENOENT") continue;
+			throw error;
+		}
+	}
 }
 
 async function prepareChromeProfile(config) {
