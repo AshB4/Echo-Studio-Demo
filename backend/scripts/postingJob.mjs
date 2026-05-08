@@ -38,7 +38,7 @@ const DUPLICATE_COOLDOWN_HOURS = Number(
 	process.env.POSTPUNK_DUPLICATE_COOLDOWN_HOURS || 24,
 );
 const FACEBOOK_DAILY_LIMIT = Number(process.env.POSTPUNK_FACEBOOK_DAILY_LIMIT || 1);
-const FB_MAIN_PROFILE_ID = "fb-main-profile";
+const FB_MAIN_PROFILE_IDS = new Set(["fb-main-profile", "fb-main-page"]);
 const FB_MAIN_PROFILE_MAX_PER_WEEK = Number(
 	process.env.POSTPUNK_FB_MAIN_PROFILE_MAX_PER_WEEK || 3,
 );
@@ -450,7 +450,8 @@ function isAllowedFacebookTargetToday(target, postedLog, nowMs = Date.now()) {
 	if (String(target?.platform || "").toLowerCase() !== "facebook") {
 		return { allowed: true, reason: null };
 	}
-	if (String(target?.accountId || "") !== FB_MAIN_PROFILE_ID) {
+	const accountId = String(target?.accountId || "");
+	if (!FB_MAIN_PROFILE_IDS.has(accountId)) {
 		return { allowed: true, reason: null };
 	}
 	const weekday = weekdayKeyUtc(nowMs);
@@ -458,18 +459,16 @@ function isAllowedFacebookTargetToday(target, postedLog, nowMs = Date.now()) {
 		FB_MAIN_PROFILE_ALLOWED_DAYS.length > 0 &&
 		!FB_MAIN_PROFILE_ALLOWED_DAYS.includes(weekday)
 	) {
-		return { allowed: false, reason: `fb-main-profile weekday blocked (${weekday})` };
+		return { allowed: false, reason: `${accountId} weekday blocked (${weekday})` };
 	}
-	const weeklyCount = postedCountThisWeekForTarget(
-		postedLog,
-		"facebook",
-		FB_MAIN_PROFILE_ID,
-		nowMs,
+	const weeklyCount = Array.from(FB_MAIN_PROFILE_IDS).reduce(
+		(total, id) => total + postedCountThisWeekForTarget(postedLog, "facebook", id, nowMs),
+		0,
 	);
 	if (weeklyCount >= FB_MAIN_PROFILE_MAX_PER_WEEK) {
 		return {
 			allowed: false,
-			reason: `fb-main-profile weekly cap reached (${weeklyCount}/${FB_MAIN_PROFILE_MAX_PER_WEEK})`,
+			reason: `${accountId} weekly cap reached (${weeklyCount}/${FB_MAIN_PROFILE_MAX_PER_WEEK})`,
 		};
 	}
 	return { allowed: true, reason: null };

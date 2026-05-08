@@ -37,6 +37,26 @@
     }
   },
   {
+    "platform": "facebook",
+    "id": "fb-main-page",
+    "label": "Facebook • SanguineQueen Personal",
+    "credentials": {
+      "accessToken": "${FB_MAIN_PAGE_ACCESS_TOKEN}",
+      "appId": "${FB_APP_ID}",
+      "appSecret": "${FB_APP_SECRET}"
+    },
+    "metadata": {
+      "pageId": "${FB_MAIN_PAGE_ID}",
+      "profileName": "SanguineQueen",
+      "profileUrl": "https://www.facebook.com/SanguineQueen/",
+      "cadenceRule": "weekends-only-max-3-per-week",
+      "browserOnly": true,
+      "browserFirst": true,
+      "browserFallback": true,
+      "aliasOf": "fb-main-profile"
+    }
+  },
+  {
     "platform": "substack",
     "id": "substack-main",
     "label": "Substack • Main Publication",

@@ -82,8 +82,13 @@ Facebook:
 
 - `fb-color-with-ash`
 - `fb-main-profile`
+- `fb-main-page`
 
-`fb-main-profile` is the guarded personal lane:
+`fb-main-profile` and `fb-main-page` are the guarded personal lane aliases for:
+
+- `https://www.facebook.com/SanguineQueen/`
+
+That lane is:
 
 - opt-in
 - not a blind duplicate lane
