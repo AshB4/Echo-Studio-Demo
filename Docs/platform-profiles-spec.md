@@ -173,6 +173,17 @@ where the official material is more operational than stylistic.
 - Avoid:
   - sounding like an ad immediately
   - dense technical blocks with no story
+- Personal-lane rule:
+  - treat `fb-main-profile` as a secondary Facebook lane, not a blind duplicate target
+  - same core asset/post can be reused when it fits, but personal Facebook should default to:
+    - goblin memes
+    - "I made this" posts
+    - coloring reveals
+    - process/story posts
+    - personality-driven image posts
+  - repetitive affiliate or batch-heavy promo posts should not auto-mirror to the personal profile
+  - dual-posting to page + personal should be opt-in per post or by approved content type
+  - cadence rule for `fb-main-profile`: weekends only by default, max `3` posts per week
 - Source notes:
   - This profile is more inference-driven and should be tuned against your own page data.
 

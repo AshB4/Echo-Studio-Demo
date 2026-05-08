@@ -38,6 +38,16 @@ const DUPLICATE_COOLDOWN_HOURS = Number(
 	process.env.POSTPUNK_DUPLICATE_COOLDOWN_HOURS || 24,
 );
 const FACEBOOK_DAILY_LIMIT = Number(process.env.POSTPUNK_FACEBOOK_DAILY_LIMIT || 1);
+const FB_MAIN_PROFILE_ID = "fb-main-profile";
+const FB_MAIN_PROFILE_MAX_PER_WEEK = Number(
+	process.env.POSTPUNK_FB_MAIN_PROFILE_MAX_PER_WEEK || 3,
+);
+const FB_MAIN_PROFILE_ALLOWED_DAYS = String(
+	process.env.POSTPUNK_FB_MAIN_PROFILE_ALLOWED_DAYS || "fri,sat,sun",
+)
+	.split(",")
+	.map((value) => String(value || "").trim().toLowerCase())
+	.filter(Boolean);
 const PINTEREST_DAILY_LIMIT = Number(process.env.POSTPUNK_PINTEREST_DAILY_LIMIT || 6);
 const PINTEREST_GOBLIN_DAILY_LIMIT = Number(
 	process.env.POSTPUNK_PINTEREST_GOBLIN_DAILY_LIMIT || 2,
@@ -363,6 +373,14 @@ function archiveEntryHasPlatform(entry, platform) {
 	);
 }
 
+function archiveEntryHasTarget(entry, platform, accountId = null) {
+	return archiveEntryTargets(entry).some(
+		(target) =>
+			String(target?.platform || "").toLowerCase() === String(platform || "").toLowerCase() &&
+			(target?.accountId ?? null) === (accountId ?? null),
+	);
+}
+
 function archiveEntryProductId(entry) {
 	return (
 		entry?.metadata?.productProfileId ||
@@ -397,6 +415,64 @@ function postedCountTodayForPlatform(postedLog = [], platform = "facebook", nowM
 		if (timestamp >= dayStart) count += 1;
 	}
 	return count;
+}
+
+function startOfUtcWeek(timestampMs) {
+	const dayStart = startOfUtcDay(timestampMs);
+	const date = new Date(dayStart);
+	const weekday = date.getUTCDay();
+	const daysSinceMonday = (weekday + 6) % 7;
+	return dayStart - daysSinceMonday * 24 * 60 * 60 * 1000;
+}
+
+function postedCountThisWeekForTarget(
+	postedLog = [],
+	platform = "facebook",
+	accountId = null,
+	nowMs = Date.now(),
+) {
+	const weekStart = startOfUtcWeek(nowMs);
+	let count = 0;
+	for (const entry of postedLog) {
+		if (!archiveEntryHasTarget(entry, platform, accountId)) continue;
+		const timestamp = archiveEntryTimestamp(entry);
+		if (!timestamp) continue;
+		if (timestamp >= weekStart) count += 1;
+	}
+	return count;
+}
+
+function weekdayKeyUtc(timestampMs) {
+	return ["sun", "mon", "tue", "wed", "thu", "fri", "sat"][new Date(timestampMs).getUTCDay()];
+}
+
+function isAllowedFacebookTargetToday(target, postedLog, nowMs = Date.now()) {
+	if (String(target?.platform || "").toLowerCase() !== "facebook") {
+		return { allowed: true, reason: null };
+	}
+	if (String(target?.accountId || "") !== FB_MAIN_PROFILE_ID) {
+		return { allowed: true, reason: null };
+	}
+	const weekday = weekdayKeyUtc(nowMs);
+	if (
+		FB_MAIN_PROFILE_ALLOWED_DAYS.length > 0 &&
+		!FB_MAIN_PROFILE_ALLOWED_DAYS.includes(weekday)
+	) {
+		return { allowed: false, reason: `fb-main-profile weekday blocked (${weekday})` };
+	}
+	const weeklyCount = postedCountThisWeekForTarget(
+		postedLog,
+		"facebook",
+		FB_MAIN_PROFILE_ID,
+		nowMs,
+	);
+	if (weeklyCount >= FB_MAIN_PROFILE_MAX_PER_WEEK) {
+		return {
+			allowed: false,
+			reason: `fb-main-profile weekly cap reached (${weeklyCount}/${FB_MAIN_PROFILE_MAX_PER_WEEK})`,
+		};
+	}
+	return { allowed: true, reason: null };
 }
 
 function normalizeArrayText(value) {
@@ -1117,6 +1193,27 @@ export async function processQueue() {
 		if (ACTIVE_PLATFORM_SET.size > 0) {
 			targets = targets.filter((target) =>
 				ACTIVE_PLATFORM_SET.has(String(target.platform || "").toLowerCase()),
+			);
+		}
+		const blockedFacebookTargets = [];
+		targets = targets.filter((target) => {
+			const eligibility = isAllowedFacebookTargetToday(target, postedLog, now);
+			if (eligibility.allowed) return true;
+			blockedFacebookTargets.push(
+				`${target.platform}${target.accountId ? ` (${target.accountId})` : ""}: ${eligibility.reason}`,
+			);
+			return false;
+		});
+		if (targets.length === 0 && blockedFacebookTargets.length > 0) {
+			console.log(
+				`Deferring "${post.title ?? post.id ?? "untitled"}" to tomorrow (${blockedFacebookTargets.join("; ")}).`,
+			);
+			queueUpdates.set(post.id, pushToNextUtcDay(post, now));
+			continue;
+		}
+		if (blockedFacebookTargets.length > 0) {
+			console.log(
+				`Skipping blocked Facebook target(s) for "${post.title ?? post.id ?? "untitled"}": ${blockedFacebookTargets.join("; ")}`,
 			);
 		}
 		if (hasPlatformTarget(post, "facebook")) {

@@ -16,14 +16,17 @@
   {
     "platform": "facebook",
     "id": "fb-main-profile",
-    "label": "Facebook • Personal Profile",
+    "label": "Facebook • Main Profile (SQ)",
     "credentials": {
       "accessToken": "${FB_MAIN_PAGE_ACCESS_TOKEN}",
       "appId": "${FB_APP_ID}",
       "appSecret": "${FB_APP_SECRET}"
     },
     "metadata": {
-      "pageId": "${FB_MAIN_PAGE_ID}"
+      "pageId": "${FB_MAIN_PAGE_ID}",
+      "profileName": "SanguineQueen",
+      "profileUrl": "https://www.facebook.com/SanguineQueen/",
+      "cadenceRule": "weekends-only-max-3-per-week"
     }
   },
   {
