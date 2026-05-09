@@ -46,6 +46,8 @@ backend/**/config/pinterest-state.json
 backend/backend/
 backend/config/substack-chrome-profile/
 backend/config/substack-state.json
+backend/config/kofi-chrome-profile/
+backend/config/kofi-chrome-profile-clone-*/
 
 # ⚙️ System folders
 dist/
@@ -73,6 +75,8 @@ backend/media/videos/*
 backend/media/other/*
 !backend/media/**/.gitkeep
 backend/debug/
+backend/data/platform-debug/
+backend/data/mac-backups/
 backend/data/*.sqlite
 backend/data/*.sqlite-shm
 backend/data/*.sqlite-wal

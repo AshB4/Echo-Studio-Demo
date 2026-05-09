@@ -4,7 +4,8 @@ import { fileURLToPath } from "url";
 import { initLocalDb, listPosts, createPost } from "../utils/localDb.mjs";
 import { normalizeTagList } from "../utils/distributionTags.mjs";
 import { normalizePostStatus } from "../utils/postStatus.mjs";
-import { findDuplicatePost } from "../utils/queueGuard.mjs";
+import { findContentDuplicate, findDuplicatePost } from "../utils/queueGuard.mjs";
+import { inferPinterestQueueIdentity } from "../utils/pinterestQueueIdentity.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -183,6 +184,7 @@ function buildRows(batchData) {
     boards: normalizeBoardList(item.boards || (item.board || sharedBoard ? [item.board || sharedBoard] : [])),
     tags: normalizeTagList(item.tags || []),
     productLink: String(item.productLink || sharedLink || "").trim(),
+    batchFile: path.basename(batchData.resolved),
   }));
 }
 
@@ -216,6 +218,17 @@ function mixRows(rows) {
 
 function buildPost(row, scheduledAt) {
   const contentTags = ["affiliate", "amazon", ...row.tags];
+  const identity = inferPinterestQueueIdentity(row, {
+    batchLabel: row.batchLabel,
+    batchFile: row.batchFile,
+    campaign: row.batchLabel,
+    keyword: row.keyword,
+    angle: row.angle,
+    cluster: row.cluster,
+    productLink: row.productLink,
+    tags: row.tags,
+    image: row.image,
+  });
   return {
     id: makeId(),
     title: row.title,
@@ -223,6 +236,7 @@ function buildPost(row, scheduledAt) {
     image: null,
     mediaPath: row.image || null,
     mediaType: row.image ? "image" : null,
+    productProfileId: identity.productProfileId,
     altText: "",
     platforms: ["pinterest"],
     targets: [{ platform: "pinterest", accountId: null }],
@@ -232,11 +246,13 @@ function buildPost(row, scheduledAt) {
     platformOverrides: null,
     metadata: {
       contentMode: "affiliate",
-      batchLabel: row.batchLabel,
+      batchLabel: identity.batchLabel || row.batchLabel,
+      productProfileId: identity.productProfileId,
       keyword: row.keyword,
       angle: row.angle,
       cluster: row.cluster,
       variantId: row.variantId,
+      sourceBatchFile: row.batchFile,
       pinterestBoard: row.board || "",
       pinterestBoards: row.boards,
       pinterestTags: row.tags,
@@ -268,7 +284,8 @@ async function main() {
   for (let index = 0; index < mixedRows.length; index += 1) {
     const row = mixedRows[index];
     const post = buildPost(row, schedule[index] || null);
-    const duplicate = findDuplicatePost(workingPosts, post);
+    const duplicate =
+      findContentDuplicate(workingPosts, post) || findDuplicatePost(workingPosts, post);
     if (duplicate) {
       skipped.push({ title: row.title, reason: `duplicate:${duplicate.id}` });
       continue;

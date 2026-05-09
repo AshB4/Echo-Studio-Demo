@@ -1,5 +1,9 @@
 # PostPunk Operations README
 
+Primary command reference:
+
+- `Docs/builder/terminal-commands.md`
+
 ## Program size (current)
 - Total repo: `216M`
 - Backend: `42M`
@@ -93,6 +97,12 @@ npm run worker
 8. Use `/charts` for Pinterest CSV/snapshot analytics.
 
 ## Useful backend commands
+
+For the maintained command list, use:
+
+- `Docs/builder/terminal-commands.md`
+
+The commands below are the common core set kept here for quick orientation.
 ```bash
 cd /path/to/N8tiveFlow/backend
 npm run health:tokens     # token/account health check

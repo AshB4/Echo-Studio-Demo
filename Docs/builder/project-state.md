@@ -460,3 +460,17 @@ Current recommendation:
 - Ollama requests now use a longer backend timeout. If local generation still stalls, the app should surface a direct timeout message instead of a vague `500`.
 - SQLite is now the real source of truth. The legacy JSON files still exist, but they are mirrors, not the primary store.
 - The practical content workflow right now is import-first: generate externally if needed, then bring batches into `/batch`.
+
+## Ko-fi Webhook Integration (Future Plan)
+- **Webhook URL**: Must start with `https://` (e.g., `https://YourApplicationURL.com`)
+- **Data Format**: Sent as `application/x-www-form-urlencoded`; the `data` field contains payment info as a JSON string.
+- **Response Requirement**: Listener must return `200` status code to confirm receipt. If not received, the same `message_id` will be retried.
+- **Type Field Values**: `Tip`, `Subscription`, `Commission`, `Shop Order`.
+- **Subscription-Specific Fields**:
+  - `is_subscription_payment`: `true` for monthly payments.
+  - `is_first_subscription_payment`: `true` on the first payment.
+  - `tier_name`: Contains the membership tier name.
+- **Shop Order Details**: `shop_items` contains details of each item in the order, including `direct_link_code`.
+- **Public Display Note**: Check the `is_public` field when displaying payments publicly; hide the message when it is `false`.
+- **Testing**: Use [webhook.site](https://webhook.site/) to inspect incoming requests if no server is set up yet.
+- **Zapier Integration**: Connect Ko-fi to hundreds of apps via Zapier for no-code workflows (add note to integrate later).

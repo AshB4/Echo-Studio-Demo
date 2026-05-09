@@ -330,9 +330,13 @@ function buildPostPayload(post) {
 		image: post.image ?? post.media ?? null,
 		mediaPath: post.mediaPath ?? null,
 		mediaType: post.mediaType ?? null,
+		contentIntent: Array.isArray(post.contentIntent) ? post.contentIntent : [],
 		hashtags: normalizeHashtags(post.hashtags ?? post.tags ?? []),
 		platformOverrides: post.platformOverrides ?? {},
-		metadata: post.metadata ?? {},
+		metadata: {
+			...(post.metadata ?? {}),
+			__workerManaged: true,
+		},
 	};
 }
 
@@ -906,6 +910,7 @@ function hasPinterestTarget(post) {
 function productIdFor(post) {
 	return (
 		post?.metadata?.productProfileId ||
+		post?.metadata?.batchLabel ||
 		post?.productProfileId ||
 		null
 	);

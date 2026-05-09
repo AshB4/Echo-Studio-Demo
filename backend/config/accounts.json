@@ -12,6 +12,7 @@
       "pageId": "${FACEBOOK_PAGE_ID}",
       "pageName": "Color With Ash",
       "pageUrl": "https://www.facebook.com/ColorWithAshB",
+      "default": false,
       "browserOnly": true,
       "browserFirst": true,
       "browserFallback": true
@@ -31,6 +32,7 @@
       "profileName": "SanguineQueen",
       "profileUrl": "https://www.facebook.com/SanguineQueen/",
       "cadenceRule": "weekends-only-max-3-per-week",
+      "default": false,
       "browserOnly": true,
       "browserFirst": true,
       "browserFallback": true
@@ -50,6 +52,10 @@
       "profileName": "SanguineQueen",
       "profileUrl": "https://www.facebook.com/SanguineQueen/",
       "cadenceRule": "weekends-only-max-3-per-week",
+      "default": true,
+      "browserUserDataDir": "__DEFAULT_CHROME__",
+      "browserProfileDirectory": "Default",
+      "cloneChromeProfile": false,
       "browserOnly": true,
       "browserFirst": true,
       "browserFallback": true,
@@ -87,6 +93,22 @@
     "label": "Dev.to • Main Account",
     "credentials": {
       "apiKey": "${DEVTO_API_KEY}"
+    }
+  },
+  {
+    "platform": "kofi",
+    "id": "kofi-main",
+    "label": "Ko-fi • Main Account",
+    "credentials": {},
+    "metadata": {
+      "browserOnly": true,
+      "browserFirst": true,
+      "browserUserDataDir": "__KOFI_AUTOMATION_PROFILE__",
+      "browserProfileDirectory": "Default",
+      "cloneChromeProfile": false,
+      "managePostsUrl": "https://ko-fi.com/manage/posts",
+      "shopSetupUrl": "https://ko-fi.com/shop/settings?addnewitem=true&productType=0#setup",
+      "default": true
     }
   },
   {

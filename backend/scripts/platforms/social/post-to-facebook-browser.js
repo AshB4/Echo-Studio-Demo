@@ -50,9 +50,16 @@ function shouldForceHeadlessForServer() {
 	return !display && !waylandDisplay;
 }
 
-function resolveProfileConfig() {
+function resolveProfileConfig(account = {}) {
+	const metadata = account?.metadata || {};
 	const configuredHeadless = boolFromEnv("FACEBOOK_HEADLESS", false);
 	const forcedHeadless = shouldForceHeadlessForServer();
+	const sourceUserDataDir =
+		metadata.browserUserDataDir === "__DEFAULT_CHROME__"
+			? defaultChromeUserDataDir()
+			: metadata.browserUserDataDir ||
+				process.env.FACEBOOK_CHROME_USER_DATA_DIR ||
+				DEFAULT_CLONED_PROFILE_DIR;
 	return {
 		useCdp: boolFromEnv("FACEBOOK_USE_CDP", false),
 		cdpUrl: process.env.FACEBOOK_CDP_URL || "http://127.0.0.1:9222",
@@ -61,12 +68,18 @@ function resolveProfileConfig() {
 		headless: configuredHeadless || forcedHeadless,
 		configuredHeadless,
 		forcedHeadless,
-		sourceUserDataDir:
-			process.env.FACEBOOK_CHROME_USER_DATA_DIR || DEFAULT_CLONED_PROFILE_DIR,
-		profileDirectory: process.env.FACEBOOK_CHROME_PROFILE_DIRECTORY || "Default",
-		cloneEnabled: boolFromEnv("FACEBOOK_CLONE_CHROME_PROFILE", false),
+		sourceUserDataDir,
+		profileDirectory:
+			metadata.browserProfileDirectory ||
+			process.env.FACEBOOK_CHROME_PROFILE_DIRECTORY ||
+			"Default",
+		cloneEnabled:
+			metadata.cloneChromeProfile ??
+			boolFromEnv("FACEBOOK_CLONE_CHROME_PROFILE", false),
 		clonedUserDataDir:
-			process.env.FACEBOOK_CLONED_CHROME_USER_DATA_DIR || DEFAULT_CLONED_PROFILE_DIR,
+			metadata.clonedBrowserUserDataDir ||
+			process.env.FACEBOOK_CLONED_CHROME_USER_DATA_DIR ||
+			DEFAULT_CLONED_PROFILE_DIR,
 		keepOpenOnAuthRequired: boolFromEnv("FACEBOOK_KEEP_OPEN_ON_AUTH_REQUIRED", true),
 		keepOpenOnPostFailure: boolFromEnv("FACEBOOK_KEEP_OPEN_ON_POST_FAILURE", true),
 	};
@@ -75,6 +88,49 @@ function resolveProfileConfig() {
 function logStep(step, detail = "") {
 	const suffix = detail ? ` :: ${detail}` : "";
 	console.log(`[fb-browser] ${step}${suffix}`);
+}
+
+async function dumpFacebookSurface(page, label) {
+	try {
+		const surface = await page.evaluate(() => {
+			const pick = (el) => {
+				const text = String(el.textContent || "").replace(/\s+/g, " ").trim();
+				const aria = String(el.getAttribute?.("aria-label") || "").replace(/\s+/g, " ").trim();
+				return {
+					tag: String(el.tagName || "").toLowerCase(),
+					role: String(el.getAttribute?.("role") || ""),
+					text: text.slice(0, 120),
+					aria: aria.slice(0, 120),
+				};
+			};
+			const buttons = Array.from(
+				document.querySelectorAll('div[role="button"], button, a[role="button"], [aria-label]'),
+			)
+				.filter((el) => {
+					const rect = el.getBoundingClientRect();
+					const style = window.getComputedStyle(el);
+					return (
+						rect.width > 0 &&
+						rect.height > 0 &&
+						style.visibility !== "hidden" &&
+						style.display !== "none"
+					);
+				})
+				.slice(0, 40)
+				.map(pick);
+			return {
+				title: document.title,
+				url: location.href,
+				bodyText: String(document.body?.innerText || "").replace(/\s+/g, " ").trim().slice(0, 1200),
+				buttons,
+			};
+		});
+		logStep(`surface:${label}`, JSON.stringify(surface));
+		return surface;
+	} catch (error) {
+		logStep("surface:dump-failed", `${label}: ${error?.message || String(error)}`);
+		return null;
+	}
 }
 
 function shouldFallbackToChromium() {
@@ -298,6 +354,13 @@ function resolveLocalMediaPath(post) {
 }
 
 function resolveTargetUrl(account = {}) {
+	const accountId = String(account?.id || "").toLowerCase();
+	if (accountId === "fb-main-page") {
+		return (
+			account?.metadata?.profileUrl ||
+			"https://www.facebook.com/SanguineQueen/"
+		);
+	}
 	const explicit =
 		account?.metadata?.pageUrl ||
 		account?.metadata?.profileUrl ||
@@ -419,6 +482,7 @@ async function dismissInterruptivePopups(page) {
 
 async function fillComposer(page, text) {
 	const selectors = [
+		'div[role="button"]:has-text("What\'s on your mind?")',
 		'div[role="dialog"] [contenteditable="true"][role="textbox"]',
 		'div[role="dialog"] div[contenteditable="true"]',
 		'div[role="dialog"] textarea',
@@ -448,6 +512,91 @@ async function fillComposer(page, text) {
 	}
 
 	return null;
+}
+
+async function openFacebookComposer(page) {
+	const selectors = [
+		'div[role="button"]:has-text("What\'s on your mind?")',
+		'div[role="button"]:has-text("What\'s on your mind")',
+		'div[role="button"]:has-text("Write something")',
+		'div[role="button"]:has-text("Create post")',
+		'button:has-text("Create post")',
+		'div[aria-label="Create a post"]',
+		'div[role="button"][aria-label*="What\'s on your mind"]',
+		'div[role="button"][aria-label*="Create a post"]',
+		'div[role="button"]:has-text("Post")',
+		'a[role="button"]:has-text("Post")',
+		'h2:has-text("Create post")',
+		'div[data-pagelet="FeedComposer"]',
+	];
+
+	for (const selector of selectors) {
+		try {
+			const locator = page.locator(selector).first();
+			if ((await locator.count()) > 0) {
+				await locator.click({ timeout: 4000 });
+				return selector;
+			}
+		} catch {
+			// continue
+		}
+	}
+
+	return null;
+}
+
+async function switchFacebookProfile(page, profileName) {
+	const name = String(profileName || "").trim();
+	if (!name) return null;
+
+	let openProfileMenu = null;
+	try {
+		const profileButton = page.getByRole("button", { name: "Your profile" }).first();
+		if ((await profileButton.count().catch(() => 0)) > 0) {
+			await profileButton.click({ timeout: 4000, force: true });
+			openProfileMenu = "getByRole(button[name=Your profile])";
+		}
+	} catch {
+		// continue
+	}
+
+	if (!openProfileMenu) {
+		openProfileMenu = await clickFirst(page, [
+			'div[role="button"][aria-label="Your profile"]',
+			'div[role="button"]:has-text("Your profile")',
+			'button[aria-label="Your profile"]',
+		]);
+	}
+
+	if (!openProfileMenu) return null;
+
+	await page.waitForTimeout(1200);
+
+	const selectors = [
+		`div[role="menuitem"]:has-text("${name}")`,
+		`div[role="button"]:has-text("${name}")`,
+		`a:has-text("${name}")`,
+		`span:has-text("${name}")`,
+		`div[role="menuitem"]:has-text("Switch profile")`,
+		`div[role="menuitem"]:has-text("See all profiles")`,
+		`div[role="button"]:has-text("Switch profile")`,
+		`div[role="button"]:has-text("See all profiles")`,
+	];
+
+	for (const selector of selectors) {
+		try {
+			const locator = page.locator(selector).first();
+			if ((await locator.count()) > 0) {
+				await locator.click({ timeout: 4000 });
+				await page.waitForTimeout(2000);
+				return selector;
+			}
+		} catch {
+			// continue
+		}
+	}
+
+	return openProfileMenu;
 }
 
 async function attachMedia(page, mediaPath) {
@@ -688,7 +837,7 @@ async function clickFacebookFinalPostButton(page) {
 	await dismissInterruptivePopups(page);
 	// Explicit support for FB variants where the visible action is nested in role="none" wrappers.
 	const roleNonePostWrappers = page.locator(
-		'div[role="dialog"] div[role="none"]:has(span:has-text("Post")), div[role="dialog"] div[role="none"]:has(span:has-text("Post now")), div[role="dialog"] div[role="none"]:has(span:has-text("Share now"))',
+		'div[role="dialog"] div[role="none"]:has(span:has-text("Post")), div[role="dialog"] div[role="none"]:has(span:has-text("Post now")), div[role="dialog"] div[role="none"]:has(span:has-text("Share now")), div[role="none"]:has(span:has-text("Post")), div[role="none"]:has(span:has-text("Post now")), div[role="none"]:has(span:has-text("Share now"))',
 	);
 	const wrapperCount = await roleNonePostWrappers.count().catch(() => 0);
 	for (let index = wrapperCount - 1; index >= 0; index -= 1) {
@@ -835,12 +984,25 @@ export default async function postToFacebookBrowser(post, context = {}) {
 		await page.waitForTimeout(2500);
 		await dismissInterruptivePopups(page);
 		logStep("page:url", page.url());
+		await dumpFacebookSurface(page, "after-open");
 
 		if (pageLooksLikeAuthRequired(page)) {
 			logStep("auth-required:auto-login", page.url());
 			await ensureFacebookLoggedIn(page);
 			await dismissInterruptivePopups(page);
 			logStep("auth-required:resolved", page.url());
+			await dumpFacebookSurface(page, "after-auth");
+		}
+
+		if (String(account?.metadata?.profileName || "").trim()) {
+			const profileSwitchSelector = await switchFacebookProfile(
+				page,
+				account.metadata.profileName,
+			);
+			if (profileSwitchSelector) {
+				logStep("profile-switch:clicked", profileSwitchSelector);
+				await dumpFacebookSurface(page, "after-profile-switch");
+			}
 		}
 
 		const switchSelector = await handlePageIdentitySwitch(page);
@@ -863,19 +1025,9 @@ export default async function postToFacebookBrowser(post, context = {}) {
 
 		logStep("composer:find");
 		await dismissInterruptivePopups(page);
+		await dumpFacebookSurface(page, "before-composer");
 		const composerSelector = await withStepTimeout("find-composer", () =>
-			clickFirst(page, [
-				'div[role="button"]:has-text("What\'s on your mind")',
-				'div[role="button"]:has-text("Write something")',
-				'div[role="button"]:has-text("Create post")',
-				'button:has-text("Create post")',
-				'div[aria-label="Create a post"]',
-				'div[role="button"][aria-label*="What\'s on your mind"]',
-				'div[role="button"]:has-text("Post")',
-				'a[role="button"]:has-text("Post")',
-				'h2:has-text("Create post")',
-				'div[data-pagelet="FeedComposer"]',
-			]),
+			openFacebookComposer(page),
 		);
 
 		if (!composerSelector) {

@@ -294,6 +294,7 @@ export const postToAllPlatforms = async (post, targetsInput) => {
 				image: post.image,
 				mediaPath: post.mediaPath ?? null,
 				mediaType: post.mediaType ?? null,
+				contentIntent: Array.isArray(post.contentIntent) ? post.contentIntent : [],
 				saveAsDraft: Boolean(post.saveAsDraft),
 				hashtags: normalizeHashtags(post.hashtags),
 				platformOverrides: post.platformOverrides ?? {},

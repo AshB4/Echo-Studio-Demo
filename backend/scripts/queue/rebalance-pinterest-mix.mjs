@@ -183,43 +183,155 @@ function totalRemaining(queues) {
 	return [...queues.values()].reduce((sum, list) => sum + list.length, 0);
 }
 
-function takeFrom(queues, preferred, dayCounts, lastGroup, maxSameProductPerDay) {
-	const queueKeys = [...queues.keys()];
-	const categories =
-		preferred === "wildcard"
-			? queueKeys
-			: [
-				...queueKeys.filter((key) => categoryMatches(key, preferred)),
-				...queueKeys.filter((key) => !categoryMatches(key, preferred)),
-			];
-	const choices = [];
+function basenameWithoutExt(value) {
+	const raw = String(value || "").trim();
+	if (!raw) return "";
+	const normalized = raw.split("?")[0];
+	const base = normalized.split("/").pop() || normalized;
+	return base.replace(/\.[a-z0-9]+$/i, "");
+}
 
-	for (const category of categories) {
-		for (const post of queues.get(category) || []) {
-			const group = productGroup(post);
-			if ((dayCounts.get(group) || 0) >= maxSameProductPerDay) continue;
-			choices.push({
-				category,
-				post,
+function mediaFamily(post) {
+	const base = basenameWithoutExt(post?.mediaPath || post?.image || "");
+	if (!base) return "";
+	return base
+		.replace(/_pinterest_\d+x\d+$/i, "")
+		.replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+		.toLowerCase()
+		.replace(/[^a-z0-9]+/g, " ")
+		.trim();
+}
+
+function interleaveByMedia(posts = []) {
+	const buckets = new Map();
+	for (const post of posts) {
+		const key = mediaFamily(post) || `no-media:${post.id}`;
+		if (!buckets.has(key)) buckets.set(key, []);
+		buckets.get(key).push(post);
+	}
+	for (const list of buckets.values()) {
+		list.sort((a, b) => scheduledMs(a) - scheduledMs(b) || String(a.id).localeCompare(String(b.id)));
+	}
+	const keys = [...buckets.keys()].sort(
+		(a, b) => (buckets.get(b)?.length || 0) - (buckets.get(a)?.length || 0) || a.localeCompare(b),
+	);
+	const mixed = [];
+	let added = true;
+	while (added) {
+		added = false;
+		for (const key of keys) {
+			const list = buckets.get(key) || [];
+			if (!list.length) continue;
+			mixed.push(list.shift());
+			added = true;
+		}
+	}
+	return mixed;
+}
+
+function buildProductBuckets(candidates) {
+	const buckets = new Map();
+	const initialCategoryCounts = {};
+	for (const post of candidates) {
+		const group = productGroup(post);
+		const category = categoryForPost(post);
+		if (!buckets.has(group)) {
+			buckets.set(group, {
 				group,
-				preferredMatch: categoryMatches(category, preferred),
+				category,
+				posts: [],
 			});
 		}
-		if (choices.some((choice) => choice.preferredMatch)) break;
+		buckets.get(group).posts.push(post);
+		initialCategoryCounts[category] = (initialCategoryCounts[category] || 0) + 1;
+	}
+	for (const bucket of buckets.values()) {
+		bucket.posts = interleaveByMedia(bucket.posts);
+	}
+	return { buckets, initialCategoryCounts };
+}
+
+function recentHitCount(recentDays, group, lookback = 3) {
+	let count = 0;
+	for (let index = Math.max(0, recentDays.length - lookback); index < recentDays.length; index += 1) {
+		if (recentDays[index]?.has(group)) count += 1;
+	}
+	return count;
+}
+
+function categoryRecentHitCount(recentDays, category, bucketByGroup, lookback = 2) {
+	let count = 0;
+	for (let index = Math.max(0, recentDays.length - lookback); index < recentDays.length; index += 1) {
+		const groups = recentDays[index];
+		if (!groups) continue;
+		for (const group of groups) {
+			if (bucketByGroup.get(group)?.category === category) {
+				count += 1;
+				break;
+			}
+		}
+	}
+	return count;
+}
+
+function totalRemainingBuckets(buckets) {
+	let total = 0;
+	for (const bucket of buckets.values()) total += bucket.posts.length;
+	return total;
+}
+
+function takeFromBuckets(
+	buckets,
+	preferred,
+	dayCounts,
+	lastGroup,
+	lastMedia,
+	recentDays,
+	globalCounts,
+	maxSameProductPerDay,
+) {
+	const choices = [];
+	for (const bucket of buckets.values()) {
+		if (!bucket.posts.length) continue;
+		if ((dayCounts.get(bucket.group) || 0) >= maxSameProductPerDay) continue;
+		const post = bucket.posts[0];
+		const family = mediaFamily(post);
+		choices.push({
+			bucket,
+			post,
+			group: bucket.group,
+			category: bucket.category,
+			family,
+			preferredMatch: categoryMatches(bucket.category, preferred),
+			sameGroupToday: dayCounts.has(bucket.group),
+			sameCategoryToday: Array.from(dayCounts.keys()).some(
+				(group) => buckets.get(group)?.category === bucket.category,
+			),
+			recentGroupHits: recentHitCount(recentDays, bucket.group, 3),
+			recentCategoryHits: categoryRecentHitCount(recentDays, bucket.category, buckets, 2),
+			globalCount: globalCounts.get(bucket.group) || 0,
+			sameAsLastGroup: bucket.group === lastGroup,
+			sameAsLastMedia: Boolean(family && family === lastMedia),
+			remainingInBucket: bucket.posts.length,
+		});
 	}
 
 	choices.sort((a, b) => {
+		if (a.sameGroupToday !== b.sameGroupToday) return a.sameGroupToday ? 1 : -1;
+		if (a.recentGroupHits !== b.recentGroupHits) return a.recentGroupHits - b.recentGroupHits;
+		if (a.globalCount !== b.globalCount) return a.globalCount - b.globalCount;
+		if (a.sameCategoryToday !== b.sameCategoryToday) return a.sameCategoryToday ? 1 : -1;
 		if (a.preferredMatch !== b.preferredMatch) return a.preferredMatch ? -1 : 1;
-		const aPenalty = a.group === lastGroup ? 1 : 0;
-		const bPenalty = b.group === lastGroup ? 1 : 0;
-		if (aPenalty !== bPenalty) return aPenalty - bPenalty;
+		if (a.recentCategoryHits !== b.recentCategoryHits) return a.recentCategoryHits - b.recentCategoryHits;
+		if (a.sameAsLastGroup !== b.sameAsLastGroup) return a.sameAsLastGroup ? 1 : -1;
+		if (a.sameAsLastMedia !== b.sameAsLastMedia) return a.sameAsLastMedia ? 1 : -1;
+		if (a.remainingInBucket !== b.remainingInBucket) return b.remainingInBucket - a.remainingInBucket;
 		return scheduledMs(a.post) - scheduledMs(b.post) || String(a.post.id).localeCompare(String(b.post.id));
 	});
 
 	const selected = choices[0];
 	if (!selected) return null;
-	const list = queues.get(selected.category);
-	list.splice(list.indexOf(selected.post), 1);
+	selected.bucket.posts.shift();
 	return selected;
 }
 
@@ -228,22 +340,28 @@ export function rebalancePinterestMix(posts, options = {}) {
 	const slotsUtc = options.slotsUtc || DEFAULT_SLOTS_UTC;
 	const dailyPlan = options.dailyPlan || DEFAULT_DAILY_PLAN;
 	const candidates = buildCandidates(posts, startDate);
-	const { queues, initialCategoryCounts } = buildQueues(candidates, dailyPlan);
+	const { buckets, initialCategoryCounts } = buildProductBuckets(candidates);
 	const maxSameProductPerDay =
 		options.maxSameProductPerDay || DEFAULT_MAX_SAME_PRODUCT_PER_DAY;
 
 	let dayIndex = 0;
 	let moved = 0;
 	let lastGroup = null;
+	let lastMedia = "";
+	const recentDays = [];
+	const globalCounts = new Map();
 
-	while (totalRemaining(queues) > 0) {
+	while (totalRemainingBuckets(buckets) > 0) {
 		const dayCounts = new Map();
-		for (let slotIndex = 0; slotIndex < slotsUtc.length && totalRemaining(queues) > 0; slotIndex += 1) {
-			const selected = takeFrom(
-				queues,
+		for (let slotIndex = 0; slotIndex < slotsUtc.length && totalRemainingBuckets(buckets) > 0; slotIndex += 1) {
+			const selected = takeFromBuckets(
+				buckets,
 				dailyPlan[slotIndex] || "wildcard",
 				dayCounts,
 				lastGroup,
+				lastMedia,
+				recentDays,
+				globalCounts,
 				maxSameProductPerDay,
 			);
 			if (!selected) break;
@@ -253,8 +371,11 @@ export function rebalancePinterestMix(posts, options = {}) {
 			selected.post.updatedAt = new Date().toISOString();
 			delete selected.post.scheduled_at;
 			dayCounts.set(selected.group, (dayCounts.get(selected.group) || 0) + 1);
+			globalCounts.set(selected.group, (globalCounts.get(selected.group) || 0) + 1);
 			lastGroup = selected.group;
+			lastMedia = selected.family || lastMedia;
 		}
+		recentDays.push(new Set(dayCounts.keys()));
 		dayIndex += 1;
 	}
 

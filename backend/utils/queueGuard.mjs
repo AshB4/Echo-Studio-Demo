@@ -43,6 +43,14 @@ function signature(post) {
 	].join("::");
 }
 
+function contentSignature(post) {
+	return [
+		normalizeText(post?.title),
+		normalizeText(post?.body),
+		targetsSignature(post),
+	].join("::");
+}
+
 export function findDuplicatePost(posts, candidate, options = {}) {
 	const { excludeId = null } = options;
 	const needle = signature(candidate);
@@ -55,3 +63,14 @@ export function findDuplicatePost(posts, candidate, options = {}) {
 	);
 }
 
+export function findContentDuplicate(posts, candidate, options = {}) {
+	const { excludeId = null } = options;
+	const needle = contentSignature(candidate);
+	if (!needle || !Array.isArray(posts)) return null;
+	return (
+		posts.find((post) => {
+			if (excludeId && post?.id === excludeId) return false;
+			return contentSignature(post) === needle;
+		}) || null
+	);
+}
