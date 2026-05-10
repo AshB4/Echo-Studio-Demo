@@ -83,6 +83,7 @@ backend/data/*.sqlite-wal
 backend/queue/postQueue.json
 backend/queue/postedLog.json
 backend/queue/rejections.json
+backend/queue/*.json
 frontend/assets/goblinposts/
 frontend/assets/BuzzingBees/
 frontend/assets/spring26/
