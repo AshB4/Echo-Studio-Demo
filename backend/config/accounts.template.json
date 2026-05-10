@@ -10,9 +10,14 @@
     },
     "metadata": {
       "pageId": "${FB_COLOR_WITH_ASH_PAGE_ID}",
-      "pageName": "Color With Ash"
-      ,
-      "default": false
+      "pageName": "Color With Ash",
+      "default": true,
+      "shareToAccountIds": [
+        "fb-main-page"
+      ],
+      "browserUserDataDir": "__DEFAULT_CHROME__",
+      "browserProfileDirectory": "Profile 11",
+      "cloneChromeProfile": false
     }
   },
   {
@@ -49,7 +54,7 @@
       "browserUserDataDir": "__DEFAULT_CHROME__",
       "browserProfileDirectory": "Default",
       "cloneChromeProfile": false,
-      "default": true,
+      "default": false,
       "aliasOf": "fb-main-profile"
     }
   },

@@ -12,7 +12,13 @@
       "pageId": "${FACEBOOK_PAGE_ID}",
       "pageName": "Color With Ash",
       "pageUrl": "https://www.facebook.com/ColorWithAshB",
-      "default": false,
+      "default": true,
+      "shareToAccountIds": [
+        "fb-main-page"
+      ],
+      "browserUserDataDir": "__DEFAULT_CHROME__",
+      "browserProfileDirectory": "Profile 11",
+      "cloneChromeProfile": false,
       "browserOnly": true,
       "browserFirst": true,
       "browserFallback": true
@@ -52,7 +58,7 @@
       "profileName": "SanguineQueen",
       "profileUrl": "https://www.facebook.com/SanguineQueen/",
       "cadenceRule": "weekends-only-max-3-per-week",
-      "default": true,
+      "default": false,
       "browserUserDataDir": "__DEFAULT_CHROME__",
       "browserProfileDirectory": "Default",
       "cloneChromeProfile": false,

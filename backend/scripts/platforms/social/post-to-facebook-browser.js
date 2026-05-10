@@ -7,6 +7,8 @@ import { fileURLToPath } from "url";
 import fs from "fs";
 import { copyFile, lstat, mkdir, readdir } from "fs/promises";
 import { chromium } from "playwright";
+import { getAccount } from "../../../utils/accountStore.mjs";
+import { createBrowserDebugRecorder } from "../../../utils/browserDebugRecorder.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -18,6 +20,7 @@ try {
 } catch (e) {}
 
 const BACKEND_ROOT = path.join(__dirname, "../../..");
+const DEBUG_DIR = path.join(BACKEND_ROOT, "debug", "facebook");
 const DEFAULT_CLONED_PROFILE_DIR = path.join(
 	BACKEND_ROOT,
 	"config",
@@ -26,6 +29,7 @@ const DEFAULT_CLONED_PROFILE_DIR = path.join(
 const STEP_TIMEOUT_MS = Number(process.env.FACEBOOK_BROWSER_STEP_TIMEOUT_MS || 15000);
 const CLEANUP_TIMEOUT_MS = Number(process.env.FACEBOOK_BROWSER_CLEANUP_TIMEOUT_MS || 12000);
 const POST_SETTLE_MS = Number(process.env.FACEBOOK_POST_SETTLE_MS || 8000);
+const FACEBOOK_GRAPH_VERSION = "v18.0";
 
 function boolFromEnv(name, fallback = true) {
 	const value = process.env[name];
@@ -88,6 +92,22 @@ function resolveProfileConfig(account = {}) {
 function logStep(step, detail = "") {
 	const suffix = detail ? ` :: ${detail}` : "";
 	console.log(`[fb-browser] ${step}${suffix}`);
+}
+
+function shouldUseManualShareMode() {
+	return boolFromEnv("FACEBOOK_MANUAL_SHARE_MODE", false);
+}
+
+function shouldSkipExistingFeedCheck() {
+	return boolFromEnv("FACEBOOK_SKIP_EXISTING_CHECK", true);
+}
+
+function createDebugRecorder(enabled) {
+	return createBrowserDebugRecorder({
+		enabled,
+		debugDir: DEBUG_DIR,
+		logPrefix: "FACEBOOK_DEBUG",
+	});
 }
 
 async function dumpFacebookSurface(page, label) {
@@ -373,24 +393,447 @@ function resolveTargetUrl(account = {}) {
 	return "https://www.facebook.com/me";
 }
 
-function pageLooksLikeAuthRequired(page) {
+function normalizeSnippet(text) {
+	return String(text || "")
+		.replace(/\s+/g, " ")
+		.trim()
+		.slice(0, 120);
+}
+
+async function extractPublishedPostPermalink(page, text) {
+	const snippet = normalizeSnippet(text);
+	if (!snippet) return "";
+	try {
+		const href = await page.evaluate((targetSnippet) => {
+			const normalize = (value) => String(value || "").replace(/\s+/g, " ").trim();
+			const candidates = Array.from(document.querySelectorAll('div[role="article"]'));
+			const article = candidates.find((node) =>
+				normalize(node.innerText || "").includes(targetSnippet),
+			);
+			if (!article) return "";
+			const links = Array.from(article.querySelectorAll("a[href]"))
+				.map((node) => node.getAttribute("href") || "")
+				.filter((href) => /\/posts\/|\/permalink\/|story\.php|\/photos\//i.test(href));
+			return links[0] || "";
+		}, snippet);
+		if (!href) return "";
+		return new URL(href, page.url()).toString();
+	} catch (error) {
+		logStep("share:permalink-failed", error?.message || String(error));
+		return "";
+	}
+}
+
+async function shareLinkToFacebookFeed(account, message, link) {
+	const accessToken = String(account?.credentials?.accessToken || "").trim();
+	const pageId = String(account?.metadata?.pageId || "").trim();
+	if (!accessToken || !pageId || !link) {
+		throw new Error("Share target is missing pageId, access token, or permalink");
+	}
+
+	const body = new URLSearchParams();
+	body.set("message", String(message || "").trim());
+	body.set("link", String(link).trim());
+	body.set("access_token", accessToken);
+
+	const response = await fetch(
+		`https://graph.facebook.com/${FACEBOOK_GRAPH_VERSION}/${pageId}/feed`,
+		{
+			method: "POST",
+			headers: {
+				"content-type": "application/x-www-form-urlencoded",
+			},
+			body,
+		},
+	);
+	const data = await response.json().catch(() => ({}));
+	if (!response.ok || data?.error) {
+		throw new Error(data?.error?.message || `HTTP ${response.status}`);
+	}
+	return {
+		type: "feed-share",
+		postId: data?.id || null,
+	};
+}
+
+async function clickShareButtonForPost(page, text) {
+	const snippet = normalizeSnippet(text);
+	if (!snippet) return null;
+
+	try {
+		const result = await page.evaluate((targetSnippet) => {
+			const normalize = (value) => String(value || "").replace(/\s+/g, " ").trim();
+			const isVisible = (el) => {
+				if (!el) return false;
+				const style = window.getComputedStyle(el);
+				if (!style || style.visibility === "hidden" || style.display === "none") return false;
+				const rect = el.getBoundingClientRect();
+				return rect.width > 0 && rect.height > 0;
+			};
+
+			const articles = Array.from(document.querySelectorAll('div[role="article"]'));
+			const article = articles.find((node) =>
+				normalize(node.innerText || "").includes(targetSnippet),
+			);
+			if (!article) return null;
+
+			const candidates = Array.from(
+				article.querySelectorAll('div[role="button"], button, a[role="button"], span'),
+			);
+			const target = candidates.find((node) => {
+				const text = normalize(node.textContent || "");
+				const aria = normalize(node.getAttribute?.("aria-label") || "");
+				return (
+					isVisible(node) &&
+					(text === "Share" ||
+						aria === "Share" ||
+						text === "Send this to friends or post it on your profile." ||
+						aria === "Send this to friends or post it on your profile.")
+				);
+			});
+			if (!target) return null;
+			let clickable = target;
+			while (clickable && clickable !== document.body) {
+				const role = String(clickable.getAttribute?.("role") || "");
+				if (
+					clickable instanceof HTMLElement &&
+					isVisible(clickable) &&
+					(role === "button" || clickable.tagName === "BUTTON" || clickable.tagName === "A")
+				) {
+					const rect = clickable.getBoundingClientRect();
+					return {
+						x: Math.round(rect.left + rect.width / 2),
+						y: Math.round(rect.top + rect.height / 2),
+						label: normalize(clickable.textContent || clickable.getAttribute?.("aria-label") || "Share"),
+					};
+				}
+				clickable = clickable.parentElement;
+			}
+			const rect = target.getBoundingClientRect();
+			return {
+				x: Math.round(rect.left + rect.width / 2),
+				y: Math.round(rect.top + rect.height / 2),
+				label: normalize(target.textContent || target.getAttribute?.("aria-label") || "Share"),
+			};
+		}, snippet);
+
+		if (!result?.x || !result?.y) return null;
+		await page.mouse.click(result.x, result.y, { delay: 40 });
+		return `share-mouse:${result.label || "Share"}`;
+	} catch (error) {
+		logStep("share:ui-click-failed", error?.message || String(error));
+		return null;
+	}
+}
+
+async function clickShareButtonInFeed(page) {
+	try {
+		await dismissInterruptivePopups(page);
+		await page.mouse.wheel(0, 1200).catch(() => {});
+		await page.waitForTimeout(800);
+
+		const selectors = [
+			'div[data-ad-rendering-role="share_button"]',
+			'div[data-ad-rendering-role="share_button"] span',
+			'div[role="button"] div[data-ad-rendering-role="share_button"]',
+			'div[role="button"]:has(span:has-text("Share"))',
+			'div[role="button"]:has-text("Share")',
+			'span:has-text("Share")',
+		];
+
+		for (const selector of selectors) {
+			try {
+				const locator = page.locator(selector).first();
+				const count = await locator.count().catch(() => 0);
+				if (count > 0) {
+					await locator.scrollIntoViewIfNeeded({ timeout: 4000 }).catch(() => {});
+					await locator.click({ timeout: 4000, force: true });
+					logStep("share:feed-click", selector);
+					return selector;
+				}
+			} catch {
+				// continue
+			}
+		}
+
+		const articleShare = await page.evaluate(() => {
+			const normalize = (value) => String(value || "").replace(/\s+/g, " ").trim();
+			const isVisible = (el) => {
+				if (!el) return false;
+				const style = window.getComputedStyle(el);
+				if (!style || style.visibility === "hidden" || style.display === "none") return false;
+				const rect = el.getBoundingClientRect();
+				return rect.width > 0 && rect.height > 0;
+			};
+			const articles = Array.from(document.querySelectorAll('div[role="article"]'));
+			for (const article of articles) {
+				const shareCandidates = Array.from(
+					article.querySelectorAll('[data-ad-rendering-role="share_button"], div[role="button"], button, span'),
+				).filter((node) => {
+					const text = normalize(node.textContent || "");
+					const aria = normalize(node.getAttribute?.("aria-label") || "");
+					return (
+						isVisible(node) &&
+						(text === "Share" ||
+							aria === "Share" ||
+							text.includes("Share") ||
+							aria.includes("Share"))
+					);
+				});
+				const target = shareCandidates[0];
+				if (!target) continue;
+				let clickable = target;
+				while (clickable && clickable !== document.body) {
+					const role = String(clickable.getAttribute?.("role") || "");
+					if (
+						clickable instanceof HTMLElement &&
+						isVisible(clickable) &&
+						(role === "button" || clickable.tagName === "BUTTON" || clickable.tagName === "A")
+					) {
+						const rect = clickable.getBoundingClientRect();
+						return {
+							x: Math.round(rect.left + rect.width / 2),
+							y: Math.round(rect.top + rect.height / 2),
+							label: normalize(clickable.textContent || clickable.getAttribute?.("aria-label") || "Share"),
+						};
+					}
+					clickable = clickable.parentElement;
+				}
+			}
+			return null;
+		});
+
+		if (articleShare?.x && articleShare?.y) {
+			await page.mouse.click(articleShare.x, articleShare.y, { delay: 40 });
+			logStep("share:feed-mouse", articleShare.label || "Share");
+			return `mouse:${articleShare.label || "Share"}`;
+		}
+	} catch (error) {
+		logStep("share:feed-click-failed", error?.message || String(error));
+	}
+	return null;
+}
+
+async function confirmUiShare(page) {
+	for (let attempt = 0; attempt < 12; attempt += 1) {
+		await dismissInterruptivePopups(page);
+
+		const direct = await clickFirst(page, [
+			'div[role="dialog"] [data-ad-rendering-role="share_button"]',
+			'div[role="dialog"] div[data-ad-rendering-role="share_button"]',
+			'div[role="dialog"] div[role="button"][data-ad-rendering-role="share_button"]',
+			'div[role="dialog"] div[role="button"]:has(span:has-text("Share"))',
+			'div[role="dialog"] div:has(span:has-text("Share"))',
+			'div[role="dialog"] span:has-text("Share")',
+			'div[role="menuitem"]:has-text("Share now")',
+			'div[role="button"]:has-text("Share now")',
+			'button:has-text("Share now")',
+			'div[role="menuitem"]:has-text("Share to Feed")',
+			'div[role="button"]:has-text("Share to Feed")',
+			'button:has-text("Share to Feed")',
+			'div[role="menuitem"]:has-text("Post")',
+			'div[role="button"]:has-text("Post")',
+			'button:has-text("Post")',
+		], 2500);
+		if (direct) return direct;
+
+		const dialogShareClicked = await page.evaluate(() => {
+			const normalize = (value) => String(value || "").replace(/\s+/g, " ").trim();
+			const isVisible = (el) => {
+				if (!el) return false;
+				const style = window.getComputedStyle(el);
+				if (!style || style.visibility === "hidden" || style.display === "none") return false;
+				const rect = el.getBoundingClientRect();
+				return rect.width > 0 && rect.height > 0;
+			};
+			const dialogs = Array.from(document.querySelectorAll('div[role="dialog"]'));
+			for (const dialog of dialogs) {
+				const candidates = Array.from(
+					dialog.querySelectorAll('[data-ad-rendering-role="share_button"], div[role="button"], button, span'),
+				);
+				const target = candidates.find((node) => {
+					const text = normalize(node.textContent || "");
+					const aria = normalize(node.getAttribute?.("aria-label") || "");
+					const role = String(node.getAttribute?.("role") || "");
+					return (
+						isVisible(node) &&
+						(role === "button" ||
+							node.tagName === "BUTTON" ||
+							node.tagName === "A" ||
+							(node instanceof HTMLElement && node.hasAttribute("data-ad-rendering-role"))) &&
+						(text === "Share" ||
+							aria === "Share" ||
+							text === "Share now" ||
+							aria === "Share now" ||
+							text === "Share to Feed" ||
+							aria === "Share to Feed" ||
+							text.includes("Share") ||
+							aria.includes("Share"))
+					);
+				});
+				if (!target) continue;
+				let clickable = target;
+				while (clickable && clickable !== document.body) {
+					const role = String(clickable.getAttribute?.("role") || "");
+					if (
+						clickable instanceof HTMLElement &&
+						isVisible(clickable) &&
+						(role === "button" || clickable.tagName === "BUTTON" || clickable.tagName === "A")
+					) {
+						const rect = clickable.getBoundingClientRect();
+						clickable.click();
+						return {
+							x: Math.round(rect.left + rect.width / 2),
+							y: Math.round(rect.top + rect.height / 2),
+							label: normalize(clickable.textContent || clickable.getAttribute?.("aria-label") || "Share"),
+						};
+					}
+					clickable = clickable.parentElement;
+				}
+			}
+			return null;
+		});
+		if (dialogShareClicked?.x && dialogShareClicked?.y) {
+			await page.mouse.click(dialogShareClicked.x, dialogShareClicked.y, { delay: 40 });
+			return `dialog-share:${dialogShareClicked.label || "Share"}`;
+		}
+
+		const successVisible = await page
+			.locator('text=/Shared successfully|Your post was shared|Post published/i')
+			.first()
+			.isVisible()
+			.catch(() => false);
+		if (successVisible) {
+			return "share-success-signal";
+		}
+
+		await page.waitForTimeout(800);
+	}
+
+	return null;
+}
+
+async function sharePostViaUi(page, post) {
+	await dismissInterruptivePopups(page);
+	const shareSelector = (await clickShareButtonForPost(page, post.body || post.title || "")) ||
+		(await clickShareButtonInFeed(page));
+	if (!shareSelector) {
+		return {
+			status: "error",
+			error: "Could not find Share button for the newly published Facebook post",
+			mode: "facebook-ui",
+		};
+	}
+
+	await page.waitForTimeout(1200);
+	await dismissInterruptivePopups(page);
+	const confirmSelector = await confirmUiShare(page);
+	if (!confirmSelector) {
+		return {
+			status: "error",
+			error: "Clicked Share but could not confirm the Facebook share action",
+			mode: "facebook-ui",
+			shareSelector,
+		};
+	}
+
+	return {
+		status: "posted",
+		mode: "facebook-ui",
+		shareSelector,
+		confirmSelector,
+	};
+}
+
+async function sharePostToConfiguredAccounts(page, post, account) {
+	const shareToAccountIds = Array.isArray(account?.metadata?.shareToAccountIds)
+		? account.metadata.shareToAccountIds
+		: [];
+	if (!shareToAccountIds.length) return [];
+
+	const uiShareResult = await sharePostViaUi(page, post);
+	if (uiShareResult?.status === "posted") {
+		logStep("share:ui-success", JSON.stringify(uiShareResult));
+		return shareToAccountIds.map((accountId) => ({
+			accountId,
+			...uiShareResult,
+		}));
+	}
+
+	const permalink = await extractPublishedPostPermalink(page, post.body || post.title || "");
+	if (!permalink) {
+		return shareToAccountIds.map((accountId) => ({
+			accountId,
+			status: "error",
+			error:
+				uiShareResult?.error ||
+				"Could not extract published post permalink for share",
+			uiShareAttempt: uiShareResult,
+		}));
+	}
+
+	const results = [];
+	for (const shareAccountId of shareToAccountIds) {
+		try {
+			const shareAccount = await getAccount("facebook", shareAccountId);
+			if (!shareAccount) {
+				results.push({
+					accountId: shareAccountId,
+					status: "error",
+					error: "Share target account not found",
+					permalink,
+				});
+				continue;
+			}
+			const shared = await shareLinkToFacebookFeed(
+				shareAccount,
+				post.body || post.title || "",
+				permalink,
+			);
+			logStep("share:success", `${shareAccountId} :: ${permalink}`);
+			results.push({
+				accountId: shareAccountId,
+				status: "posted",
+				permalink,
+				...shared,
+			});
+		} catch (error) {
+			logStep("share:error", `${shareAccountId} :: ${error?.message || String(error)}`);
+			results.push({
+				accountId: shareAccountId,
+				status: "error",
+				error: error?.message || String(error),
+				permalink,
+			});
+		}
+	}
+	return results;
+}
+
+async function pageLooksLikeAuthRequired(page) {
 	const url = String(page?.url?.() || "");
 	const isLoginUrl = /facebook\.com\/login/i.test(url) ||
 		/facebook\.com\/checkpoint/i.test(url) ||
 		/facebook\.com\/accounts/i.test(url);
-	
-	// Also check for login form elements on the page
-	const hasLoginForm = page.locator('input[name="email"], input[id="email"], input[type="text"]').count() > 0 &&
-		page.locator('input[name="pass"], input[id="pass"], input[type="password"]').count() > 0;
-	
+
+	const emailCount = await page
+		.locator('input[name="email"], input[id="email"], input[aria-label*="Email" i], input[autocomplete="username"]')
+		.count()
+		.catch(() => 0);
+	const passwordCount = await page
+		.locator('input[name="pass"], input[id="pass"], input[type="password"], input[autocomplete="current-password"]')
+		.count()
+		.catch(() => 0);
+	const hasLoginForm = emailCount > 0 && passwordCount > 0;
+
 	logStep("auth-check:url", url);
-	logStep("auth-check:isLoginUrl", isLoginUrl);
-	logStep("auth-check:hasLoginForm", hasLoginForm);
-	
+	logStep("auth-check:isLoginUrl", String(isLoginUrl));
+	logStep("auth-check:hasLoginForm", `${hasLoginForm} (email=${emailCount}, pass=${passwordCount})`);
+
 	return isLoginUrl || hasLoginForm;
 }
 
-async function ensureFacebookLoggedIn(page) {
+async function ensureFacebookLoggedIn(page, debug = null) {
 	const username = process.env.FACEBOOK_LOGIN_USERNAME;
 	const password = process.env.FACEBOOK_LOGIN_PASSWORD;
 	
@@ -400,44 +843,137 @@ async function ensureFacebookLoggedIn(page) {
 	
 	logStep("facebook:login:start");
 	
-	for (const selector of ['input[name="email"]', 'input[id="email"]', 'input[type="text"]']) {
+	let emailFilled = false;
+	for (const selector of [
+		'input[name="email"]',
+		'input[id="email"]',
+		'input[aria-label*="Email" i]',
+		'input[autocomplete="username"]',
+		'input[type="text"]',
+	]) {
 		try {
 			const locator = page.locator(selector).first();
-			if ((await locator.count()) > 0) {
+			if ((await locator.count()) > 0 && (await locator.isVisible().catch(() => true))) {
 				await locator.fill(username);
 				logStep("facebook:login:email-filled");
+				await debug?.log("facebook:login:email-filled", { selector });
+				emailFilled = true;
 				break;
 			}
 		} catch {}
 	}
-	
-	for (const selector of ['input[name="pass"]', 'input[id="pass"]', 'input[type="password"]']) {
+
+	let passwordFilled = false;
+	for (const selector of [
+		'input[name="pass"]',
+		'input[id="pass"]',
+		'input[type="password"]',
+		'input[autocomplete="current-password"]',
+	]) {
 		try {
 			const locator = page.locator(selector).first();
-			if ((await locator.count()) > 0) {
+			if ((await locator.count()) > 0 && (await locator.isVisible().catch(() => true))) {
 				await locator.fill(password);
 				logStep("facebook:login:password-filled");
+				await debug?.log("facebook:login:password-filled", { selector });
+				passwordFilled = true;
 				break;
 			}
 		} catch {}
 	}
-	
-	const loginClicked = await clickFirst(page, [
-		'button[type="submit"]',
-		'button[name="login"]',
-		'a[role="button"]',
-		'div[role="button"]',
-	]);
-	
-	if (!loginClicked) {
-		throw new Error("Unable to find Facebook login button");
+
+	if (!emailFilled || !passwordFilled) {
+		throw new Error(
+			`Unable to fill Facebook login form (emailFilled=${emailFilled}, passwordFilled=${passwordFilled})`,
+		);
 	}
-	
-	await page.waitForURL((url) => !url.toString().includes("/login"), {
-		timeout: 30000,
-	});
-	
+
+	const loginClicked = await clickFirstWithDebug(page, [
+		'button[name="login"]',
+		'div[role="button"][aria-label="Log In"]',
+		'div[role="button"][aria-label="Log in to Facebook"]',
+		'div[role="button"]:has-text("Log In")',
+		'div[role="button"]:has-text("Log in")',
+		'button:has-text("Log In")',
+		'button:has-text("Log in")',
+		'button[type="submit"]',
+	], debug, "facebook:login:submit-click");
+
+	if (!loginClicked) {
+		let submitted = false;
+		try {
+			const roleButton = page.getByRole("button", { name: /log in/i }).first();
+			if ((await roleButton.count().catch(() => 0)) > 0) {
+				await roleButton.click({ timeout: 4000, force: true });
+				logStep("facebook:login:clicked", 'getByRole(button[name=/log in/i])');
+				await debug?.log("facebook:login:clicked", {
+					selector: 'getByRole(button[name=/log in/i])',
+				});
+				submitted = true;
+			}
+		} catch {
+			// continue
+		}
+		if (!submitted) {
+			try {
+				submitted = await page.evaluate(() => {
+					const candidates = Array.from(
+						document.querySelectorAll('button, div[role="button"], a[role="button"], input[type="submit"]'),
+					);
+					const target = candidates.find((node) => {
+						const text = String(
+							node.textContent ||
+							node.getAttribute?.("aria-label") ||
+							node.getAttribute?.("value") ||
+							"",
+						)
+							.replace(/\s+/g, " ")
+							.trim()
+							.toLowerCase();
+						return text === "log in" || text === "log in to facebook";
+					});
+					if (!target) return false;
+					target.click();
+					return true;
+				});
+				if (submitted) {
+					logStep("facebook:login:clicked", "dom-eval-log-in");
+					await debug?.log("facebook:login:clicked", {
+						selector: "dom-eval-log-in",
+					});
+				}
+			} catch {
+				// continue
+			}
+		}
+		if (submitted) {
+			await page.waitForLoadState("domcontentloaded", { timeout: 30000 }).catch(() => {});
+			await page.waitForTimeout(2500);
+			logStep("facebook:login:success");
+			await debug?.log("facebook:login:success", { mode: "fallback-submit" });
+			return;
+		}
+		const passwordField = page.locator(
+			'input[name="pass"], input[id="pass"], input[type="password"], input[autocomplete="current-password"]',
+		).first();
+		if ((await passwordField.count().catch(() => 0)) > 0) {
+			await passwordField.press("Enter").catch(() => {});
+			logStep("facebook:login:submit-enter");
+			await debug?.log("facebook:login:submit-enter", { ok: true });
+		} else {
+			await debug?.screenshot(page, "facebook-login-button-missing");
+			throw new Error("Unable to find Facebook login button");
+		}
+	} else {
+		logStep("facebook:login:clicked", loginClicked);
+		await debug?.log("facebook:login:clicked", { selector: loginClicked });
+	}
+
+	await page.waitForLoadState("domcontentloaded", { timeout: 30000 }).catch(() => {});
+	await page.waitForTimeout(2500);
+
 	logStep("facebook:login:success");
+	await debug?.log("facebook:login:success", { mode: "primary-submit" });
 }
 
 async function clickFirst(page, selectors, timeout = 4000) {
@@ -445,13 +981,35 @@ async function clickFirst(page, selectors, timeout = 4000) {
 		try {
 			const locator = page.locator(selector).first();
 			if ((await locator.count()) > 0) {
-				await locator.click({ timeout });
+				await locator.click({ timeout, force: true });
 				return selector;
 			}
 		} catch {
 			// continue
 		}
 	}
+	return null;
+}
+
+async function clickFirstWithDebug(page, selectors, debug, stepName, timeout = 4000) {
+	for (const selector of selectors) {
+		try {
+			const locator = page.locator(selector).first();
+			const count = await locator.count().catch(() => 0);
+			if (count > 0) {
+				await locator.click({ timeout, force: true });
+				await debug?.log(stepName, { selector, ok: true });
+				return selector;
+			}
+		} catch (error) {
+			await debug?.log(stepName, {
+				selector,
+				ok: false,
+				error: error?.message || String(error),
+			});
+		}
+	}
+	await debug?.log(stepName, { ok: false, selectors });
 	return null;
 }
 
@@ -957,7 +1515,8 @@ export default async function postToFacebookBrowser(post, context = {}) {
 	const account = context?.account || context?.target?.account || context || {};
 	const targetUrl = resolveTargetUrl(account);
 	const mediaPath = resolveLocalMediaPath(post);
-	const config = resolveProfileConfig();
+	const config = resolveProfileConfig(account);
+	const debug = createDebugRecorder(boolFromEnv("FACEBOOK_DEBUG", true));
 	let browserContext = null;
 	let cleanup = async () => {};
 	let shouldCloseContext = true;
@@ -984,14 +1543,26 @@ export default async function postToFacebookBrowser(post, context = {}) {
 		await page.waitForTimeout(2500);
 		await dismissInterruptivePopups(page);
 		logStep("page:url", page.url());
+		await debug.log("page:open", { targetUrl, finalUrl: page.url() });
 		await dumpFacebookSurface(page, "after-open");
+		await debug.screenshot(page, "after-open");
 
-		if (pageLooksLikeAuthRequired(page)) {
+		if (await pageLooksLikeAuthRequired(page)) {
 			logStep("auth-required:auto-login", page.url());
-			await ensureFacebookLoggedIn(page);
+			try {
+				await ensureFacebookLoggedIn(page, debug);
+			} catch (error) {
+				keepWindowOpen = config.keepOpenOnAuthRequired && !config.useCdp;
+				await debug.log("auth-required:error", {
+					message: error?.message || String(error),
+				});
+				await debug.screenshot(page, "auth-required-error");
+				throw error;
+			}
 			await dismissInterruptivePopups(page);
 			logStep("auth-required:resolved", page.url());
 			await dumpFacebookSurface(page, "after-auth");
+			await debug.screenshot(page, "after-auth");
 		}
 
 		if (String(account?.metadata?.profileName || "").trim()) {
@@ -1013,19 +1584,22 @@ export default async function postToFacebookBrowser(post, context = {}) {
 		}
 
 		const feedText = post.body || post.title || "";
-		if (await verifyPostVisibleOnFeed(page, feedText)) {
-			logStep("already-visible");
-			return {
-				type: "browser-post",
-				via: config.useCdp ? "playwright-cdp" : "playwright",
-				targetUrl,
-				alreadyVisible: true,
-			};
+		if (!shouldSkipExistingFeedCheck()) {
+			if (await verifyPostVisibleOnFeed(page, feedText)) {
+				logStep("already-visible");
+				return {
+					type: "browser-post",
+					via: config.useCdp ? "playwright-cdp" : "playwright",
+					targetUrl,
+					alreadyVisible: true,
+				};
+			}
 		}
 
 		logStep("composer:find");
 		await dismissInterruptivePopups(page);
 		await dumpFacebookSurface(page, "before-composer");
+		await debug.screenshot(page, "before-composer");
 		const composerSelector = await withStepTimeout("find-composer", () =>
 			openFacebookComposer(page),
 		);
@@ -1033,6 +1607,7 @@ export default async function postToFacebookBrowser(post, context = {}) {
 		if (!composerSelector) {
 			logStep("composer:missing");
 			keepWindowOpen = config.keepOpenOnPostFailure && !config.useCdp;
+			await debug.screenshot(page, "composer-missing");
 			throw new Error("Facebook browser fallback could not find the post composer");
 		}
 		logStep("composer:clicked", composerSelector);
@@ -1046,6 +1621,7 @@ export default async function postToFacebookBrowser(post, context = {}) {
 		);
 		if (!filled) {
 			logStep("composer:fill-missing");
+			await debug.screenshot(page, "composer-fill-missing");
 			throw new Error("Facebook browser fallback could not fill the post body");
 		}
 		logStep("composer:filled", filled);
@@ -1057,6 +1633,7 @@ export default async function postToFacebookBrowser(post, context = {}) {
 			);
 			if (!attached) {
 				logStep("media:missing");
+				await debug.screenshot(page, "media-missing");
 				throw new Error("Facebook browser fallback could not attach media");
 			}
 			logStep("media:attached", attached);
@@ -1073,6 +1650,7 @@ export default async function postToFacebookBrowser(post, context = {}) {
 		if (!postButtonSelector) {
 			logStep("post-button:missing");
 			keepWindowOpen = config.keepOpenOnPostFailure && !config.useCdp;
+			await debug.screenshot(page, "post-button-missing");
 			throw new Error("Facebook browser fallback could not find the Post button");
 		}
 		logStep("post-button:clicked", postButtonSelector);
@@ -1113,6 +1691,7 @@ export default async function postToFacebookBrowser(post, context = {}) {
 			) {
 				keepWindowOpen = config.keepOpenOnPostFailure && !config.useCdp;
 				logStep("post-button:final-missing");
+				await debug.screenshot(page, "final-post-button-missing");
 				throw new Error(
 					"Facebook browser fallback advanced with Next, but could not find the final Post button.",
 				);
@@ -1125,43 +1704,58 @@ export default async function postToFacebookBrowser(post, context = {}) {
 		if (!submitted) {
 			keepWindowOpen = config.keepOpenOnPostFailure && !config.useCdp;
 			logStep("post-submit:not-confirmed");
+			await debug.screenshot(page, "post-submit-not-confirmed");
 			throw new Error(
 				"Facebook browser fallback clicked Post, but the composer did not close.",
 			);
 		}
 		const publishSeen = await waitForPublishSignal(page, publishSignalBaseline);
+		let feedVisible = false;
 		if (!publishSeen) {
-			const feedVisibleWithoutSignal = await verifyPostVisibleOnFeed(
+			feedVisible = await verifyPostVisibleOnFeed(
 				page,
 				post.body || post.title || "",
 			);
-			if (feedVisibleWithoutSignal) {
-				await page.waitForTimeout(POST_SETTLE_MS);
+			if (feedVisible) {
 				logStep("done:feed-visible-no-signal");
-				return {
-					type: "browser-post",
-					via: config.useCdp ? "playwright-cdp" : "playwright",
-					targetUrl,
-					composerSelector,
-					postButtonSelector,
-				};
+			} else {
+				keepWindowOpen = config.keepOpenOnPostFailure && !config.useCdp;
+				logStep("post-submit:no-publish-signal");
+				throw new Error(
+					"Facebook browser fallback did not detect a publish confirmation signal.",
+				);
 			}
-			keepWindowOpen = config.keepOpenOnPostFailure && !config.useCdp;
-			logStep("post-submit:no-publish-signal");
-			throw new Error(
-				"Facebook browser fallback did not detect a publish confirmation signal.",
-			);
+		} else {
+			feedVisible = await verifyPostVisibleOnFeed(page, post.body || post.title || "");
 		}
-		const feedVisible = await verifyPostVisibleOnFeed(page, post.body || post.title || "");
 		if (!feedVisible) {
 			keepWindowOpen = config.keepOpenOnPostFailure && !config.useCdp;
 			logStep("post-submit:not-found-on-feed");
+			await debug.screenshot(page, "post-not-found-on-feed");
 			throw new Error(
 				"Facebook browser fallback could not verify the new post on feed after publish.",
 			);
 		}
+		const manualShareMode = shouldUseManualShareMode();
+		let shareResults = [];
+		if (manualShareMode) {
+			keepWindowOpen = !config.useCdp;
+			logStep("share:manual-mode", "window-left-open-for-manual-share");
+			await debug.log("share:manual-mode", {
+				ok: true,
+				message: "Browser left open for manual share after successful post",
+			});
+		} else {
+			shareResults = await sharePostToConfiguredAccounts(page, post, account);
+		}
+		await debug.log("post-success", {
+			finalUrl: page.url(),
+			manualShareMode,
+			shareResults,
+		});
 		await page.waitForTimeout(POST_SETTLE_MS);
 		logStep("done");
+		await debug.flush();
 
 		return {
 			type: "browser-post",
@@ -1169,9 +1763,12 @@ export default async function postToFacebookBrowser(post, context = {}) {
 			targetUrl,
 			composerSelector,
 			postButtonSelector,
+			manualShareMode,
+			shareResults,
 		};
 	} finally {
 		logStep("cleanup", shouldCloseContext && !keepWindowOpen ? "close" : "keep-open");
+		await debug.flush().catch(() => {});
 		if (shouldCloseContext && !keepWindowOpen) {
 			await settleWithTimeout("context-close", browserContext.close());
 		}
