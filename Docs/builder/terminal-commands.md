@@ -119,6 +119,13 @@ cd /path/to/N8tiveFlow/backend
 node scripts/capture-kofi-session.mjs
 ```
 
+Capture Facebook session with dedicated profile:
+
+```bash
+cd /path/to/N8tiveFlow/backend
+node scripts/capture-facebook-session.mjs
+```
+
 Test a Ko-fi post by post id:
 
 ```bash

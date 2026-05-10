@@ -8,6 +8,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { chromium } from "playwright";
 import { ensurePinterestImageReady } from "../../../utils/imagePreflight.mjs";
+import { createBrowserDebugRecorder } from "../../../utils/browserDebugRecorder.mjs";
 import {
 	getPinterestPinMappings,
 	savePinterestPinMappings,
@@ -254,68 +255,11 @@ async function preparePinterestProfileLaunch(options) {
 }
 
 function createDebugRecorder(enabled) {
-	const events = [];
-	const stamp = new Date().toISOString().replace(/[:.]/g, "-");
-	const sessionDir = path.join(DEBUG_DIR, stamp);
-
-	const ensureDir = async () => {
-		if (!enabled) return;
-		await mkdir(sessionDir, { recursive: true });
-	};
-
-	const log = async (step, details = {}) => {
-		const event = {
-			at: new Date().toISOString(),
-			step,
-			...details,
-		};
-		events.push(event);
-		if (enabled) {
-			console.log(`[PINTEREST_DEBUG] ${step}`, details);
-		}
-	};
-
-	const screenshot = async (page, name) => {
-		if (!enabled) return;
-		await ensureDir();
-		const safeName = String(name || "step").replace(/[^a-z0-9_-]+/gi, "-");
-		try {
-			await page.screenshot({
-				path: path.join(sessionDir, `${Date.now()}_${safeName}.png`),
-				fullPage: false,
-				timeout: 5000,
-				animations: "disabled",
-			});
-		} catch (error) {
-			events.push({
-				at: new Date().toISOString(),
-				step: "debug-screenshot-failed",
-				name: safeName,
-				error: error?.message || String(error),
-			});
-			console.warn(
-				`[PINTEREST_DEBUG] screenshot failed for ${safeName}:`,
-				error?.message || String(error),
-			);
-		}
-	};
-
-	const flush = async () => {
-		if (!enabled) return;
-		await ensureDir();
-		await writeFile(
-			path.join(sessionDir, "events.json"),
-			JSON.stringify(events, null, 2),
-		);
-	};
-
-	return {
+	return createBrowserDebugRecorder({
 		enabled,
-		sessionDir,
-		log,
-		screenshot,
-		flush,
-	};
+		debugDir: DEBUG_DIR,
+		logPrefix: "PINTEREST_DEBUG",
+	});
 }
 
 function resolveLocalMediaPath(post) {
@@ -830,7 +774,6 @@ function buildBoardCandidates({
 }) {
 	const maxCandidates = Number(process.env.PINTEREST_MAX_BOARD_CANDIDATES || 8);
 	const lookup = buildAllowedBoardLookup(config);
-	const configBoards = lookup.allowedBoards.slice(0, Math.max(maxCandidates, 8));
 	const resolved = [];
 
 	for (const source of [
@@ -840,7 +783,6 @@ function buildBoardCandidates({
 		routedBoard,
 		config?.defaultBoard || "",
 		...metadataBoards,
-		...configBoards,
 	]) {
 		for (const name of splitBoardValues(source)) {
 			const allowed = resolveAllowedBoardName(name, lookup);
@@ -853,7 +795,7 @@ function buildBoardCandidates({
 		if (fallbackBoard) {
 			resolved.push(fallbackBoard);
 		} else if (lookup.allowedBoards.length > 0) {
-			resolved.push(lookup.allowedBoards[0]);
+			resolved.push(...lookup.allowedBoards.slice(0, Math.max(maxCandidates, 3)));
 		}
 	}
 
