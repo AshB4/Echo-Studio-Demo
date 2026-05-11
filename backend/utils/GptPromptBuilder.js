@@ -179,6 +179,23 @@ Supported angle families:
 - comparison`;
 }
 
+export function buildCtrLayer() {
+	return `CTR and trust framing:
+- Specificity beats vagueness: prefer numbers, platforms, outcomes, constraints, and timeframes.
+- Curiosity must resolve into utility: the hook should reveal the category and payoff, not hide them.
+- Emotion works best when attached to consequence: fear of invisibility, wasted effort, relief, or identity reinforcement.
+- High CTR without trust is a loss: support the hook with proof, process, or believable context.
+- Developer audiences punish hype faster than general audiences: use implementation detail, tradeoffs, failures, and real constraints.
+
+Supported headline and hook families:
+- problem-aware
+- beginner-friendly
+- comparison
+- outcome-driven
+- platform-specific
+- pattern-interrupt`;
+}
+
 export function buildOutputSchema(productName, productType, audience, options = {}) {
 	const postIntent = inferPostIntent(options, options.productProfile);
 	const campaignPhase = inferCampaignPhase(options, options.productProfile);
@@ -198,6 +215,46 @@ export function buildOutputSchema(productName, productType, audience, options = 
   "post_intent": "${postIntent}",
   "campaign_phase": "${campaignPhase}",
   "campaign_angle": "",
+  "headline": "",
+  "headline_variants": ["", "", ""],
+  "primary_emotion": "",
+  "secondary_emotion": "",
+  "curiosity_type": "",
+  "specificity_signals": {
+    "number": false,
+    "platform": false,
+    "outcome": false,
+    "timeframe": false,
+    "qualifier": false
+  },
+  "authority_signals": [],
+  "trust_signals": [],
+  "pattern_interrupt_type": "",
+  "hook_type": "",
+  "content_intent": "",
+  "search_intent": "",
+  "save_intent": "",
+  "share_intent": "",
+  "thumbnail_concept": "",
+  "first_line": "",
+  "platform_optimizations": {},
+  "ctr_score": 0,
+  "clarity_score": 0,
+  "trust_score": 0,
+  "curiosity_score": 0,
+  "save_score": 0,
+  "share_score": 0,
+  "intent_primary": "",
+  "intent_secondary": "",
+  "awareness_stage": "",
+  "pain_proximity": 0,
+  "commerciality_score": 0,
+  "emotion_tags": [],
+  "identity_tags": [],
+  "query_chain_depth": 0,
+  "evergreen_score": 0,
+  "jtbd": "",
+  "pin_angle": "",
   "intent_layer": {
     "primary_intent": "problem | aesthetic | comparison | beginner | lifestyle | direct-offer",
     "keyword_focus": "",
@@ -365,6 +422,26 @@ export function buildRequirementsLayer() {
 - post_intent: choose the best fit for this product and angle
 - campaign_phase: choose the best phase for the request and timing
 - campaign_angle: the specific framing idea for this phase
+- intent_primary / intent_secondary: classify the explicit and latent intents
+- headline / headline_variants: choose the strongest hook and 3 useful alternates
+- primary_emotion / secondary_emotion: name the emotional frame behind the hook
+- curiosity_type: label the curiosity gap instead of leaving it implicit
+- specificity_signals: mark the concrete details that improve CTR without killing trust
+- authority_signals / trust_signals: include proof, process, or credibility cues
+- pattern_interrupt_type / hook_type: explain what type of opening you are using
+- content_intent / search_intent / save_intent / share_intent: classify the behavior goal
+- thumbnail_concept / first_line: provide the thumbnail and opening lead
+- platform_optimizations: adapt the hook/body/CTA per platform instead of repeating the same text
+- ctr_score / clarity_score / trust_score / curiosity_score / save_score / share_score: score the lane across CTR and retention
+- awareness_stage: problem-aware, solution-aware, evaluation, purchase, or post-purchase
+- pain_proximity: numeric score from 0-10 for urgency or frustration
+- commerciality_score: numeric score from 0-10 for buying readiness
+- emotion_tags: emotional states that matter for the audience
+- identity_tags: the self-image or tribe the content should align with
+- query_chain_depth: how many likely follow-up searches this query spawns
+- evergreen_score: durability of the topic over time
+- jtbd: the job the audience is trying to get done
+- pin_angle: the angle family used for Pinterest packaging
 - intent_layer: map the likely user intent, keyword focus, use case, and audience segment
 - core_problem: the painful or urgent thing the audience is dealing with
 - core_promise: the believable outcome or relief offered
@@ -443,6 +520,7 @@ export function buildStrategyStagePrompt(productName, productType, audience, opt
 		buildSystemLayer(),
 		buildCompactContext(productName, productType, audience, options),
 		buildGuardrailsLayer(options),
+		buildCtrLayer(),
 		buildContentMixLayer(),
 		buildIntentAnswerLayer(),
 		"Task: produce the campaign strategy for one post only.",
@@ -454,6 +532,46 @@ export function buildStrategyStagePrompt(productName, productType, audience, opt
   "post_intent": "${inferPostIntent(options, options.productProfile)}",
   "campaign_phase": "${inferCampaignPhase(options, options.productProfile)}",
   "campaign_angle": "",
+  "headline": "",
+  "headline_variants": ["", "", ""],
+  "primary_emotion": "",
+  "secondary_emotion": "",
+  "curiosity_type": "",
+  "specificity_signals": {
+    "number": false,
+    "platform": false,
+    "outcome": false,
+    "timeframe": false,
+    "qualifier": false
+  },
+  "authority_signals": [],
+  "trust_signals": [],
+  "pattern_interrupt_type": "",
+  "hook_type": "",
+  "content_intent": "",
+  "search_intent": "",
+  "save_intent": "",
+  "share_intent": "",
+  "thumbnail_concept": "",
+  "first_line": "",
+  "platform_optimizations": {},
+  "ctr_score": 0,
+  "clarity_score": 0,
+  "trust_score": 0,
+  "curiosity_score": 0,
+  "save_score": 0,
+  "share_score": 0,
+  "intent_primary": "",
+  "intent_secondary": "",
+  "awareness_stage": "",
+  "pain_proximity": 0,
+  "commerciality_score": 0,
+  "emotion_tags": [],
+  "identity_tags": [],
+  "query_chain_depth": 0,
+  "evergreen_score": 0,
+  "jtbd": "",
+  "pin_angle": "",
   "intent_layer": {
     "primary_intent": "",
     "keyword_focus": "",
@@ -519,6 +637,7 @@ export function buildCopyStagePrompt(
 		buildPriorStageSummary("Strategy", strategy),
 		buildPriorStageSummary("Discoverability", discoverability),
 		buildGuardrailsLayer(options),
+		buildCtrLayer(),
 		buildContentMixLayer(),
 		buildIntentAnswerLayer(),
 		"Task: write compact platform-ready copy for one post only. Keep variants concise.",
@@ -636,6 +755,8 @@ export const buildSeoPrompt = (productName, productType, audience, options = {})
 		buildBehaviorLayer(),
 		"",
 		buildIntentAnswerLayer(),
+		"",
+		buildCtrLayer(),
 		"",
 		buildContentMixLayer(),
 		"",

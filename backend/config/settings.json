@@ -1,41 +1,11 @@
 {
-  "active_platforms": ["LinkedIn", "Pinterest", "X", "kofi"],
+  "active_platforms": ["LinkedIn", "Pinterest", "X"],
   "platform_mode": "exclusive",
-  "platformRoles": {
-    "kofi": {
-      "role": "relationship + supporter retention",
-      "canonical": false,
-      "tone": "human creator journal",
-      "automationLevel": "low",
-      "maxPostsPerWeek": 3
-    },
-    "pinterest": {
-      "role": "search discovery",
-      "canonical": false,
-      "tone": "utility-first",
-      "automationLevel": "high",
-      "maxPostsPerDay": 6
-    },
-    "devto": {
-      "role": "authority building",
-      "canonical": "optional",
-      "tone": "transparent technical",
-      "automationLevel": "medium",
-      "maxPostsPerWeek": 1
-    },
-    "facebook": {
-      "role": "community + reach",
-      "canonical": false,
-      "tone": "friendly + direct",
-      "automationLevel": "medium"
-    }
-  },
   "daily_limit": 3,
   "auto_post": true,
   "campaign_start": "2025-05-08",
   "campaign_end": "2025-05-31",
 
-  // Optional extras:
   "timezone": "America/Chicago",
   "posting_window": { "start": "09:00", "end": "17:00" },
   "retry_on_fail": true,

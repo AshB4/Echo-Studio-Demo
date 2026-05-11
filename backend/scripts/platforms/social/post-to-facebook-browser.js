@@ -61,7 +61,9 @@ function resolveProfileConfig(account = {}) {
 	const sourceUserDataDir =
 		metadata.browserUserDataDir === "__DEFAULT_CHROME__"
 			? defaultChromeUserDataDir()
-			: metadata.browserUserDataDir ||
+			: metadata.browserUserDataDir === "__FACEBOOK_AUTOMATION_PROFILE__"
+				? path.join(BACKEND_ROOT, "data", "facebook-automation-profile")
+				: metadata.browserUserDataDir ||
 				process.env.FACEBOOK_CHROME_USER_DATA_DIR ||
 				DEFAULT_CLONED_PROFILE_DIR;
 	return {
@@ -100,6 +102,21 @@ function shouldUseManualShareMode() {
 
 function shouldSkipExistingFeedCheck() {
 	return boolFromEnv("FACEBOOK_SKIP_EXISTING_CHECK", true);
+}
+
+function getFacebookPostText(post) {
+	const baseText = String(post?.body || post?.title || "").trim();
+	const productLabel = String(
+		post?.metadata?.productProfileLabel ||
+			post?.metadata?.productProfileId ||
+			post?.productProfileLabel ||
+			post?.productProfileId ||
+			"",
+	).trim();
+	if (!productLabel) return baseText;
+	const productLine = `Product: ${productLabel}`;
+	if (baseText.includes(productLine)) return baseText;
+	return baseText ? `${baseText}\n\n${productLine}` : productLine;
 }
 
 function createDebugRecorder(enabled) {
@@ -715,7 +732,8 @@ async function confirmUiShare(page) {
 
 async function sharePostViaUi(page, post) {
 	await dismissInterruptivePopups(page);
-	const shareSelector = (await clickShareButtonForPost(page, post.body || post.title || "")) ||
+	const shareText = getFacebookPostText(post);
+	const shareSelector = (await clickShareButtonForPost(page, shareText)) ||
 		(await clickShareButtonInFeed(page));
 	if (!shareSelector) {
 		return {
@@ -760,7 +778,8 @@ async function sharePostToConfiguredAccounts(page, post, account) {
 		}));
 	}
 
-	const permalink = await extractPublishedPostPermalink(page, post.body || post.title || "");
+	const shareText = getFacebookPostText(post);
+	const permalink = await extractPublishedPostPermalink(page, shareText);
 	if (!permalink) {
 		return shareToAccountIds.map((accountId) => ({
 			accountId,
@@ -787,7 +806,7 @@ async function sharePostToConfiguredAccounts(page, post, account) {
 			}
 			const shared = await shareLinkToFacebookFeed(
 				shareAccount,
-				post.body || post.title || "",
+				shareText,
 				permalink,
 			);
 			logStep("share:success", `${shareAccountId} :: ${permalink}`);
@@ -1040,7 +1059,6 @@ async function dismissInterruptivePopups(page) {
 
 async function fillComposer(page, text) {
 	const selectors = [
-		'div[role="button"]:has-text("What\'s on your mind?")',
 		'div[role="dialog"] [contenteditable="true"][role="textbox"]',
 		'div[role="dialog"] div[contenteditable="true"]',
 		'div[role="dialog"] textarea',
@@ -1060,9 +1078,58 @@ async function fillComposer(page, text) {
 		try {
 			const locator = page.locator(selector).first();
 			if ((await locator.count()) > 0) {
-				await locator.click({ timeout: 4000 });
-				await locator.fill(text, { timeout: 4000 });
-				return selector;
+				await locator.scrollIntoViewIfNeeded({ timeout: 3000 }).catch(() => {});
+				await locator.click({ timeout: 4000, force: true });
+
+				const isEditable = await locator.evaluate((el) => {
+					if (!el) return false;
+					const tag = String(el.tagName || "").toLowerCase();
+					return (
+						tag === "textarea" ||
+						tag === "input" ||
+						el.isContentEditable ||
+						el.getAttribute?.("contenteditable") === "true"
+					);
+				}).catch(() => false);
+
+				if (isEditable) {
+					try {
+						await locator.fill(text, { timeout: 4000 });
+					} catch {
+						await page.keyboard.insertText(text).catch(() => {});
+					}
+				} else {
+					await page.keyboard.insertText(text).catch(() => {});
+				}
+
+				const captured = await locator.evaluate((el) => {
+					if (!el) return "";
+					return String(
+						el.value ??
+							el.textContent ??
+							el.innerText ??
+							el.getAttribute?.("aria-label") ??
+							"",
+					).trim();
+				}).catch(() => "");
+				if (captured) {
+					return selector;
+				}
+				await page.waitForTimeout(500);
+				const fallbackCaptured = await page.evaluate(() => {
+					const active = document.activeElement;
+					if (!active) return "";
+					return String(
+						active.value ??
+							active.textContent ??
+							active.innerText ??
+							active.getAttribute?.("aria-label") ??
+							"",
+					).trim();
+				}).catch(() => "");
+				if (fallbackCaptured) {
+					return selector;
+				}
 			}
 		} catch {
 			// continue
@@ -1583,11 +1650,11 @@ export default async function postToFacebookBrowser(post, context = {}) {
 			await dismissInterruptivePopups(page);
 		}
 
-		const feedText = post.body || post.title || "";
+		const facebookPostText = getFacebookPostText(post);
 		if (!shouldSkipExistingFeedCheck()) {
-			if (await verifyPostVisibleOnFeed(page, feedText)) {
-				logStep("already-visible");
-				return {
+		if (await verifyPostVisibleOnFeed(page, facebookPostText)) {
+			logStep("already-visible");
+			return {
 					type: "browser-post",
 					via: config.useCdp ? "playwright-cdp" : "playwright",
 					targetUrl,
@@ -1617,7 +1684,7 @@ export default async function postToFacebookBrowser(post, context = {}) {
 
 		logStep("composer:fill");
 		const filled = await withStepTimeout("fill-composer", () =>
-			fillComposer(page, post.body || post.title || ""),
+			fillComposer(page, facebookPostText),
 		);
 		if (!filled) {
 			logStep("composer:fill-missing");
@@ -1712,10 +1779,7 @@ export default async function postToFacebookBrowser(post, context = {}) {
 		const publishSeen = await waitForPublishSignal(page, publishSignalBaseline);
 		let feedVisible = false;
 		if (!publishSeen) {
-			feedVisible = await verifyPostVisibleOnFeed(
-				page,
-				post.body || post.title || "",
-			);
+			feedVisible = await verifyPostVisibleOnFeed(page, facebookPostText);
 			if (feedVisible) {
 				logStep("done:feed-visible-no-signal");
 			} else {
@@ -1726,7 +1790,7 @@ export default async function postToFacebookBrowser(post, context = {}) {
 				);
 			}
 		} else {
-			feedVisible = await verifyPostVisibleOnFeed(page, post.body || post.title || "");
+			feedVisible = await verifyPostVisibleOnFeed(page, facebookPostText);
 		}
 		if (!feedVisible) {
 			keepWindowOpen = config.keepOpenOnPostFailure && !config.useCdp;

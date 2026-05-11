@@ -346,6 +346,98 @@ function inferDestinationUrl(raw, productProfile) {
   );
 }
 
+function deriveIntentMetadata({ trigger, category, productProfile, input = {}, raw = {} }) {
+  const audience = String(input.audience || productProfile?.audience || "").trim();
+  const identityTags = Array.from(
+    new Set(
+      [
+        ...tokenize(audience).slice(0, 3),
+        productProfile?.category === "Devtools" ? "developer" : "",
+        productProfile?.category === "Physical products" ? "maker" : "",
+        String(productProfile?.id || "").includes("goblin") ? "goblin brain" : "",
+        /garden|outdoor|home\/garden/i.test(category) ? "home gardener" : "",
+      ]
+        .map((value) => String(value || "").trim())
+        .filter(Boolean),
+    ),
+  ).slice(0, 4);
+  const emotionTagsByTrigger = {
+    "peace/quiet": ["calm", "relief", "breathing-room"],
+    convenience: ["ease", "clarity", "less-friction"],
+    transformation: ["anticipation", "hope", "contrast"],
+    productivity: ["control", "focus", "momentum"],
+    humor: ["playful", "quirky", "scroll-stopping"],
+    "burnout relief": ["relief", "softness", "rest"],
+  };
+  const intentPrimary =
+    raw.intent_primary ||
+    (trigger === "productivity" || trigger === "burnout relief"
+      ? "problem"
+      : trigger === "transformation"
+        ? "aesthetic"
+        : trigger === "humor"
+          ? "identity"
+          : "lifestyle");
+  const intentSecondary =
+    raw.intent_secondary ||
+    (trigger === "productivity"
+      ? "solution"
+      : trigger === "peace/quiet"
+        ? "aspiration"
+        : trigger === "transformation"
+          ? "inspiration"
+          : "evaluation");
+  const awarenessStage =
+    raw.awareness_stage ||
+    (trigger === "productivity" || trigger === "burnout relief"
+      ? "problem-aware"
+      : trigger === "transformation"
+        ? "inspiration"
+        : "evaluation");
+  const painProximity = Number.isFinite(Number(raw.pain_proximity))
+    ? Number(raw.pain_proximity)
+    : trigger === "burnout relief"
+      ? 9
+      : trigger === "productivity"
+        ? 8
+        : trigger === "convenience"
+          ? 5
+          : 4;
+  const commercialityScore = Number.isFinite(Number(raw.commerciality_score))
+    ? Number(raw.commerciality_score)
+    : category === "dev products"
+      ? 8
+      : category === "seasonal affiliate" || category === "home/garden affiliate"
+        ? 7
+        : 5;
+  const queryChainDepth = Number.isFinite(Number(raw.query_chain_depth))
+    ? Number(raw.query_chain_depth)
+    : category === "dev products"
+      ? 4
+      : 3;
+  const evergreenScore = Number.isFinite(Number(raw.evergreen_score))
+    ? Number(raw.evergreen_score)
+    : category === "dev products"
+      ? 9
+      : 7;
+
+  return {
+    intent_primary: intentPrimary,
+    intent_secondary: intentSecondary,
+    awareness_stage: awarenessStage,
+    pain_proximity: painProximity,
+    commerciality_score: commercialityScore,
+    emotion_tags: Array.isArray(raw.emotion_tags) && raw.emotion_tags.length > 0 ? raw.emotion_tags : emotionTagsByTrigger[trigger] || ["clarity"],
+    identity_tags: Array.isArray(raw.identity_tags) && raw.identity_tags.length > 0 ? raw.identity_tags : identityTags,
+    query_chain_depth: queryChainDepth,
+    evergreen_score: evergreenScore,
+    jtbd:
+      raw.jtbd ||
+      `Help ${audience || "the audience"} move from ${intentPrimary} toward ${intentSecondary || "clarity"}`.trim(),
+    pin_angle: raw.pin_angle || trigger || category || "general",
+  };
+}
+
 function buildHookVariants(trigger, productName = "", productType = "") {
   const base = `${productName || productType || "This pin"}`.trim();
   const templates = TRIGGER_TEMPLATES[trigger] || TRIGGER_TEMPLATES.convenience;
@@ -387,6 +479,10 @@ function buildCreativeHistoryItem(post) {
     trigger: String(post?.psychological_trigger || "").trim(),
     category: String(post?.category || "").trim(),
     destinationUrl: String(post?.destination_url || post?.link?.primary || post?.link?.amazon || post?.link?.gumroad || "").trim(),
+    intentPrimary: String(post?.metadata?.intentPrimary || post?.metadata?.intent_primary || "").trim(),
+    intentSecondary: String(post?.metadata?.intentSecondary || post?.metadata?.intent_secondary || "").trim(),
+    awarenessStage: String(post?.metadata?.awarenessStage || post?.metadata?.awareness_stage || "").trim(),
+    pinAngle: String(post?.metadata?.pinAngle || post?.metadata?.pin_angle || "").trim(),
     timestamp: timestampForEntry(post),
   };
 }
@@ -512,6 +608,13 @@ export function enrichPinterestCreativeResult(raw = {}, input = {}, context = nu
     raw.category ||
     context?.category ||
     inferCategoryFromText([raw.product, raw.hook, raw.visual_style, raw.image_concept, input.productName, input.productType].filter(Boolean).join(" "), productProfile, trigger);
+  const intentMetadata = deriveIntentMetadata({
+    trigger,
+    category,
+    productProfile,
+    input,
+    raw,
+  });
   const recentHistory = Array.isArray(context?.recentHistory) ? context.recentHistory : [];
   const hookCandidates = [
     raw.hook,
@@ -634,6 +737,7 @@ export function enrichPinterestCreativeResult(raw = {}, input = {}, context = nu
     category,
     destination_url: destinationUrl,
     confidence_score: confidenceScore,
+    ...intentMetadata,
     image_similarity_score: Math.round(visualSimilarity * 100),
     hook_similarity_score: Math.round(hookSimilarity * 100),
     category_throttle_count: categoryThrottleCount,

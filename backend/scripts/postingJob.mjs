@@ -916,6 +916,25 @@ function productIdFor(post) {
 	);
 }
 
+function productLabelFor(post) {
+	return (
+		post?.metadata?.productProfileLabel ||
+		post?.productProfileLabel ||
+		post?.metadata?.productName ||
+		post?.metadata?.productProfileId ||
+		post?.productProfileId ||
+		post?.metadata?.batchLabel ||
+		post?.title ||
+		null
+	);
+}
+
+function buildAlertPostContext(post) {
+	const title = post?.title ?? post?.id ?? "untitled";
+	const product = productLabelFor(post);
+	return product ? `Title: ${title}\nProduct: ${product}` : `Title: ${title}`;
+}
+
 function splitMediaValues(value) {
 	if (Array.isArray(value)) {
 		return value.flatMap((item) => splitMediaValues(item));
@@ -1330,7 +1349,7 @@ export async function processQueue() {
 					)
 					.join(", ");
 				await sendWorkerAlert(
-					`Post succeeded.\nTitle: ${post.title ?? post.id ?? "untitled"}\nPlatforms: ${successSummary}`,
+					`Post succeeded.\n${buildAlertPostContext(post)}\nPlatforms: ${successSummary}`,
 				);
 				if (successes.some((item) => item.platform === "facebook")) {
 					facebookPostedToday += 1;
@@ -1380,7 +1399,7 @@ export async function processQueue() {
 					})
 					.join("\n");
 				await sendWorkerAlert(
-					`Post failed on one or more targets.\nTitle: ${post.title ?? post.id ?? "untitled"}\nFailures:\n${summary}\n\nRerun command: cd backend && npm run worker`,
+					`Post failed on one or more targets.\n${buildAlertPostContext(post)}\nFailures:\n${summary}\n\nRerun command: cd backend && npm run worker`,
 				);
 				const retryBase =
 					successes.length > 0

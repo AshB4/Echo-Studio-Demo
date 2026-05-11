@@ -36,7 +36,11 @@ test("buildSeoPrompt asks for strict JSON output", () => {
   assert.match(prompt, /"hook_options": \[/);
   assert.match(prompt, /"platform_variants":/);
   assert.match(prompt, /"campaign_phase":/);
+  assert.match(prompt, /"headline":/);
+  assert.match(prompt, /"ctr_score":/);
   assert.match(prompt, /"intent_layer":/);
+  assert.match(prompt, /"intent_primary":/);
+  assert.match(prompt, /"awareness_stage":/);
   assert.match(prompt, /"answer_style_description":/);
   assert.match(prompt, /"angle_options":/);
   assert.match(prompt, /"visual_hook":/);
@@ -74,6 +78,7 @@ test("buildChunkedPromptStages creates small staged prompts", () => {
     selectedPlatforms: [],
     postIntent: "soft-sell",
     campaignPhase: "launch",
+    campaignAngle: "beginner",
   });
 
   assert.equal(stages.length, 4);
@@ -83,6 +88,7 @@ test("buildChunkedPromptStages creates small staged prompts", () => {
   );
   assert.match(stages[0].prompt, /campaign_phase/);
   assert.match(stages[0].prompt, /intent_layer/);
+  assert.match(stages[0].prompt, /headline_variants/);
   assert.match(stages[1].prompt, /hook_options/);
   assert.match(stages[1].prompt, /answer_style_description/);
   assert.match(stages[2].prompt, /platform_variants/);
@@ -118,6 +124,40 @@ test("normalizeSeoResult fills defaults", () => {
   assert.equal(normalized.primary_cta, "");
   assert.equal(normalized.campaign_phase, "");
   assert.equal(normalized.campaign_angle, "");
+  assert.equal(normalized.headline, "PostPunk");
+  assert.deepEqual(normalized.headline_variants, []);
+  assert.equal(normalized.primary_emotion, "");
+  assert.equal(normalized.secondary_emotion, "");
+  assert.equal(normalized.curiosity_type, "");
+  assert.deepEqual(normalized.specificity_signals, {});
+  assert.deepEqual(normalized.authority_signals, []);
+  assert.deepEqual(normalized.trust_signals, []);
+  assert.equal(normalized.pattern_interrupt_type, "");
+  assert.equal(normalized.hook_type, "");
+  assert.equal(normalized.content_intent, "");
+  assert.equal(normalized.search_intent, "PostPunk");
+  assert.equal(normalized.save_intent, "");
+  assert.equal(normalized.share_intent, "");
+  assert.equal(normalized.thumbnail_concept, "");
+  assert.equal(normalized.first_line, "");
+  assert.deepEqual(normalized.platform_optimizations, {});
+  assert.equal(normalized.ctr_score, 0);
+  assert.equal(normalized.clarity_score, 0);
+  assert.equal(normalized.trust_score, 0);
+  assert.equal(normalized.curiosity_score, 0);
+  assert.equal(normalized.save_score, 0);
+  assert.equal(normalized.share_score, 0);
+  assert.equal(normalized.intent_primary, "lifestyle");
+  assert.equal(normalized.intent_secondary, "evaluation");
+  assert.equal(normalized.awareness_stage, "evaluation");
+  assert.equal(normalized.pain_proximity, 0);
+  assert.equal(normalized.commerciality_score, 0);
+  assert.deepEqual(normalized.emotion_tags, ["ease", "clarity", "less-friction"]);
+  assert.deepEqual(normalized.identity_tags, ["indie", "devs"]);
+  assert.equal(normalized.query_chain_depth, 0);
+  assert.equal(normalized.evergreen_score, 0);
+  assert.equal(normalized.jtbd, "Help Indie devs move from lifestyle toward evaluation");
+  assert.equal(normalized.pin_angle, "convenience");
   assert.equal(normalized.intent_layer.primary_intent, "");
   assert.equal(normalized.answer_style_description, "");
   assert.equal(normalized.visual_hook, "");

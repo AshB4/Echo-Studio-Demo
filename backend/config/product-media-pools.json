@@ -1,9 +1,9 @@
 {
   "ai-powered-grad": [
     "https://public-files.gumroad.com/kpl9y0d2qn3m29tvmdi5ohudkxne",
-    "frontend/assets/InteralAssets/PostPunkCalenderDesign.png",
-    "frontend/assets/InteralAssets/dailysquare-banner.png",
-    "frontend/assets/InteralAssets/postpunk-banner.png"
+    "frontend/assets/appImgs/PostPunkCalenderDesign.png",
+    "frontend/assets/appImgs/dailysquare-banner.png",
+    "frontend/assets/appImgs/postpunk-banner.png"
   ],
   "goblin-coloring-affirmations": [
     "https://public-files.gumroad.com/nqt0xhulzgedfqgudq4j161nw7cm",
@@ -36,8 +36,8 @@
     "frontend/assets/buzzingbees/FeelGoodHobbyPoppy.png"
   ],
   "_default": [
-    "frontend/assets/InteralAssets/PostPunkCalenderDesign.png",
-    "frontend/assets/InteralAssets/dailysquare-banner.png"
+    "frontend/assets/appImgs/PostPunkCalenderDesign.png",
+    "frontend/assets/appImgs/dailysquare-banner.png"
   ],
   "prompt-storm": [
     "https://public-files.gumroad.com/l60mvt6b4g61gg4svr750ec4ofq3"
@@ -57,18 +57,18 @@
     "https://mockup-api.teespring.com/v3/image/fEaLBX6CWYMipUEzreinLgq6sK8/1200/1200.jpg"
   ],
   "amazon-beauty-olaplex": [
-    "frontend/assets/spring2026/olaplex/Olaplex3mins.jpg",
-    "frontend/assets/spring2026/olaplex/Olaplex3xStronger.jpg",
-    "frontend/assets/spring2026/olaplex/OlaplexBeforeAfter.jpg",
-    "frontend/assets/spring2026/olaplex/OlaplexRepairHair.jpg",
-    "frontend/assets/spring2026/olaplex/OlaplexReverseDamage.jpg"
+    "frontend/assets/spring2026/Olaplex3mins.jpg",
+    "frontend/assets/spring2026/Olaplex3xStronger.jpg",
+    "frontend/assets/spring2026/OlaplexBeforeAfter.jpg",
+    "frontend/assets/spring2026/OlaplexRepairHair.jpg",
+    "frontend/assets/spring2026/OlaplexReverseDamage.jpg"
   ],
   "amazon-beauty-laneige-lip-mask": [
-    "frontend/assets/spring2026/liplaniage/LipLaneigeHowToUse.jpg",
-    "frontend/assets/spring2026/liplaniage/LipLaneigeKoreanLipsMask.jpg",
-    "frontend/assets/spring2026/liplaniage/LipLaneigeResultsIn.jpg",
-    "frontend/assets/spring2026/liplaniage/LipLaneige1.jpg",
-    "frontend/assets/spring2026/liplaniage/LipPlumper3Stack.jpg"
+    "frontend/assets/spring2026/LipLaneigeHowToUse.jpg",
+    "frontend/assets/spring2026/LipLaneigeKoreanLipsMask.jpg",
+    "frontend/assets/spring2026/LipLaneigeResultsIn.jpg",
+    "frontend/assets/spring2026/LipLaneige1.jpg",
+    "frontend/assets/spring2026/LipPlumper3Stack.jpg"
   ],
   "amazon-password-logbook": [
     "frontend/assets/passwordbook/KeepWhatMatters.png",

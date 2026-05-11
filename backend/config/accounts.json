@@ -13,12 +13,12 @@
       "pageName": "Color With Ash",
       "pageUrl": "https://www.facebook.com/ColorWithAshB",
       "default": true,
+      "browserUserDataDir": "__FACEBOOK_AUTOMATION_PROFILE__",
+      "browserProfileDirectory": "Default",
+      "cloneChromeProfile": false,
       "shareToAccountIds": [
         "fb-main-page"
       ],
-      "browserUserDataDir": "__DEFAULT_CHROME__",
-      "browserProfileDirectory": "Profile 11",
-      "cloneChromeProfile": false,
       "browserOnly": true,
       "browserFirst": true,
       "browserFallback": true

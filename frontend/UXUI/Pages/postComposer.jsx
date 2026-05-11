@@ -64,6 +64,74 @@ export default function PostComposer() {
     setCampaignPhase,
     campaignAngle,
     setCampaignAngle,
+    headline,
+    setHeadline,
+    headlineVariants,
+    setHeadlineVariants,
+    primaryEmotion,
+    setPrimaryEmotion,
+    secondaryEmotion,
+    setSecondaryEmotion,
+    curiosityType,
+    setCuriosityType,
+    specificitySignals,
+    setSpecificitySignals,
+    authoritySignals,
+    setAuthoritySignals,
+    trustSignals,
+    setTrustSignals,
+    patternInterruptType,
+    setPatternInterruptType,
+    hookType,
+    setHookType,
+    contentIntent,
+    setContentIntent,
+    searchIntent,
+    setSearchIntent,
+    saveIntent,
+    setSaveIntent,
+    shareIntent,
+    setShareIntent,
+    thumbnailConcept,
+    setThumbnailConcept,
+    firstLine,
+    setFirstLine,
+    platformOptimizations,
+    setPlatformOptimizations,
+    ctrScore,
+    setCtrScore,
+    clarityScore,
+    setClarityScore,
+    trustScore,
+    setTrustScore,
+    curiosityScore,
+    setCuriosityScore,
+    saveScore,
+    setSaveScore,
+    shareScore,
+    setShareScore,
+    intentPrimary,
+    setIntentPrimary,
+    intentSecondary,
+    setIntentSecondary,
+    awarenessStage,
+    setAwarenessStage,
+    painProximity,
+    setPainProximity,
+    commercialityScore,
+    setCommercialityScore,
+    emotionTags,
+    setEmotionTags,
+    identityTags,
+    setIdentityTags,
+    queryChainDepth,
+    setQueryChainDepth,
+    evergreenScore,
+    setEvergreenScore,
+    jtbd,
+    setJtbd,
+    pinAngle,
+    setPinAngle,
     visualHook,
     setVisualHook,
     redditSubreddit,
@@ -123,7 +191,7 @@ export default function PostComposer() {
     aiProductName?.trim() ||
     title?.trim()
   );
-  const displayedAiTitle = aiSuggestions?.product_name || aiProductName || title || "";
+  const displayedAiTitle = aiSuggestions?.headline || aiSuggestions?.product_name || aiProductName || title || "";
   const displayedAiBody = aiSuggestions?.meta_description || "";
   const displayedAiAltText = aiSuggestions?.alt_text_examples?.[0] || "";
   const displayedAiHashtags = Array.isArray(aiSuggestions?.keywords)
@@ -133,6 +201,10 @@ export default function PostComposer() {
   const displayedCampaignPhase = aiSuggestions?.campaign_phase || campaignPhase || "";
   const displayedCampaignAngle = aiSuggestions?.campaign_angle || campaignAngle || "";
   const displayedVisualHook = aiSuggestions?.visual_hook || visualHook || "";
+  const displayedCtrHeadline = aiSuggestions?.headline || headline || displayedAiTitle;
+  const displayedCtrScore = aiSuggestions?.ctr_score ?? ctrScore ?? "";
+  const displayedTrustScore = aiSuggestions?.trust_score ?? trustScore ?? "";
+  const displayedClarityScore = aiSuggestions?.clarity_score ?? clarityScore ?? "";
   const displayedAiImageConcept = aiSuggestions?.image_concept || "";
   const displayedAiImagePrompt = aiSuggestions?.image_prompt || "";
   const displayedAiHook = aiSuggestions?.hook_options?.[0] || "";
@@ -329,7 +401,10 @@ export default function PostComposer() {
   };
 
   const applyAiTitle = () => {
-    if (displayedAiTitle) setTitle(displayedAiTitle);
+    if (displayedAiTitle) {
+      setTitle(displayedAiTitle);
+      setHeadline(displayedAiTitle);
+    }
   };
 
   const applyAiBody = () => {
@@ -358,10 +433,81 @@ export default function PostComposer() {
     applyAiHashtags();
     applyAiAltText();
     applyAiImagePlan();
+    if (aiSuggestions?.headline) setHeadline(aiSuggestions.headline);
+    if (Array.isArray(aiSuggestions?.headline_variants)) {
+      setHeadlineVariants(aiSuggestions.headline_variants.join(", "));
+    }
+    if (aiSuggestions?.primary_emotion) setPrimaryEmotion(aiSuggestions.primary_emotion);
+    if (aiSuggestions?.secondary_emotion) setSecondaryEmotion(aiSuggestions.secondary_emotion);
+    if (aiSuggestions?.curiosity_type) setCuriosityType(aiSuggestions.curiosity_type);
+    if (aiSuggestions?.specificity_signals) {
+      setSpecificitySignals(JSON.stringify(aiSuggestions.specificity_signals, null, 2));
+    }
+    if (Array.isArray(aiSuggestions?.authority_signals)) {
+      setAuthoritySignals(aiSuggestions.authority_signals.join(", "));
+    }
+    if (Array.isArray(aiSuggestions?.trust_signals)) {
+      setTrustSignals(aiSuggestions.trust_signals.join(", "));
+    }
+    if (aiSuggestions?.pattern_interrupt_type) setPatternInterruptType(aiSuggestions.pattern_interrupt_type);
+    if (aiSuggestions?.hook_type) setHookType(aiSuggestions.hook_type);
+    if (aiSuggestions?.content_intent) setContentIntent(aiSuggestions.content_intent);
+    if (aiSuggestions?.search_intent) setSearchIntent(aiSuggestions.search_intent);
+    if (aiSuggestions?.save_intent) setSaveIntent(aiSuggestions.save_intent);
+    if (aiSuggestions?.share_intent) setShareIntent(aiSuggestions.share_intent);
+    if (aiSuggestions?.thumbnail_concept) setThumbnailConcept(aiSuggestions.thumbnail_concept);
+    if (aiSuggestions?.first_line) setFirstLine(aiSuggestions.first_line);
+    if (aiSuggestions?.platform_optimizations) {
+      setPlatformOptimizations(JSON.stringify(aiSuggestions.platform_optimizations, null, 2));
+    }
+    if (aiSuggestions?.ctr_score !== undefined && aiSuggestions?.ctr_score !== null) {
+      setCtrScore(aiSuggestions.ctr_score);
+    }
+    if (aiSuggestions?.clarity_score !== undefined && aiSuggestions?.clarity_score !== null) {
+      setClarityScore(aiSuggestions.clarity_score);
+    }
+    if (aiSuggestions?.trust_score !== undefined && aiSuggestions?.trust_score !== null) {
+      setTrustScore(aiSuggestions.trust_score);
+    }
+    if (aiSuggestions?.curiosity_score !== undefined && aiSuggestions?.curiosity_score !== null) {
+      setCuriosityScore(aiSuggestions.curiosity_score);
+    }
+    if (aiSuggestions?.save_score !== undefined && aiSuggestions?.save_score !== null) {
+      setSaveScore(aiSuggestions.save_score);
+    }
+    if (aiSuggestions?.share_score !== undefined && aiSuggestions?.share_score !== null) {
+      setShareScore(aiSuggestions.share_score);
+    }
     if (displayedAiIntent) setPostIntent(displayedAiIntent);
     if (displayedCampaignPhase) setCampaignPhase(displayedCampaignPhase);
     if (displayedCampaignAngle) setCampaignAngle(displayedCampaignAngle);
     if (displayedVisualHook) setVisualHook(displayedVisualHook);
+    if (aiSuggestions?.intent_primary) setIntentPrimary(aiSuggestions.intent_primary);
+    if (aiSuggestions?.intent_secondary) setIntentSecondary(aiSuggestions.intent_secondary);
+    if (aiSuggestions?.awareness_stage) setAwarenessStage(aiSuggestions.awareness_stage);
+    if (aiSuggestions?.pin_angle) setPinAngle(aiSuggestions.pin_angle);
+    if (aiSuggestions?.jtbd) setJtbd(aiSuggestions.jtbd);
+    if (aiSuggestions?.pain_proximity !== undefined && aiSuggestions?.pain_proximity !== null) {
+      setPainProximity(aiSuggestions.pain_proximity);
+    }
+    if (
+      aiSuggestions?.commerciality_score !== undefined &&
+      aiSuggestions?.commerciality_score !== null
+    ) {
+      setCommercialityScore(aiSuggestions.commerciality_score);
+    }
+    if (Array.isArray(aiSuggestions?.emotion_tags)) {
+      setEmotionTags(aiSuggestions.emotion_tags.join(", "));
+    }
+    if (Array.isArray(aiSuggestions?.identity_tags)) {
+      setIdentityTags(aiSuggestions.identity_tags.join(", "));
+    }
+    if (aiSuggestions?.query_chain_depth !== undefined && aiSuggestions?.query_chain_depth !== null) {
+      setQueryChainDepth(aiSuggestions.query_chain_depth);
+    }
+    if (aiSuggestions?.evergreen_score !== undefined && aiSuggestions?.evergreen_score !== null) {
+      setEvergreenScore(aiSuggestions.evergreen_score);
+    }
   };
 
   const handleHealthIssue = (health) => {
@@ -505,6 +651,457 @@ export default function PostComposer() {
               value={visualHook}
               onChange={(e) => setVisualHook(e.target.value)}
               placeholder="Short visual sentence for thumbnails or pins"
+            />
+          </label>
+        </div>
+      </section>
+
+      <section className="mb-6 rounded border border-fuchsia-500 bg-fuchsia-950/30 p-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="text-xs uppercase tracking-[0.3em] text-fuchsia-300">Intent Snapshot</p>
+            <h2 className="mt-1 text-lg font-semibold text-fuchsia-100">
+              Visible summary before you scroll into the full metadata block
+            </h2>
+          </div>
+          <a
+            href="#intent-discoverability"
+            className="rounded border border-fuchsia-400 px-3 py-2 text-xs text-fuchsia-100 hover:bg-fuchsia-400 hover:text-black transition-colors"
+          >
+            Jump to edit
+          </a>
+        </div>
+        <div className="mt-4 grid gap-3 md:grid-cols-3">
+          <div className="rounded border border-fuchsia-700 bg-black/40 p-3">
+            <p className="text-xs uppercase tracking-[0.25em] text-fuchsia-300">Primary</p>
+            <p className="mt-2 text-fuchsia-100">{intentPrimary || "—"}</p>
+          </div>
+          <div className="rounded border border-fuchsia-700 bg-black/40 p-3">
+            <p className="text-xs uppercase tracking-[0.25em] text-fuchsia-300">Stage</p>
+            <p className="mt-2 text-fuchsia-100">{awarenessStage || "—"}</p>
+          </div>
+          <div className="rounded border border-fuchsia-700 bg-black/40 p-3">
+            <p className="text-xs uppercase tracking-[0.25em] text-fuchsia-300">JTBD</p>
+            <p className="mt-2 text-fuchsia-100">{jtbd || "—"}</p>
+          </div>
+        </div>
+      </section>
+
+      <section className="mb-6 rounded border border-amber-500 bg-amber-950/20 p-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="text-xs uppercase tracking-[0.3em] text-amber-300">CTR Snapshot</p>
+            <h2 className="mt-1 text-lg font-semibold text-amber-100">
+              Headline and trust cues for click-through
+            </h2>
+          </div>
+          <a
+            href="#ctr-headline"
+            className="rounded border border-amber-400 px-3 py-2 text-xs text-amber-100 hover:bg-amber-400 hover:text-black transition-colors"
+          >
+            Jump to edit
+          </a>
+        </div>
+        <div className="mt-4 grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+          <div className="rounded border border-amber-700 bg-black/40 p-3">
+            <p className="text-xs uppercase tracking-[0.25em] text-amber-300">Headline</p>
+            <p className="mt-2 text-amber-100">{displayedCtrHeadline || "—"}</p>
+          </div>
+          <div className="rounded border border-amber-700 bg-black/40 p-3">
+            <p className="text-xs uppercase tracking-[0.25em] text-amber-300">CTR Score</p>
+            <p className="mt-2 text-amber-100">{displayedCtrScore || "—"}</p>
+          </div>
+          <div className="rounded border border-amber-700 bg-black/40 p-3">
+            <p className="text-xs uppercase tracking-[0.25em] text-amber-300">Trust Score</p>
+            <p className="mt-2 text-amber-100">{displayedTrustScore || "—"}</p>
+          </div>
+          <div className="rounded border border-amber-700 bg-black/40 p-3">
+            <p className="text-xs uppercase tracking-[0.25em] text-amber-300">Clarity Score</p>
+            <p className="mt-2 text-amber-100">{displayedClarityScore || "—"}</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="ctr-headline" className="mb-6 scroll-mt-6 rounded border border-amber-600 bg-black/60 p-4">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <h2 className="text-lg font-semibold text-amber-300">CTR / Headline</h2>
+            <p className="text-sm text-teal-400">
+              Shape the hook, trust cues, and platform-specific click-through framing here.
+            </p>
+          </div>
+          <span className="rounded-full border border-amber-500 px-3 py-1 text-xs text-amber-200">
+            CTR-aware copy
+          </span>
+        </div>
+
+        <div className="mt-4 grid gap-4 md:grid-cols-2">
+          <label className="block md:col-span-2">
+            <span className="text-sm font-medium text-amber-300">Headline</span>
+            <input
+              className="mt-2 w-full rounded border border-amber-500 bg-black p-2 text-amber-100"
+              value={headline}
+              onChange={(e) => setHeadline(e.target.value)}
+              placeholder="The main headline or post title"
+            />
+          </label>
+          <label className="block md:col-span-2">
+            <span className="text-sm font-medium text-amber-300">Headline Variants</span>
+            <textarea
+              className="mt-2 w-full rounded border border-amber-500 bg-black p-2 text-amber-100 min-h-[84px]"
+              value={headlineVariants}
+              onChange={(e) => setHeadlineVariants(e.target.value)}
+              placeholder="Comma-separated alternates"
+            />
+          </label>
+          <label className="block">
+            <span className="text-sm font-medium text-amber-300">Primary Emotion</span>
+            <input
+              className="mt-2 w-full rounded border border-amber-500 bg-black p-2 text-amber-100"
+              value={primaryEmotion}
+              onChange={(e) => setPrimaryEmotion(e.target.value)}
+              placeholder="clarity, frustration, relief..."
+            />
+          </label>
+          <label className="block">
+            <span className="text-sm font-medium text-amber-300">Secondary Emotion</span>
+            <input
+              className="mt-2 w-full rounded border border-amber-500 bg-black p-2 text-amber-100"
+              value={secondaryEmotion}
+              onChange={(e) => setSecondaryEmotion(e.target.value)}
+              placeholder="supporting emotional layer"
+            />
+          </label>
+          <label className="block">
+            <span className="text-sm font-medium text-amber-300">Curiosity Type</span>
+            <input
+              className="mt-2 w-full rounded border border-amber-500 bg-black p-2 text-amber-100"
+              value={curiosityType}
+              onChange={(e) => setCuriosityType(e.target.value)}
+              placeholder="process, outcome, comparison..."
+            />
+          </label>
+          <label className="block">
+            <span className="text-sm font-medium text-amber-300">Pattern Interrupt</span>
+            <input
+              className="mt-2 w-full rounded border border-amber-500 bg-black p-2 text-amber-100"
+              value={patternInterruptType}
+              onChange={(e) => setPatternInterruptType(e.target.value)}
+              placeholder="contrarian, direct, story..."
+            />
+          </label>
+          <label className="block">
+            <span className="text-sm font-medium text-amber-300">Hook Type</span>
+            <input
+              className="mt-2 w-full rounded border border-amber-500 bg-black p-2 text-amber-100"
+              value={hookType}
+              onChange={(e) => setHookType(e.target.value)}
+              placeholder="problem-aware, beginner, platform-specific..."
+            />
+          </label>
+          <label className="block">
+            <span className="text-sm font-medium text-amber-300">Content Intent</span>
+            <input
+              className="mt-2 w-full rounded border border-amber-500 bg-black p-2 text-amber-100"
+              value={contentIntent}
+              onChange={(e) => setContentIntent(e.target.value)}
+              placeholder="educate, sell, inspire..."
+            />
+          </label>
+          <label className="block">
+            <span className="text-sm font-medium text-amber-300">Search Intent</span>
+            <input
+              className="mt-2 w-full rounded border border-amber-500 bg-black p-2 text-amber-100"
+              value={searchIntent}
+              onChange={(e) => setSearchIntent(e.target.value)}
+              placeholder="what someone would search for"
+            />
+          </label>
+          <label className="block">
+            <span className="text-sm font-medium text-amber-300">Save Intent</span>
+            <input
+              className="mt-2 w-full rounded border border-amber-500 bg-black p-2 text-amber-100"
+              value={saveIntent}
+              onChange={(e) => setSaveIntent(e.target.value)}
+              placeholder="template, checklist, reference..."
+            />
+          </label>
+          <label className="block">
+            <span className="text-sm font-medium text-amber-300">Share Intent</span>
+            <input
+              className="mt-2 w-full rounded border border-amber-500 bg-black p-2 text-amber-100"
+              value={shareIntent}
+              onChange={(e) => setShareIntent(e.target.value)}
+              placeholder="why someone would share this"
+            />
+          </label>
+          <label className="block md:col-span-2">
+            <span className="text-sm font-medium text-amber-300">First Line</span>
+            <textarea
+              className="mt-2 w-full rounded border border-amber-500 bg-black p-2 text-amber-100 min-h-[84px]"
+              value={firstLine}
+              onChange={(e) => setFirstLine(e.target.value)}
+              placeholder="The opening line or first hook sentence"
+            />
+          </label>
+          <label className="block md:col-span-2">
+            <span className="text-sm font-medium text-amber-300">Thumbnail Concept</span>
+            <input
+              className="mt-2 w-full rounded border border-amber-500 bg-black p-2 text-amber-100"
+              value={thumbnailConcept}
+              onChange={(e) => setThumbnailConcept(e.target.value)}
+              placeholder="what the thumbnail should visually communicate"
+            />
+          </label>
+          <label className="block md:col-span-2">
+            <span className="text-sm font-medium text-amber-300">Specificity Signals</span>
+            <textarea
+              className="mt-2 w-full rounded border border-amber-500 bg-black p-2 text-amber-100 min-h-[96px] font-mono text-sm"
+              value={specificitySignals}
+              onChange={(e) => setSpecificitySignals(e.target.value)}
+              placeholder='{\n  "number": true,\n  "platform": true,\n  "outcome": true\n}'
+            />
+          </label>
+          <label className="block">
+            <span className="text-sm font-medium text-amber-300">Authority Signals</span>
+            <textarea
+              className="mt-2 w-full rounded border border-amber-500 bg-black p-2 text-amber-100 min-h-[84px]"
+              value={authoritySignals}
+              onChange={(e) => setAuthoritySignals(e.target.value)}
+              placeholder="metrics, process, screenshots"
+            />
+          </label>
+          <label className="block">
+            <span className="text-sm font-medium text-amber-300">Trust Signals</span>
+            <textarea
+              className="mt-2 w-full rounded border border-amber-500 bg-black p-2 text-amber-100 min-h-[84px]"
+              value={trustSignals}
+              onChange={(e) => setTrustSignals(e.target.value)}
+              placeholder="proof, constraints, honesty"
+            />
+          </label>
+          <label className="block md:col-span-2">
+            <span className="text-sm font-medium text-amber-300">Platform Optimizations</span>
+            <textarea
+              className="mt-2 w-full rounded border border-amber-500 bg-black p-2 text-amber-100 min-h-[120px] font-mono text-sm"
+              value={platformOptimizations}
+              onChange={(e) => setPlatformOptimizations(e.target.value)}
+              placeholder='{\n  "Pinterest": { "hook": "", "body": "", "cta": "" }\n}'
+            />
+          </label>
+          <label className="block">
+            <span className="text-sm font-medium text-amber-300">CTR Score</span>
+            <input
+              className="mt-2 w-full rounded border border-amber-500 bg-black p-2 text-amber-100"
+              type="number"
+              min="0"
+              max="100"
+              step="1"
+              value={ctrScore}
+              onChange={(e) => setCtrScore(e.target.value)}
+              placeholder="0-100"
+            />
+          </label>
+          <label className="block">
+            <span className="text-sm font-medium text-amber-300">Clarity Score</span>
+            <input
+              className="mt-2 w-full rounded border border-amber-500 bg-black p-2 text-amber-100"
+              type="number"
+              min="0"
+              max="100"
+              step="1"
+              value={clarityScore}
+              onChange={(e) => setClarityScore(e.target.value)}
+              placeholder="0-100"
+            />
+          </label>
+          <label className="block">
+            <span className="text-sm font-medium text-amber-300">Trust Score</span>
+            <input
+              className="mt-2 w-full rounded border border-amber-500 bg-black p-2 text-amber-100"
+              type="number"
+              min="0"
+              max="100"
+              step="1"
+              value={trustScore}
+              onChange={(e) => setTrustScore(e.target.value)}
+              placeholder="0-100"
+            />
+          </label>
+          <label className="block">
+            <span className="text-sm font-medium text-amber-300">Curiosity Score</span>
+            <input
+              className="mt-2 w-full rounded border border-amber-500 bg-black p-2 text-amber-100"
+              type="number"
+              min="0"
+              max="100"
+              step="1"
+              value={curiosityScore}
+              onChange={(e) => setCuriosityScore(e.target.value)}
+              placeholder="0-100"
+            />
+          </label>
+          <label className="block">
+            <span className="text-sm font-medium text-amber-300">Save Score</span>
+            <input
+              className="mt-2 w-full rounded border border-amber-500 bg-black p-2 text-amber-100"
+              type="number"
+              min="0"
+              max="100"
+              step="1"
+              value={saveScore}
+              onChange={(e) => setSaveScore(e.target.value)}
+              placeholder="0-100"
+            />
+          </label>
+          <label className="block">
+            <span className="text-sm font-medium text-amber-300">Share Score</span>
+            <input
+              className="mt-2 w-full rounded border border-amber-500 bg-black p-2 text-amber-100"
+              type="number"
+              min="0"
+              max="100"
+              step="1"
+              value={shareScore}
+              onChange={(e) => setShareScore(e.target.value)}
+              placeholder="0-100"
+            />
+          </label>
+        </div>
+      </section>
+
+      <section id="intent-discoverability" className="mb-6 scroll-mt-6 rounded border border-fuchsia-700 bg-black/60 p-4">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <h2 className="text-lg font-semibold text-fuchsia-300">Intent / Discoverability</h2>
+            <p className="text-sm text-teal-400">
+              Classify the post by intent and search behavior instead of only by keyword.
+            </p>
+          </div>
+          <span className="rounded-full border border-fuchsia-500 px-3 py-1 text-xs text-fuchsia-200">
+            Pinterest-first metadata
+          </span>
+        </div>
+
+        <div className="mt-4 grid gap-4 md:grid-cols-2">
+          <label className="block">
+            <span className="text-sm font-medium text-fuchsia-300">Intent Primary</span>
+            <input
+              className="mt-2 w-full rounded border border-fuchsia-500 bg-black p-2 text-fuchsia-100"
+              value={intentPrimary}
+              onChange={(e) => setIntentPrimary(e.target.value)}
+              placeholder="problem, aesthetic, comparison, beginner..."
+            />
+          </label>
+          <label className="block">
+            <span className="text-sm font-medium text-fuchsia-300">Intent Secondary</span>
+            <input
+              className="mt-2 w-full rounded border border-fuchsia-500 bg-black p-2 text-fuchsia-100"
+              value={intentSecondary}
+              onChange={(e) => setIntentSecondary(e.target.value)}
+              placeholder="latent intent or fallback state"
+            />
+          </label>
+          <label className="block">
+            <span className="text-sm font-medium text-fuchsia-300">Awareness Stage</span>
+            <select
+              className="mt-2 w-full rounded border border-fuchsia-500 bg-black p-2 text-fuchsia-100"
+              value={awarenessStage}
+              onChange={(e) => setAwarenessStage(e.target.value)}
+            >
+              <option value="problem-aware">Problem-aware</option>
+              <option value="solution-aware">Solution-aware</option>
+              <option value="evaluation">Evaluation</option>
+              <option value="purchase">Purchase</option>
+              <option value="post-purchase">Post-purchase</option>
+            </select>
+          </label>
+          <label className="block">
+            <span className="text-sm font-medium text-fuchsia-300">Pin Angle</span>
+            <input
+              className="mt-2 w-full rounded border border-fuchsia-500 bg-black p-2 text-fuchsia-100"
+              value={pinAngle}
+              onChange={(e) => setPinAngle(e.target.value)}
+              placeholder="problem, aesthetic, beginner, seasonal..."
+            />
+          </label>
+          <label className="block">
+            <span className="text-sm font-medium text-fuchsia-300">JTBD</span>
+            <input
+              className="mt-2 w-full rounded border border-fuchsia-500 bg-black p-2 text-fuchsia-100"
+              value={jtbd}
+              onChange={(e) => setJtbd(e.target.value)}
+              placeholder="What job is the audience trying to get done?"
+            />
+          </label>
+          <label className="block">
+            <span className="text-sm font-medium text-fuchsia-300">Pain Proximity</span>
+            <input
+              className="mt-2 w-full rounded border border-fuchsia-500 bg-black p-2 text-fuchsia-100"
+              type="number"
+              min="0"
+              max="10"
+              step="1"
+              value={painProximity}
+              onChange={(e) => setPainProximity(e.target.value)}
+              placeholder="0-10"
+            />
+          </label>
+          <label className="block">
+            <span className="text-sm font-medium text-fuchsia-300">Commerciality Score</span>
+            <input
+              className="mt-2 w-full rounded border border-fuchsia-500 bg-black p-2 text-fuchsia-100"
+              type="number"
+              min="0"
+              max="10"
+              step="1"
+              value={commercialityScore}
+              onChange={(e) => setCommercialityScore(e.target.value)}
+              placeholder="0-10"
+            />
+          </label>
+          <label className="block">
+            <span className="text-sm font-medium text-fuchsia-300">Emotion Tags</span>
+            <input
+              className="mt-2 w-full rounded border border-fuchsia-500 bg-black p-2 text-fuchsia-100"
+              value={emotionTags}
+              onChange={(e) => setEmotionTags(e.target.value)}
+              placeholder="frustrated, hopeful, curious"
+            />
+          </label>
+          <label className="block">
+            <span className="text-sm font-medium text-fuchsia-300">Identity Tags</span>
+            <input
+              className="mt-2 w-full rounded border border-fuchsia-500 bg-black p-2 text-fuchsia-100"
+              value={identityTags}
+              onChange={(e) => setIdentityTags(e.target.value)}
+              placeholder="developer, indie hacker, home gardener"
+            />
+          </label>
+          <label className="block">
+            <span className="text-sm font-medium text-fuchsia-300">Query Chain Depth</span>
+            <input
+              className="mt-2 w-full rounded border border-fuchsia-500 bg-black p-2 text-fuchsia-100"
+              type="number"
+              min="0"
+              max="10"
+              step="1"
+              value={queryChainDepth}
+              onChange={(e) => setQueryChainDepth(e.target.value)}
+              placeholder="0-10"
+            />
+          </label>
+          <label className="block">
+            <span className="text-sm font-medium text-fuchsia-300">Evergreen Score</span>
+            <input
+              className="mt-2 w-full rounded border border-fuchsia-500 bg-black p-2 text-fuchsia-100"
+              type="number"
+              min="0"
+              max="10"
+              step="1"
+              value={evergreenScore}
+              onChange={(e) => setEvergreenScore(e.target.value)}
+              placeholder="0-10"
             />
           </label>
         </div>

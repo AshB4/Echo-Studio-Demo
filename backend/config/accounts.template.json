@@ -12,12 +12,12 @@
       "pageId": "${FB_COLOR_WITH_ASH_PAGE_ID}",
       "pageName": "Color With Ash",
       "default": true,
+      "browserUserDataDir": "__FACEBOOK_AUTOMATION_PROFILE__",
+      "browserProfileDirectory": "Default",
+      "cloneChromeProfile": false,
       "shareToAccountIds": [
         "fb-main-page"
-      ],
-      "browserUserDataDir": "__DEFAULT_CHROME__",
-      "browserProfileDirectory": "Profile 11",
-      "cloneChromeProfile": false
+      ]
     }
   },
   {

@@ -4,6 +4,11 @@ This is the practical command reference for PostPunk.
 
 Use this file when you need to run something, not when you need strategy or architecture context.
 
+Shell tools used throughout these docs:
+
+- `rg` = `ripgrep`, a fast recursive search tool used instead of `grep` for most text searches.
+- `rsync` = file sync tool used to copy code, assets, and queue snapshots between the Mac and HP.
+
 Related docs:
 
 - `Docs/builder/README-OPERATIONS.md` for overall operating flow

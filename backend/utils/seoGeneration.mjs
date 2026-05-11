@@ -48,6 +48,31 @@ export function normalizeSeoResult(raw, input, context = null) {
     raw.intent_layer && typeof raw.intent_layer === "object" ? raw.intent_layer : {};
   const angleOptions =
     raw.angle_options && typeof raw.angle_options === "object" ? raw.angle_options : {};
+  const specificitySignals =
+    raw.specificity_signals && typeof raw.specificity_signals === "object"
+      ? raw.specificity_signals
+      : {};
+  const platformOptimizations =
+    raw.platform_optimizations && typeof raw.platform_optimizations === "object"
+      ? raw.platform_optimizations
+      : {};
+  const headlineVariants = Array.isArray(raw.headline_variants)
+    ? raw.headline_variants.filter(Boolean)
+    : Array.isArray(raw.headlineVariants)
+      ? raw.headlineVariants.filter(Boolean)
+      : [];
+  const authoritySignals = Array.isArray(raw.authority_signals)
+    ? raw.authority_signals.filter(Boolean)
+    : Array.isArray(raw.authoritySignals)
+      ? raw.authoritySignals.filter(Boolean)
+      : [];
+  const trustSignals = Array.isArray(raw.trust_signals)
+    ? raw.trust_signals.filter(Boolean)
+    : Array.isArray(raw.trustSignals)
+      ? raw.trustSignals.filter(Boolean)
+      : [];
+  const emotionTags = Array.isArray(raw.emotion_tags) ? raw.emotion_tags.filter(Boolean) : [];
+  const identityTags = Array.isArray(raw.identity_tags) ? raw.identity_tags.filter(Boolean) : [];
 
   const normalized = {
     product_name: raw.product_name || input.productName,
@@ -64,6 +89,46 @@ export function normalizeSeoResult(raw, input, context = null) {
     post_intent: raw.post_intent || "",
     campaign_phase: raw.campaign_phase || input.campaignPhase || "",
     campaign_angle: raw.campaign_angle || "",
+    headline: raw.headline || raw.product_name || input.productName,
+    headline_variants: headlineVariants,
+    primary_emotion: raw.primary_emotion || "",
+    secondary_emotion: raw.secondary_emotion || "",
+    curiosity_type: raw.curiosity_type || "",
+    specificity_signals: specificitySignals,
+    authority_signals: authoritySignals,
+    trust_signals: trustSignals,
+    pattern_interrupt_type: raw.pattern_interrupt_type || "",
+    hook_type: raw.hook_type || "",
+    content_intent: raw.content_intent || "",
+    search_intent: raw.search_intent || raw.searchIntent || input.productName || "",
+    save_intent: raw.save_intent || "",
+    share_intent: raw.share_intent || "",
+    thumbnail_concept: raw.thumbnail_concept || "",
+    first_line: raw.first_line || raw.hook || "",
+    platform_optimizations: platformOptimizations,
+    ctr_score: Number.isFinite(Number(raw.ctr_score)) ? Number(raw.ctr_score) : 0,
+    clarity_score: Number.isFinite(Number(raw.clarity_score)) ? Number(raw.clarity_score) : 0,
+    trust_score: Number.isFinite(Number(raw.trust_score)) ? Number(raw.trust_score) : 0,
+    curiosity_score: Number.isFinite(Number(raw.curiosity_score)) ? Number(raw.curiosity_score) : 0,
+    save_score: Number.isFinite(Number(raw.save_score)) ? Number(raw.save_score) : 0,
+    share_score: Number.isFinite(Number(raw.share_score)) ? Number(raw.share_score) : 0,
+    intent_primary: raw.intent_primary || intentLayer.primary_intent || "",
+    intent_secondary: raw.intent_secondary || "",
+    awareness_stage: raw.awareness_stage || "",
+    pain_proximity: Number.isFinite(Number(raw.pain_proximity)) ? Number(raw.pain_proximity) : 0,
+    commerciality_score: Number.isFinite(Number(raw.commerciality_score))
+      ? Number(raw.commerciality_score)
+      : 0,
+    emotion_tags: emotionTags,
+    identity_tags: identityTags,
+    query_chain_depth: Number.isFinite(Number(raw.query_chain_depth)) ? Number(raw.query_chain_depth) : 0,
+    evergreen_score: Number.isFinite(Number(raw.evergreen_score))
+      ? Number(raw.evergreen_score)
+      : Number.isFinite(Number(raw.evergreenScore))
+        ? Number(raw.evergreenScore)
+        : 0,
+    jtbd: raw.jtbd || "",
+    pin_angle: raw.pin_angle || raw.campaign_angle || "",
     intent_layer: {
       primary_intent: intentLayer.primary_intent || "",
       keyword_focus: intentLayer.keyword_focus || "",

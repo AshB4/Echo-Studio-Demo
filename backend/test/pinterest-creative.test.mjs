@@ -61,6 +61,11 @@ test("Pinterest creative enrichment rewrites near duplicates", () => {
   assert.notEqual(result.visual_style, "same image style");
   assert.equal(result.category_throttle_hit, true);
   assert.ok(result.confidence_score <= 99);
+  assert.ok(Array.isArray(result.emotion_tags));
+  assert.ok(Array.isArray(result.identity_tags));
+  assert.ok(result.intent_primary.length > 0);
+  assert.ok(result.awareness_stage.length > 0);
+  assert.ok(result.pin_angle.length > 0);
   assert.ok(Array.isArray(result.winner_expansion.adjacent_variations));
   assert.equal(result.asset_expansion.recommended_image_count, 3);
   assert.ok(result.asset_expansion.same_product_variants.length > 0);

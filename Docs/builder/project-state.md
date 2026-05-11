@@ -65,6 +65,16 @@ Avoid:
 - trend-chasing systems
 - video-first systems
 
+## Recent Updates
+
+- Added CTR / intent metadata to the shared content schema, SEO generation, Astro export, composer UI, and prompt-building flow.
+- Restored two previously failed queue items and moved them back into the rotation:
+  - `This Explains Too Much` on `2026-06-30T15:00:00.000Z`
+  - `Laneige Lip Mask Flavors You Can Try` on `2026-06-30T15:20:00.000Z`
+- Synced the restored queue state to HP so the Mac and server snapshot match again.
+- The composer now exposes intent and CTR fields in the UI, including headline, curiosity, trust, save/share, and score fields.
+- The builder docs now have a dedicated terminal command reference instead of scattering command snippets across strategy docs.
+
 ## What This App Is Right Now
 
 PostPunk is currently:

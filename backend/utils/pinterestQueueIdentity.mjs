@@ -19,6 +19,15 @@ function normalizedText(parts = []) {
     .join(" ");
 }
 
+function toTextArray(value) {
+  if (value === null || value === undefined) return [];
+  const list = Array.isArray(value) ? value : [value];
+  return list
+    .flatMap((item) => (Array.isArray(item) ? item : [item]))
+    .map((item) => String(item || "").trim())
+    .filter(Boolean);
+}
+
 function inferKnownIdentity(text, mediaPath = "") {
   const media = basenameLower(mediaPath);
   const fullMedia = String(mediaPath || "").toLowerCase();
@@ -120,8 +129,55 @@ export function inferPinterestQueueIdentity(input = {}, options = {}) {
   const batchLabel =
     explicitBatchLabel || known?.batchLabel || slugify(options?.campaign) || slugify(options?.batchFile) || null;
 
+  const intentPrimary = String(
+    metadata?.intentPrimary || metadata?.intent_primary || input?.intentPrimary || "",
+  ).trim();
+  const intentSecondary = String(
+    metadata?.intentSecondary || metadata?.intent_secondary || input?.intentSecondary || "",
+  ).trim();
+  const awarenessStage = String(
+    metadata?.awarenessStage || metadata?.awareness_stage || input?.awarenessStage || "",
+  ).trim();
+  const painProximity = Number.isFinite(Number(metadata?.painProximity ?? metadata?.pain_proximity ?? input?.painProximity))
+    ? Number(metadata?.painProximity ?? metadata?.pain_proximity ?? input?.painProximity)
+    : null;
+  const commercialityScore = Number.isFinite(
+    Number(metadata?.commercialityScore ?? metadata?.commerciality_score ?? input?.commercialityScore),
+  )
+    ? Number(metadata?.commercialityScore ?? metadata?.commerciality_score ?? input?.commercialityScore)
+    : null;
+  const emotionTags = toTextArray(
+    metadata?.emotionTags || metadata?.emotion_tags || input?.emotionTags || input?.emotion_tags,
+  );
+  const identityTags = toTextArray(
+    metadata?.identityTags || metadata?.identity_tags || input?.identityTags || input?.identity_tags,
+  );
+  const queryChainDepth = Number.isFinite(
+    Number(metadata?.queryChainDepth ?? metadata?.query_chain_depth ?? input?.queryChainDepth),
+  )
+    ? Number(metadata?.queryChainDepth ?? metadata?.query_chain_depth ?? input?.queryChainDepth)
+    : null;
+  const evergreenScore = Number.isFinite(
+    Number(metadata?.evergreenScore ?? metadata?.evergreen_score ?? input?.evergreenScore),
+  )
+    ? Number(metadata?.evergreenScore ?? metadata?.evergreen_score ?? input?.evergreenScore)
+    : null;
+  const jtbd = String(metadata?.jtbd || input?.jtbd || "").trim();
+  const pinAngle = String(metadata?.pinAngle || metadata?.pin_angle || input?.pinAngle || "").trim();
+
   return {
     productProfileId: productProfileId || null,
     batchLabel: batchLabel || null,
+    intentPrimary: intentPrimary || null,
+    intentSecondary: intentSecondary || null,
+    awarenessStage: awarenessStage || null,
+    painProximity,
+    commercialityScore,
+    emotionTags,
+    identityTags,
+    queryChainDepth,
+    evergreenScore,
+    jtbd: jtbd || null,
+    pinAngle: pinAngle || null,
   };
 }

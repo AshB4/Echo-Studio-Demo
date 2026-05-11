@@ -6,7 +6,7 @@ import { mkdir } from "fs/promises";
 import { chromium } from "playwright";
 
 const BACKEND_ROOT = process.cwd();
-const DEFAULT_PROFILE_DIR = path.join(BACKEND_ROOT, "config", "facebook-chrome-profile");
+const DEFAULT_PROFILE_DIR = path.join(BACKEND_ROOT, "data", "facebook-automation-profile");
 const DEFAULT_TARGET_URL = "https://www.facebook.com/ColorWithAshB";
 
 function boolFromEnv(name, fallback = false) {
