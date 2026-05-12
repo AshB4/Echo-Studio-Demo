@@ -1,0 +1,22 @@
+[
+  {
+    "id": "e764f3ae-194d-42ee-b260-05dac105ef9c",
+    "timestamp": "2026-05-12T01:53:01.061Z",
+    "type": "touchpoint",
+    "channel": "facebook",
+    "source": "post",
+    "campaign": "goblin-affirmations",
+    "page": "/products/goblin-coloring",
+    "event_type": "content_view"
+  },
+  {
+    "id": "16b1b7dc-09ee-4f84-8d74-664809429bbc",
+    "timestamp": "2026-05-12T02:08:05.376Z",
+    "type": "touchpoint",
+    "channel": "facebook",
+    "source": "post",
+    "campaign": "goblin-affirmations",
+    "page": "/products/goblin-coloring",
+    "event_type": "content_view"
+  }
+]

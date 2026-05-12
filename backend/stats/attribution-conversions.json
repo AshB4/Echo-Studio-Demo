@@ -1,0 +1,12 @@
+[
+  {
+    "id": "146c6b24-2362-46e8-98df-3b44ee0a070f",
+    "timestamp": "2026-05-12T01:53:26.897Z",
+    "type": "conversion",
+    "channel": "gumroad",
+    "source": "purchase",
+    "campaign": "goblin-affirmations",
+    "value": 29.99,
+    "product_id": "goblin-coloring-affirmations"
+  }
+]
