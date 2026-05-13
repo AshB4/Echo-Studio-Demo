@@ -260,6 +260,75 @@ function mixRows(rows) {
   return mixed;
 }
 
+function groupScheduleByDay(schedule = []) {
+  const days = [];
+  let currentDay = null;
+  let currentSlots = [];
+
+  for (const slot of schedule) {
+    const dayKey = String(slot || "").slice(0, 10);
+    if (dayKey !== currentDay) {
+      if (currentSlots.length > 0) days.push(currentSlots);
+      currentDay = dayKey;
+      currentSlots = [];
+    }
+    currentSlots.push(slot);
+  }
+
+  if (currentSlots.length > 0) days.push(currentSlots);
+  return days;
+}
+
+function spreadRowsAcrossSchedule(rows, schedule = []) {
+  const days = groupScheduleByDay(schedule);
+  const buckets = new Map();
+
+  for (const row of rows) {
+    const key = buildMixKey(row);
+    if (!buckets.has(key)) buckets.set(key, []);
+    buckets.get(key).push(row);
+  }
+
+  const keys = [...buckets.keys()];
+  const ordered = [];
+  let rotationIndex = 0;
+
+  for (const daySlots of days) {
+    const usedToday = new Set();
+    for (let slotIndex = 0; slotIndex < daySlots.length; slotIndex += 1) {
+      let selectedKey = null;
+
+      for (let offset = 0; offset < keys.length; offset += 1) {
+        const key = keys[(rotationIndex + offset) % keys.length];
+        const bucket = buckets.get(key);
+        if (bucket?.length && !usedToday.has(key)) {
+          selectedKey = key;
+          rotationIndex = (rotationIndex + offset + 1) % keys.length;
+          break;
+        }
+      }
+
+      if (!selectedKey) {
+        for (let offset = 0; offset < keys.length; offset += 1) {
+          const key = keys[(rotationIndex + offset) % keys.length];
+          const bucket = buckets.get(key);
+          if (bucket?.length) {
+            selectedKey = key;
+            rotationIndex = (rotationIndex + offset + 1) % keys.length;
+            break;
+          }
+        }
+      }
+
+      if (!selectedKey) break;
+      ordered.push(buckets.get(selectedKey).shift());
+      usedToday.add(selectedKey);
+    }
+  }
+
+  return ordered;
+}
+
 export default function AffiliateBuilderPage() {
   const { toast } = useToast();
   const boardListId = "pinterest-board-suggestions";
@@ -583,9 +652,10 @@ export default function AffiliateBuilderPage() {
           randomSeed,
         },
       );
+      const scheduledRows = spreadRowsAcrossSchedule(mixedRows, schedule);
 
-      for (let index = 0; index < mixedRows.length; index += 1) {
-        const row = mixedRows[index];
+      for (let index = 0; index < scheduledRows.length; index += 1) {
+        const row = scheduledRows[index];
         const scheduledAt = schedule[index] || null;
         const payload = {
           title: row.title,
@@ -631,7 +701,7 @@ export default function AffiliateBuilderPage() {
 
       toast({
         title: "Affiliate rows queued",
-        description: `${mixedRows.length} Pinterest affiliate posts were added to the queue in mixed order.`,
+        description: `${scheduledRows.length} Pinterest affiliate posts were added to the queue with same-product posts spread across different days first.`,
       });
     } catch (error) {
       toast({

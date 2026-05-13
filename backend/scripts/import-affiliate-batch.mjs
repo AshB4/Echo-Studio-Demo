@@ -189,7 +189,7 @@ function buildRows(batchData) {
 }
 
 function buildMixKey(row) {
-  return `${row.productLink}::${row.cluster || row.board || "default"}`;
+  return canonicalizeProductLink(row.productLink || "") || row.keyword || row.title || "default";
 }
 
 function mixRows(rows) {
@@ -214,6 +214,91 @@ function mixRows(rows) {
     }
   }
   return mixed;
+}
+
+function canonicalizeProductLink(link) {
+  const raw = String(link || "").trim();
+  if (!raw) return "";
+
+  try {
+    const parsed = new URL(raw);
+    if (/(^|\.)amazon\./i.test(parsed.hostname)) {
+      const asin = parsed.pathname.match(/\/dp\/([A-Z0-9]{10})(?:[/?]|$)/i)?.[1]?.toUpperCase() || "";
+      return asin ? `amazon:${asin}` : `${parsed.origin}${parsed.pathname}`;
+    }
+    return `${parsed.origin}${parsed.pathname}`.replace(/\/+$/, "");
+  } catch {
+    return raw.toLowerCase();
+  }
+}
+
+function groupScheduleByDay(schedule = []) {
+  const days = [];
+  let currentDay = null;
+  let currentSlots = [];
+
+  for (const slot of schedule) {
+    const dayKey = String(slot || "").slice(0, 10);
+    if (dayKey !== currentDay) {
+      if (currentSlots.length > 0) days.push(currentSlots);
+      currentDay = dayKey;
+      currentSlots = [];
+    }
+    currentSlots.push(slot);
+  }
+
+  if (currentSlots.length > 0) days.push(currentSlots);
+  return days;
+}
+
+function spreadRowsAcrossSchedule(rows, schedule = []) {
+  const days = groupScheduleByDay(schedule);
+  const buckets = new Map();
+
+  for (const row of rows) {
+    const key = buildMixKey(row);
+    if (!buckets.has(key)) buckets.set(key, []);
+    buckets.get(key).push(row);
+  }
+
+  const keys = [...buckets.keys()].sort();
+  const ordered = [];
+  let rotationIndex = 0;
+
+  for (const daySlots of days) {
+    const usedToday = new Set();
+    for (let slotIndex = 0; slotIndex < daySlots.length; slotIndex += 1) {
+      let selectedKey = null;
+
+      for (let offset = 0; offset < keys.length; offset += 1) {
+        const key = keys[(rotationIndex + offset) % keys.length];
+        const bucket = buckets.get(key);
+        if (bucket?.length && !usedToday.has(key)) {
+          selectedKey = key;
+          rotationIndex = (rotationIndex + offset + 1) % keys.length;
+          break;
+        }
+      }
+
+      if (!selectedKey) {
+        for (let offset = 0; offset < keys.length; offset += 1) {
+          const key = keys[(rotationIndex + offset) % keys.length];
+          const bucket = buckets.get(key);
+          if (bucket?.length) {
+            selectedKey = key;
+            rotationIndex = (rotationIndex + offset + 1) % keys.length;
+            break;
+          }
+        }
+      }
+
+      if (!selectedKey) break;
+      ordered.push(buckets.get(selectedKey).shift());
+      usedToday.add(selectedKey);
+    }
+  }
+
+  return ordered;
 }
 
 function buildPost(row, scheduledAt) {
@@ -288,12 +373,13 @@ async function main() {
   const batches = await Promise.all(args.batchFiles.map(readBatchFile));
   const mixedRows = mixRows(batches.flatMap(buildRows));
   const schedule = buildSchedulePlan(mixedRows.length, args.startDate, args);
+  const scheduledRows = spreadRowsAcrossSchedule(mixedRows, schedule);
   const created = [];
   const skipped = [];
   const workingPosts = [...existingPosts];
 
-  for (let index = 0; index < mixedRows.length; index += 1) {
-    const row = mixedRows[index];
+  for (let index = 0; index < scheduledRows.length; index += 1) {
+    const row = scheduledRows[index];
     const post = buildPost(row, schedule[index] || null);
     const duplicate =
       findContentDuplicate(workingPosts, post) || findDuplicatePost(workingPosts, post);
@@ -319,7 +405,7 @@ async function main() {
       {
         dryRun: args.dryRun,
         batches: batches.map((batch) => batch.resolved),
-        requested: mixedRows.length,
+        requested: scheduledRows.length,
         created: created.length,
         skipped: skipped.length,
         createdItems: created,
