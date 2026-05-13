@@ -144,6 +144,7 @@ These pieces are built and in active use:
 - affiliate builder rows can now be queued into the main PostPunk schedule with default `3/day` cadence and sale-window overrides
 - affiliate builder now understands a primary board plus alternate boards per row and suggests saved Pinterest board names from config
 - affiliate batch JSON can now be imported headlessly on remote machines with `backend/scripts/import-affiliate-batch.mjs`, including mixed-batch scheduling at `4-6/day`
+- affiliate scheduling now spreads same-product rows across different days before it repeats a product on the same day, when enough other product lanes exist
 - Product profile lifecycle status is now tracked. The shipped Gumroad/Amazon products are marked `live`, while `PostPunk Core` is `in-progress` and the memoir/Reddit product remain `planned`.
 - Telegram alerts fire for both success and failure
 - the worker now emits inventory and schedule-gap alerts when the queue has empty near-term days

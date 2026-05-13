@@ -253,9 +253,10 @@ Use it before adding features so we do not recreate logic, duplicate helpers, or
 - `/affiliate/builder` is the operational affiliate batch builder
 - The builder currently feeds Pinterest-oriented affiliate posts into the normal queue one by one
 - Default affiliate cadence in the builder is `3/day`, with date-range overrides for sale windows such as `25th-30th -> 6/day`
+- Builder queueing now spreads same-product rows across different days before allowing repeats on the same day when enough other products exist
 - The builder supports one immediate `board` plus optional per-row `boards` for future reposting to niche-fit boards on different days
 - The builder does not export paid Pinterest bulk CSV workflows; it prepares and queues rows into PostPunk instead
-- `backend/scripts/import-affiliate-batch.mjs` is the headless equivalent for remote hosts. It reads the same repo-native batch JSON, mixes rows across batches, and schedules them directly into SQLite/queue storage.
+- `backend/scripts/import-affiliate-batch.mjs` is the headless equivalent for remote hosts. It reads the same repo-native batch JSON, mixes rows across batches, and schedules them directly into SQLite/queue storage with same-product rows spread across separate days first.
 
 ### JSON shapes to reuse
 

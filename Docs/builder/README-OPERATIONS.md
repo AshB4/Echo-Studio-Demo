@@ -190,6 +190,7 @@ tail -f /opt/postpunk/backend/backup.log
 ## Scheduler cadence (current)
 - Worker runs at `:00` and `:30` each hour.
 - Backup runs nightly at `02:05` (Linux timer).
+- Affiliate importer/builder scheduling now tries to keep same-product rows on different days before allowing same-day repeats.
 
 ## Queue and media paths
 - Primary store:
