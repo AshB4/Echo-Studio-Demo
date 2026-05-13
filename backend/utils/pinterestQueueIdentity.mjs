@@ -57,12 +57,6 @@ function inferKnownIdentity(text, mediaPath = "") {
       batchLabel: "gel-nails-april",
     };
   }
-  if (/goblin|anti productivity|side quest|hot mess|doing less|move slowly|goblinaff/.test(source)) {
-    return {
-      productProfileId: "goblin-coloring-affirmations",
-      batchLabel: "goblin-restored-mix",
-    };
-  }
   if (/kawaii halloween|spooky cute|pastel goth|cute spooky|halloween coloring|kawaiihalloween/.test(source)) {
     return {
       productProfileId: "kawaii-halloween-evergreen",
@@ -75,16 +69,28 @@ function inferKnownIdentity(text, mediaPath = "") {
       batchLabel: "passover-seder-survival-kit-pinterest",
     };
   }
-  if (/prompt storm|prompt pack|creator reset/.test(source)) {
+  if (/prompt storm|prompt-storm|100prompt-storm|prompt pack|creator reset/.test(source)) {
     return {
       productProfileId: "prompt-storm",
       batchLabel: "prompt-storm-pinterest",
     };
   }
-  if (/bubble mower|splash pad|water play|gardening toy|kids gardening|backyard toy|toddler/.test(source)) {
+  if (/bubble mower|splash pad|splashez|water play|gardening toy|kids gardening|backyard toy|toddler/.test(source)) {
     return {
       productProfileId: "amazon-kids-backyard-play",
       batchLabel: "gardening-and-splash-mix",
+    };
+  }
+  if (/creator-spring|teespring|start-anyway|frog circle shirt|frog shirt|frog hoodie/.test(source)) {
+    return {
+      productProfileId: "start-anyway-frog",
+      batchLabel: "start-anyway-frog",
+    };
+  }
+  if (/goblin|anti productivity|side quest|hot mess|doing less|move slowly|goblinaff/.test(source)) {
+    return {
+      productProfileId: "goblin-coloring-affirmations",
+      batchLabel: "goblin-restored-mix",
     };
   }
   return null;
@@ -100,10 +106,7 @@ export function inferPinterestQueueIdentity(input = {}, options = {}) {
   ).trim();
   const mediaPath = String(input?.mediaPath || input?.image || options?.image || "").trim();
 
-  const text = normalizedText([
-    options?.batchFile,
-    options?.campaign,
-    explicitBatchLabel,
+  const identityText = normalizedText([
     input?.title,
     input?.description,
     input?.body,
@@ -119,7 +122,7 @@ export function inferPinterestQueueIdentity(input = {}, options = {}) {
     options?.tags,
   ]);
 
-  const known = inferKnownIdentity(text, mediaPath);
+  const known = inferKnownIdentity(identityText, mediaPath);
 
   const productProfileId =
     explicitProductId && explicitProductId !== "restored-batch" && explicitProductId !== "unknown"
