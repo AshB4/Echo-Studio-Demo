@@ -844,10 +844,43 @@ async function pageLooksLikeAuthRequired(page) {
 		.count()
 		.catch(() => 0);
 	const hasLoginForm = emailCount > 0 && passwordCount > 0;
+	const hasComposerSurface = await page
+		.evaluate(() => {
+			const bodyText = String(document.body?.innerText || "")
+				.replace(/\s+/g, " ")
+				.trim();
+			const selectors = [
+				'span',
+				'div[role="button"]',
+				'button',
+				'[aria-label]',
+			];
+			const composerTextSeen = selectors.some((selector) =>
+				Array.from(document.querySelectorAll(selector)).some((node) =>
+					/what's on your mind\??|create post|write something/i.test(
+						String(
+							node.textContent ||
+								node.getAttribute?.("aria-label") ||
+								"",
+						).replace(/\s+/g, " ").trim(),
+					),
+				),
+			);
+			return (
+				composerTextSeen ||
+				/add to your post|photo\/video|more post options/i.test(bodyText)
+			);
+		})
+		.catch(() => false);
 
 	logStep("auth-check:url", url);
 	logStep("auth-check:isLoginUrl", String(isLoginUrl));
 	logStep("auth-check:hasLoginForm", `${hasLoginForm} (email=${emailCount}, pass=${passwordCount})`);
+	logStep("auth-check:hasComposerSurface", String(hasComposerSurface));
+
+	if (!isLoginUrl && hasComposerSurface) {
+		return false;
+	}
 
 	return isLoginUrl || hasLoginForm;
 }
@@ -1021,10 +1054,22 @@ async function clickFirstWithDebug(page, selectors, debug, stepName, timeout = 4
 				return selector;
 			}
 		} catch (error) {
+			const message = String(error?.message || error || "");
+			const clickLikelySucceeded =
+				message.includes("click action done") &&
+				message.includes("waiting for scheduled navigations to finish");
+			if (clickLikelySucceeded) {
+				await debug?.log(stepName, {
+					selector,
+					ok: true,
+					note: "navigation-wait-timeout-after-click",
+				});
+				return selector;
+			}
 			await debug?.log(stepName, {
 				selector,
 				ok: false,
-				error: error?.message || String(error),
+				error: message,
 			});
 		}
 	}
@@ -1034,6 +1079,8 @@ async function clickFirstWithDebug(page, selectors, debug, stepName, timeout = 4
 
 async function dismissInterruptivePopups(page) {
 	const dismissSelectors = [
+		'div[role="button"][aria-label="Close"]',
+		'button[aria-label="Close"]',
 		'div[role="dialog"] div[role="button"]:has-text("Not now")',
 		'div[role="dialog"] button:has-text("Not now")',
 		'div[role="dialog"] div[role="button"]:has-text("Not Now")',
@@ -1055,6 +1102,32 @@ async function dismissInterruptivePopups(page) {
 		}
 	}
 	return null;
+}
+
+async function dismissFacebookLoginOverlay(page) {
+	const overlayPresent = await page
+		.evaluate(() => {
+			const bodyText = String(document.body?.innerText || "")
+				.replace(/\s+/g, " ")
+				.trim();
+			const hasLoginWords = /email or phone number|password|forgot password\?|create new account/i.test(
+				bodyText,
+			);
+			const hasPageWords = /color with ash|followers|photos|intro|see more from/i.test(bodyText);
+			return hasLoginWords && hasPageWords;
+		})
+		.catch(() => false);
+	if (!overlayPresent) return null;
+
+	const closeSelector = await clickFirst(page, [
+		'div[role="button"][aria-label="Close"]',
+		'button[aria-label="Close"]',
+		'div[aria-label="Close"]',
+	], 3000);
+	if (!closeSelector) return null;
+	await page.waitForTimeout(1200);
+	logStep("overlay:dismissed", closeSelector);
+	return closeSelector;
 }
 
 async function fillComposer(page, text) {
@@ -1143,6 +1216,8 @@ async function openFacebookComposer(page) {
 	const selectors = [
 		'div[role="button"]:has-text("What\'s on your mind?")',
 		'div[role="button"]:has-text("What\'s on your mind")',
+		'span:has-text("What\'s on your mind?")',
+		'span:has-text("What\'s on your mind")',
 		'div[role="button"]:has-text("Write something")',
 		'div[role="button"]:has-text("Create post")',
 		'button:has-text("Create post")',
@@ -1165,6 +1240,43 @@ async function openFacebookComposer(page) {
 		} catch {
 			// continue
 		}
+	}
+
+	try {
+		const clicked = await page.evaluate(() => {
+			const normalize = (value) =>
+				String(value || "").replace(/\s+/g, " ").trim().toLowerCase();
+			const isVisible = (node) => {
+				if (!(node instanceof HTMLElement)) return false;
+				const style = window.getComputedStyle(node);
+				if (!style || style.visibility === "hidden" || style.display === "none") return false;
+				const rect = node.getBoundingClientRect();
+				return rect.width > 0 && rect.height > 0;
+			};
+			const spans = Array.from(document.querySelectorAll("span")).filter((node) =>
+				normalize(node.textContent).includes("what's on your mind"),
+			);
+			for (const span of spans) {
+				let current = span;
+				while (current && current !== document.body) {
+					if (
+						current instanceof HTMLElement &&
+						isVisible(current) &&
+						(current.getAttribute("role") === "button" ||
+							current.getAttribute("tabindex") === "0" ||
+							current.tagName === "BUTTON")
+					) {
+						current.click();
+						return "dom-ancestor-whats-on-your-mind";
+					}
+					current = current.parentElement;
+				}
+			}
+			return null;
+		});
+		if (clicked) return clicked;
+	} catch {
+		// continue
 	}
 
 	return null;
@@ -1608,6 +1720,7 @@ export default async function postToFacebookBrowser(post, context = {}) {
 			page.goto(targetUrl, { waitUntil: "domcontentloaded", timeout: 45000 }),
 		);
 		await page.waitForTimeout(2500);
+		await dismissFacebookLoginOverlay(page);
 		await dismissInterruptivePopups(page);
 		logStep("page:url", page.url());
 		await debug.log("page:open", { targetUrl, finalUrl: page.url() });
@@ -1627,6 +1740,7 @@ export default async function postToFacebookBrowser(post, context = {}) {
 				throw error;
 			}
 			await dismissInterruptivePopups(page);
+			await dismissFacebookLoginOverlay(page);
 			logStep("auth-required:resolved", page.url());
 			await dumpFacebookSurface(page, "after-auth");
 			await debug.screenshot(page, "after-auth");
@@ -1664,6 +1778,7 @@ export default async function postToFacebookBrowser(post, context = {}) {
 		}
 
 		logStep("composer:find");
+		await dismissFacebookLoginOverlay(page);
 		await dismissInterruptivePopups(page);
 		await dumpFacebookSurface(page, "before-composer");
 		await debug.screenshot(page, "before-composer");

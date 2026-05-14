@@ -16,56 +16,9 @@
       "browserUserDataDir": "__FACEBOOK_AUTOMATION_PROFILE__",
       "browserProfileDirectory": "Default",
       "cloneChromeProfile": false,
-      "shareToAccountIds": [
-        "fb-main-page"
-      ],
       "browserOnly": true,
       "browserFirst": true,
       "browserFallback": true
-    }
-  },
-  {
-    "platform": "facebook",
-    "id": "fb-main-profile",
-    "label": "Facebook • Main Profile (SQ)",
-    "credentials": {
-      "accessToken": "${FB_MAIN_PAGE_ACCESS_TOKEN}",
-      "appId": "${FB_APP_ID}",
-      "appSecret": "${FB_APP_SECRET}"
-    },
-    "metadata": {
-      "pageId": "${FB_MAIN_PAGE_ID}",
-      "profileName": "SanguineQueen",
-      "profileUrl": "https://www.facebook.com/SanguineQueen/",
-      "cadenceRule": "weekends-only-max-3-per-week",
-      "default": false,
-      "browserOnly": true,
-      "browserFirst": true,
-      "browserFallback": true
-    }
-  },
-  {
-    "platform": "facebook",
-    "id": "fb-main-page",
-    "label": "Facebook • SanguineQueen Personal",
-    "credentials": {
-      "accessToken": "${FB_MAIN_PAGE_ACCESS_TOKEN}",
-      "appId": "${FB_APP_ID}",
-      "appSecret": "${FB_APP_SECRET}"
-    },
-    "metadata": {
-      "pageId": "${FB_MAIN_PAGE_ID}",
-      "profileName": "SanguineQueen",
-      "profileUrl": "https://www.facebook.com/SanguineQueen/",
-      "cadenceRule": "weekends-only-max-3-per-week",
-      "default": false,
-      "browserUserDataDir": "__DEFAULT_CHROME__",
-      "browserProfileDirectory": "Default",
-      "cloneChromeProfile": false,
-      "browserOnly": true,
-      "browserFirst": true,
-      "browserFallback": true,
-      "aliasOf": "fb-main-profile"
     }
   },
   {
