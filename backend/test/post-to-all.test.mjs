@@ -5,9 +5,15 @@ import {
   withAffiliateTag,
   normalizeProductLink,
   ensureProductLink,
+  ensureAffiliateDisclosure,
+  ensureAffiliateFooter,
   normalizeHashtags,
   isConfiguredValue,
   isThreadsConfigured,
+  isAmazonAffiliatePost,
+  shouldIncludeProductLinkForPlatform,
+  shouldApplyAffiliateDisclosureForPlatform,
+  shouldSkipTargetForAffiliatePost,
 } from "../scripts/platforms/post-to-all.js";
 
 test("normalizeTargets normalizes strings and object targets", () => {
@@ -78,6 +84,82 @@ test("ensureProductLink appends missing product link", () => {
   const result = ensureProductLink("Helpful punch post", "https://example.com/product");
   assert.match(result, /Helpful punch post/);
   assert.match(result, /https:\/\/example\.com\/product/);
+});
+
+test("isAmazonAffiliatePost detects Amazon affiliate inventory", () => {
+  assert.equal(
+    isAmazonAffiliatePost({
+      metadata: {
+        productLinks: {
+          primary: "https://www.amazon.com/example-product",
+        },
+      },
+    }),
+    true,
+  );
+  assert.equal(
+    isAmazonAffiliatePost({
+      metadata: {
+        productLinks: {
+          primary: "https://example.com/product",
+        },
+      },
+    }),
+    false,
+  );
+});
+
+test("shouldIncludeProductLinkForPlatform forces affiliate links into Facebook copy", () => {
+  const post = {
+    metadata: {
+      productLinks: {
+        primary: "https://www.amazon.com/example-product",
+      },
+    },
+  };
+  assert.equal(shouldIncludeProductLinkForPlatform(post, "facebook"), true);
+  assert.equal(shouldIncludeProductLinkForPlatform(post, "pinterest"), false);
+});
+
+test("ensureAffiliateDisclosure appends the required disclosure text", () => {
+  const result = ensureAffiliateDisclosure("Useful backyard find");
+  assert.match(result, /Useful backyard find/);
+  assert.match(result, /I may earn a small commission if you buy via this link\./);
+});
+
+test("ensureAffiliateFooter places disclosure before the affiliate link", () => {
+  const result = ensureAffiliateFooter(
+    "Useful backyard find",
+    "https://www.amazon.com/example-product?tag=ashb4studio0b-20",
+  );
+  const disclosureIndex = result.indexOf("I may earn a small commission if you buy via this link.");
+  const linkIndex = result.indexOf("https://www.amazon.com/example-product?tag=ashb4studio0b-20");
+  assert.ok(disclosureIndex >= 0);
+  assert.ok(linkIndex > disclosureIndex);
+});
+
+test("shouldApplyAffiliateDisclosureForPlatform applies disclosure to Facebook Amazon affiliate posts", () => {
+  const post = {
+    metadata: {
+      productLinks: {
+        primary: "https://www.amazon.com/example-product",
+      },
+    },
+  };
+  assert.equal(shouldApplyAffiliateDisclosureForPlatform(post, "facebook"), true);
+  assert.equal(shouldApplyAffiliateDisclosureForPlatform(post, "pinterest"), true);
+});
+
+test("shouldSkipTargetForAffiliatePost blocks Amazon affiliate pins by default", () => {
+  const post = {
+    metadata: {
+      productLinks: {
+        primary: "https://www.amazon.com/example-product",
+      },
+    },
+  };
+  assert.equal(shouldSkipTargetForAffiliatePost(post, "pinterest"), true);
+  assert.equal(shouldSkipTargetForAffiliatePost(post, "facebook"), false);
 });
 
 test("normalizeHashtags normalizes arrays and strings", () => {

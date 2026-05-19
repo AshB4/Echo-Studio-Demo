@@ -47,6 +47,12 @@ const hasVendedAmazonParams = (url) =>
 	url.searchParams.has("language") ||
 	Array.from(url.searchParams.keys()).some((key) => key.toLowerCase().startsWith("ref"));
 
+const boolFromEnv = (name, fallback = true) => {
+	const value = process.env[name];
+	if (value === undefined) return fallback;
+	return !["0", "false", "off", "no"].includes(String(value).toLowerCase());
+};
+
 export const withAffiliateTag = (rawText, partnerTag) => {
 	if (!rawText || !partnerTag) return rawText || "";
 	return String(rawText).replace(/https?:\/\/[^\s]+/gi, (rawUrl) => {
@@ -96,7 +102,7 @@ export const ensureProductLink = (body, link) => {
 	return `${content}\n\n${normalizedLink}`;
 };
 
-const AFFILIATE_DISCLOSURE = "Affiliate links may earn me a small commission.";
+const AFFILIATE_DISCLOSURE = "I may earn a small commission if you buy via this link.";
 
 export const isAffiliatePost = (post) => {
 	const contentMode = post?.metadata?.contentMode || "";
@@ -109,6 +115,23 @@ export const isAffiliatePost = (post) => {
 		post?.metadata?.productLinks?.primary ||
 		"";
 	return contentMode === "affiliate" || /amazon\./i.test(String(affiliateUrl));
+};
+
+export const isAmazonAffiliatePost = (post) => {
+	const productLink = normalizeProductLink(post, "");
+	return AMAZON_HOST_PATTERN.test(String(productLink || ""));
+};
+
+export const shouldIncludeProductLinkForPlatform = (post, platform) => {
+	if (post?.metadata?.includeProductLink) return true;
+	return String(platform || "").toLowerCase() === "facebook" && isAffiliatePost(post);
+};
+
+export const shouldSkipTargetForAffiliatePost = (post, platform) => {
+	const normalizedPlatform = String(platform || "").toLowerCase();
+	if (normalizedPlatform !== "pinterest") return false;
+	if (!isAmazonAffiliatePost(post)) return false;
+	return !boolFromEnv("POSTPUNK_ALLOW_AMAZON_AFFILIATE_PINTEREST", false);
 };
 
 export const normalizeHashtags = (value) => {
@@ -131,6 +154,25 @@ export const ensureAffiliateDisclosure = (body, disclosure = AFFILIATE_DISCLOSUR
 	if (content.toLowerCase().includes(disclosure.toLowerCase())) return content;
 	if (!content) return disclosure;
 	return `${content}\n\n${disclosure}`;
+};
+
+export const ensureAffiliateFooter = (body, link, disclosure = AFFILIATE_DISCLOSURE) => {
+	const contentWithoutLink = String(body || "")
+		.split(/\n+/)
+		.map((line) => line.trim())
+		.filter(Boolean)
+		.filter((line) => String(line).trim() !== String(link || "").trim())
+		.join("\n\n")
+		.trim();
+	const withDisclosure = ensureAffiliateDisclosure(contentWithoutLink, disclosure);
+	return ensureProductLink(withDisclosure, link);
+};
+
+export const shouldApplyAffiliateDisclosureForPlatform = (post, platform) => {
+	const normalizedPlatform = String(platform || "").toLowerCase();
+	if (normalizedPlatform === "pinterest") return isAffiliatePost(post);
+	if (normalizedPlatform === "facebook") return isAmazonAffiliatePost(post);
+	return false;
 };
 
 export const isConfiguredValue = (value) => {
@@ -270,6 +312,15 @@ export const postToAllPlatforms = async (post, targetsInput) => {
 
 		try {
 			const accountOverrideKey = accountId ? `${platform}:${accountId}` : null;
+			if (shouldSkipTargetForAffiliatePost(post, platform)) {
+				results.push({
+					platform,
+					accountId,
+					status: "skipped",
+					reason: "Amazon affiliate posts to Pinterest are disabled",
+				});
+				continue;
+			}
 			const customText =
 				(accountOverrideKey && post.platformOverrides?.[accountOverrideKey]) ??
 				post.platformOverrides?.[platform] ??
@@ -279,13 +330,16 @@ export const postToAllPlatforms = async (post, targetsInput) => {
 				shouldAutoTagAmazon || productLink
 					? withAffiliateTag(customText, partnerTag)
 					: customText;
-			const linkedBody =
-				post?.metadata?.includeProductLink
-					? ensureProductLink(baseBody, productLink)
-					: baseBody;
-			const body = platform === "pinterest" && isAffiliatePost(post)
-				? ensureAffiliateDisclosure(linkedBody)
-				: linkedBody;
+			const needsProductLink = shouldIncludeProductLinkForPlatform(post, platform);
+			const needsDisclosure = shouldApplyAffiliateDisclosureForPlatform(post, platform);
+			const body =
+				needsProductLink && needsDisclosure
+					? ensureAffiliateFooter(baseBody, productLink)
+					: needsProductLink
+						? ensureProductLink(baseBody, productLink)
+						: needsDisclosure
+							? ensureAffiliateDisclosure(baseBody)
+							: baseBody;
 			const payload = {
 				title: post.title,
 				body,
