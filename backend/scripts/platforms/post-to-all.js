@@ -164,8 +164,13 @@ export const ensureAffiliateFooter = (body, link, disclosure = AFFILIATE_DISCLOS
 		.filter((line) => String(line).trim() !== String(link || "").trim())
 		.join("\n\n")
 		.trim();
-	const withDisclosure = ensureAffiliateDisclosure(contentWithoutLink, disclosure);
-	return ensureProductLink(withDisclosure, link);
+	const normalizedDisclosure = String(disclosure || "").trim();
+	const normalizedLink = String(link || "").trim();
+	const parts = [];
+	if (contentWithoutLink) parts.push(contentWithoutLink);
+	if (normalizedLink) parts.push(normalizedLink);
+	if (normalizedDisclosure) parts.push(normalizedDisclosure);
+	return parts.join("\n\n").trim();
 };
 
 export const shouldApplyAffiliateDisclosureForPlatform = (post, platform) => {

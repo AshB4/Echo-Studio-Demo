@@ -127,15 +127,17 @@ test("ensureAffiliateDisclosure appends the required disclosure text", () => {
   assert.match(result, /I may earn a small commission if you buy via this link\./);
 });
 
-test("ensureAffiliateFooter places disclosure before the affiliate link", () => {
+test("ensureAffiliateFooter places body first, affiliate link second, disclosure last", () => {
   const result = ensureAffiliateFooter(
     "Useful backyard find",
     "https://www.amazon.com/example-product?tag=ashb4studio0b-20",
   );
-  const disclosureIndex = result.indexOf("I may earn a small commission if you buy via this link.");
+  const bodyIndex = result.indexOf("Useful backyard find");
   const linkIndex = result.indexOf("https://www.amazon.com/example-product?tag=ashb4studio0b-20");
+  const disclosureIndex = result.indexOf("I may earn a small commission if you buy via this link.");
   assert.ok(disclosureIndex >= 0);
-  assert.ok(linkIndex > disclosureIndex);
+  assert.ok(linkIndex > bodyIndex);
+  assert.ok(disclosureIndex > linkIndex);
 });
 
 test("shouldApplyAffiliateDisclosureForPlatform applies disclosure to Facebook Amazon affiliate posts", () => {
