@@ -48,9 +48,15 @@ const FB_MAIN_PROFILE_ALLOWED_DAYS = String(
 	.split(",")
 	.map((value) => String(value || "").trim().toLowerCase())
 	.filter(Boolean);
+const FACEBOOK_UNIQUENESS_COOLDOWN_HOURS = Number(
+	process.env.POSTPUNK_FACEBOOK_UNIQUENESS_COOLDOWN_HOURS || 72,
+);
 const PINTEREST_DAILY_LIMIT = Number(process.env.POSTPUNK_PINTEREST_DAILY_LIMIT || 6);
 const PINTEREST_GOBLIN_DAILY_LIMIT = Number(
 	process.env.POSTPUNK_PINTEREST_GOBLIN_DAILY_LIMIT || 2,
+);
+const PINTEREST_UNIQUENESS_COOLDOWN_HOURS = Number(
+	process.env.POSTPUNK_PINTEREST_UNIQUENESS_COOLDOWN_HOURS || 72,
 );
 const PINTEREST_AVOID_CONSECUTIVE_MEDIA = !["0", "false", "off", "no"].includes(
 	String(process.env.POSTPUNK_PINTEREST_AVOID_CONSECUTIVE_MEDIA || "true").toLowerCase(),
@@ -354,6 +360,32 @@ function contentFingerprint(post) {
 	return `${title}||${body}`;
 }
 
+function textTokens(value) {
+	return new Set(
+		normalizeTextForFingerprint(value)
+			.split(/[^a-z0-9]+/)
+			.filter(Boolean)
+			.filter((token) => token.length >= 4),
+	);
+}
+
+export function facebookTextSimilarity(leftPost, rightPost) {
+	const left = new Set([
+		...textTokens(leftPost?.title),
+		...textTokens(leftPost?.body ?? leftPost?.content),
+	]);
+	const right = new Set([
+		...textTokens(rightPost?.title),
+		...textTokens(rightPost?.body ?? rightPost?.content),
+	]);
+	if (!left.size || !right.size) return 0;
+	let intersection = 0;
+	for (const token of left) {
+		if (right.has(token)) intersection += 1;
+	}
+	return intersection / Math.max(left.size, right.size);
+}
+
 function startOfUtcDay(timestampMs) {
 	const day = new Date(timestampMs);
 	day.setUTCHours(0, 0, 0, 0);
@@ -404,6 +436,33 @@ function buildLastPlatformPostByProduct(postedLog = [], platform = "facebook") {
 		const previous = map.get(productId) || 0;
 		if (timestamp > previous) {
 			map.set(productId, timestamp);
+		}
+	}
+	return map;
+}
+
+function buildPlatformPostedCountByProduct(postedLog = [], platform = "facebook") {
+	const map = new Map();
+	for (const entry of postedLog) {
+		if (!archiveEntryHasPlatform(entry, platform)) continue;
+		const productId = archiveEntryProductId(entry);
+		if (!productId) continue;
+		map.set(productId, (map.get(productId) || 0) + 1);
+	}
+	return map;
+}
+
+function buildLastPlatformPostByMediaFamily(postedLog = [], platform = "facebook") {
+	const map = new Map();
+	for (const entry of postedLog) {
+		if (!archiveEntryHasPlatform(entry, platform)) continue;
+		const family = entryMediaFamily(entry);
+		if (!family) continue;
+		const timestamp = archiveEntryTimestamp(entry);
+		if (!timestamp) continue;
+		const previous = map.get(family) || 0;
+		if (timestamp > previous) {
+			map.set(family, timestamp);
 		}
 	}
 	return map;
@@ -843,15 +902,31 @@ function hasPlatformTarget(post, platform) {
 	return targets.some((target) => String(target?.platform || "").toLowerCase() === platform);
 }
 
-function pickTodaysFacebookPostId(readyPosts, postedLog, nowMs = Date.now()) {
+export function pickTodaysFacebookPostId(readyPosts, postedLog, nowMs = Date.now()) {
 	const fbCandidates = readyPosts.filter((post) => hasPlatformTarget(post, "facebook"));
 	if (!fbCandidates.length) return null;
 	const lastByProduct = buildLastPlatformPostByProduct(postedLog, "facebook");
+	const countByProduct = buildPlatformPostedCountByProduct(postedLog, "facebook");
+	const lastByFamily = buildLastPlatformPostByMediaFamily(postedLog, "facebook");
 	const sorted = [...fbCandidates].sort((a, b) => {
 		const aProduct = productIdFor(a);
 		const bProduct = productIdFor(b);
 		const aLast = aProduct ? (lastByProduct.get(aProduct) || 0) : 0;
 		const bLast = bProduct ? (lastByProduct.get(bProduct) || 0) : 0;
+		const aCount = aProduct ? (countByProduct.get(aProduct) || 0) : 0;
+		const bCount = bProduct ? (countByProduct.get(bProduct) || 0) : 0;
+		const aSeenProduct = Boolean(aCount || aLast);
+		const bSeenProduct = Boolean(bCount || bLast);
+		const aFamily = postMediaFamily(a);
+		const bFamily = postMediaFamily(b);
+		const aFamilyLast = aFamily ? (lastByFamily.get(aFamily) || 0) : 0;
+		const bFamilyLast = bFamily ? (lastByFamily.get(bFamily) || 0) : 0;
+		const aFamilySeen = Boolean(aFamilyLast);
+		const bFamilySeen = Boolean(bFamilyLast);
+		if (aSeenProduct !== bSeenProduct) return aSeenProduct ? 1 : -1;
+		if (aCount !== bCount) return aCount - bCount;
+		if (aFamilySeen !== bFamilySeen) return aFamilySeen ? 1 : -1;
+		if (aFamilyLast !== bFamilyLast) return aFamilyLast - bFamilyLast;
 		if (aLast !== bLast) return aLast - bLast;
 		return getPostTimestamp(a) - getPostTimestamp(b);
 	});
@@ -894,6 +969,88 @@ function buildRecentFingerprintMap(postedLog = []) {
 	return map;
 }
 
+export function findRecentFacebookConflict(post, postedLog = [], nowMs = Date.now()) {
+	const cooldownMs = Math.max(0, FACEBOOK_UNIQUENESS_COOLDOWN_HOURS) * 60 * 60 * 1000;
+	if (cooldownMs <= 0) return null;
+	const currentFingerprint = contentFingerprint(post);
+	const currentFamily = postMediaFamily(post);
+	const currentProduct = productIdFor(post);
+
+	for (const entry of postedLog) {
+		if (!archiveEntryHasPlatform(entry, "facebook")) continue;
+		const timestamp = archiveEntryTimestamp(entry);
+		if (!timestamp || nowMs - timestamp > cooldownMs) continue;
+
+		const sameFingerprint =
+			Boolean(currentFingerprint) && currentFingerprint === contentFingerprint(entry);
+		const sameFamily =
+			Boolean(currentFamily) && currentFamily === entryMediaFamily(entry);
+		const sameProduct =
+			Boolean(currentProduct) && currentProduct === archiveEntryProductId(entry);
+		const similarity = facebookTextSimilarity(post, entry);
+
+		if (sameFingerprint) {
+			return {
+				reason: "facebook fingerprint cooldown",
+				timestamp,
+				entry,
+			};
+		}
+		if (sameFamily && (sameProduct || similarity >= 0.45)) {
+			return {
+				reason: "facebook media family cooldown",
+				timestamp,
+				entry,
+			};
+		}
+		if (sameProduct && similarity >= 0.6) {
+			return {
+				reason: "facebook product text cooldown",
+				timestamp,
+				entry,
+			};
+		}
+	}
+	return null;
+}
+
+export function findRecentPinterestConflict(post, postedLog = [], nowMs = Date.now()) {
+	const cooldownMs = Math.max(0, PINTEREST_UNIQUENESS_COOLDOWN_HOURS) * 60 * 60 * 1000;
+	if (cooldownMs <= 0) return null;
+	const currentFingerprint = contentFingerprint(post);
+	const currentFamily = postMediaFamily(post);
+	const currentProduct = productIdFor(post);
+
+	for (const entry of postedLog) {
+		if (!archiveEntryHasPlatform(entry, "pinterest")) continue;
+		const timestamp = archiveEntryTimestamp(entry);
+		if (!timestamp || nowMs - timestamp > cooldownMs) continue;
+
+		const sameFingerprint =
+			Boolean(currentFingerprint) && currentFingerprint === contentFingerprint(entry);
+		const sameFamily =
+			Boolean(currentFamily) && currentFamily === entryMediaFamily(entry);
+		const sameProduct =
+			Boolean(currentProduct) && currentProduct === archiveEntryProductId(entry);
+
+		if (sameFingerprint) {
+			return {
+				reason: "pinterest fingerprint cooldown",
+				timestamp,
+				entry,
+			};
+		}
+		if (sameFamily && sameProduct) {
+			return {
+				reason: "pinterest media family cooldown",
+				timestamp,
+				entry,
+			};
+		}
+	}
+	return null;
+}
+
 function hasPinterestTarget(post) {
 	const targets = normalizeTargets(
 		Array.isArray(post?.targets) && post.targets.length
@@ -933,6 +1090,10 @@ function buildAlertPostContext(post) {
 	const title = post?.title ?? post?.id ?? "untitled";
 	const product = productLabelFor(post);
 	return product ? `Title: ${title}\nProduct: ${product}` : `Title: ${title}`;
+}
+
+function buildWorkerFailureContext(post, error) {
+	return `${buildAlertPostContext(post)}\nError: ${error?.message || "Unknown worker error"}`;
 }
 
 function splitMediaValues(value) {
@@ -1240,6 +1401,21 @@ export async function processQueue() {
 			);
 		}
 		if (hasPlatformTarget(post, "facebook")) {
+			const recentFacebookConflict = findRecentFacebookConflict(post, postedLog, now);
+			if (recentFacebookConflict) {
+				const nonFacebookTargets = targets.filter((t) => t.platform !== "facebook");
+				if (nonFacebookTargets.length === 0) {
+					console.log(
+						`Deferring "${post.title ?? post.id ?? "untitled"}" to tomorrow (${recentFacebookConflict.reason}).`,
+					);
+					queueUpdates.set(post.id, pushToNextUtcDay(post, now));
+					continue;
+				}
+				console.log(
+					`Skipping Facebook for "${post.title ?? post.id ?? "untitled"}" this run (${recentFacebookConflict.reason}).`,
+				);
+				targets = nonFacebookTargets;
+			}
 			if (facebookPostedToday >= FACEBOOK_DAILY_LIMIT) {
 				const nonFacebookTargets = targets.filter((t) => t.platform !== "facebook");
 				if (nonFacebookTargets.length === 0) {
@@ -1264,6 +1440,21 @@ export async function processQueue() {
 		}
 		if (hasPlatformTarget(post, "pinterest")) {
 			const isGoblinPost = postLooksGoblin(post);
+			const recentPinterestConflict = findRecentPinterestConflict(post, postedLog, now);
+			if (recentPinterestConflict) {
+				const nonPinterestTargets = targets.filter((t) => t.platform !== "pinterest");
+				if (nonPinterestTargets.length === 0) {
+					console.log(
+						`Deferring "${post.title ?? post.id ?? "untitled"}" to tomorrow (${recentPinterestConflict.reason}).`,
+					);
+					queueUpdates.set(post.id, pushToNextUtcDay(post, now));
+					continue;
+				}
+				console.log(
+					`Skipping Pinterest for "${post.title ?? post.id ?? "untitled"}" this run (${recentPinterestConflict.reason}).`,
+				);
+				targets = nonPinterestTargets;
+			}
 			if (pinterestPostedToday >= PINTEREST_DAILY_LIMIT) {
 				const nonPinterestTargets = targets.filter((t) => t.platform !== "pinterest");
 				if (nonPinterestTargets.length === 0) {
@@ -1441,7 +1632,7 @@ export async function processQueue() {
 				error,
 			);
 			await sendWorkerAlert(
-				`Worker failed processing post.\nTitle: ${post.title ?? post.id ?? "untitled"}\nError: ${error?.message || "Unknown worker error"}\n\nRerun command: cd backend && npm run worker`,
+				`Worker failed processing post.\n${buildWorkerFailureContext(post, error)}\n\nRerun command: cd backend && npm run worker`,
 			);
 			if (retryNowAttempt) {
 				queueUpdates.set(post.id, markFailed(clearRetryNowAttempt(post)));

@@ -12,6 +12,10 @@ function basenameLower(value = "") {
   return path.basename(String(value || "")).toLowerCase();
 }
 
+function normalizedPath(value = "") {
+  return String(value || "").replace(/\\/g, "/").toLowerCase();
+}
+
 function normalizedText(parts = []) {
   return parts
     .flatMap((part) => (Array.isArray(part) ? part : [part]))
@@ -28,9 +32,28 @@ function toTextArray(value) {
     .filter(Boolean);
 }
 
-function inferKnownIdentity(text, mediaPath = "") {
+export function inferStartAnywayIdentity(text = "", mediaPath = "") {
   const media = basenameLower(mediaPath);
   const fullMedia = String(mediaPath || "").toLowerCase();
+  const source = `${text} ${media} ${fullMedia}`;
+  if (!/creator-spring|teespring|start-anyway|frog circle shirt|frog shirt|frog hoodie/.test(source)) {
+    return null;
+  }
+  if (/hoodie|cozy outfit|hoodie aesthetic|hdke-y7dfd6oe9-4yglo8ycwbu/.test(source)) {
+    return {
+      productProfileId: "start-anyway-frog-hoodie",
+      batchLabel: "start-anyway-frog",
+    };
+  }
+  return {
+    productProfileId: "start-anyway-frog-tee",
+    batchLabel: "start-anyway-frog",
+  };
+}
+
+function inferKnownIdentity(text, mediaPath = "") {
+  const media = basenameLower(mediaPath);
+  const fullMedia = normalizedPath(mediaPath);
   const source = `${text} ${media} ${fullMedia}`;
 
   if (/olaplex|bond repair|damaged hair|hair repair|hair breakage/.test(source)) {
@@ -75,16 +98,88 @@ function inferKnownIdentity(text, mediaPath = "") {
       batchLabel: "prompt-storm-pinterest",
     };
   }
+  if (fullMedia.includes("frontend/assets/spring2026/sewing/")) {
+    if (/victoriansewingkit|itemsinvictoriansewingkit/.test(media)) {
+      return {
+        productProfileId: "amazon-victorian-sewing-kit",
+        batchLabel: "spring2026-sewing",
+      };
+    }
+    if (/metalbobbinswithsewingmachine|bobbinsmetal/.test(media)) {
+      return {
+        productProfileId: "amazon-sewing-metal-bobbins",
+        batchLabel: "spring2026-sewing",
+      };
+    }
+    if (/aluminumbobbin/.test(media)) {
+      return {
+        productProfileId: "amazon-sewing-aluminum-bobbins",
+        batchLabel: "spring2026-sewing",
+      };
+    }
+    if (/plasticbobbinmachine|2plasticbobbins|plasticbobbinthredon/.test(media)) {
+      return {
+        productProfileId: "amazon-sewing-plastic-bobbins",
+        batchLabel: "spring2026-sewing",
+      };
+    }
+  }
   if (/bubble mower|splash pad|splashez|water play|gardening toy|kids gardening|backyard toy|toddler/.test(source)) {
     return {
       productProfileId: "amazon-kids-backyard-play",
       batchLabel: "gardening-and-splash-mix",
     };
   }
-  if (/creator-spring|teespring|start-anyway|frog circle shirt|frog shirt|frog hoodie/.test(source)) {
+  const startAnyway = inferStartAnywayIdentity(text, mediaPath);
+  if (startAnyway) return startAnyway;
+  if (fullMedia.includes("frontend/assets/goblinaffs/goblintees/")) {
+    if (/onesie|baby/.test(media)) {
+      return {
+        productProfileId: "goblin-certified-baby",
+        batchLabel: "goblin-tees",
+      };
+    }
+    if (/kid/.test(media)) {
+      return {
+        productProfileId: "goblin-certified-kids",
+        batchLabel: "goblin-tees",
+      };
+    }
+    if (/tank/.test(media)) {
+      return {
+        productProfileId: "goblin-tanks",
+        batchLabel: "goblin-tees",
+      };
+    }
+    if (/sweatshirt/.test(media)) {
+      return {
+        productProfileId: "goblin-sweatshirts",
+        batchLabel: "goblin-tees",
+      };
+    }
+    if (/hoodie|magentacll|dgraycll|brownhoodie/.test(media)) {
+      return {
+        productProfileId: "goblin-hoodies",
+        batchLabel: "goblin-tees",
+      };
+    }
+    if (/tee|graycll|blackcll|redcll/.test(media)) {
+      if (/black|gray|red/.test(media)) {
+        return {
+          productProfileId: "goblin-dark-tees",
+          batchLabel: "goblin-tees",
+        };
+      }
+      return {
+        productProfileId: "goblin-light-tees",
+        batchLabel: "goblin-tees",
+      };
+    }
+  }
+  if (fullMedia.includes("frontend/assets/goblinaffs/goblinmemes/")) {
     return {
-      productProfileId: "start-anyway-frog",
-      batchLabel: "start-anyway-frog",
+      productProfileId: "goblin-memes",
+      batchLabel: "goblin-memes",
     };
   }
   if (/goblin|anti productivity|side quest|hot mess|doing less|move slowly|goblinaff/.test(source)) {
@@ -167,6 +262,85 @@ export function inferPinterestQueueIdentity(input = {}, options = {}) {
     : null;
   const jtbd = String(metadata?.jtbd || input?.jtbd || "").trim();
   const pinAngle = String(metadata?.pinAngle || metadata?.pin_angle || input?.pinAngle || "").trim();
+  const identityArchetype = String(
+    metadata?.identityArchetype || metadata?.identity_archetype || input?.identityArchetype || "",
+  ).trim();
+  const ecosystemCluster = String(
+    metadata?.ecosystemCluster || metadata?.ecosystem_cluster || input?.ecosystemCluster || "",
+  ).trim();
+  const futureSelfSignal = String(
+    metadata?.futureSelfSignal || metadata?.future_self_signal || input?.futureSelfSignal || "",
+  ).trim();
+  const saveReason = String(metadata?.saveReason || metadata?.save_reason || input?.saveReason || "").trim();
+  const utilityType = String(
+    metadata?.utilityType || metadata?.utility_type || input?.utilityType || "",
+  ).trim();
+  const discoveryScore = Number.isFinite(
+    Number(metadata?.discoveryScore ?? metadata?.discovery_score ?? input?.discoveryScore),
+  )
+    ? Number(metadata?.discoveryScore ?? metadata?.discovery_score ?? input?.discoveryScore)
+    : null;
+  const retailCommonalityScore = Number.isFinite(
+    Number(metadata?.retailCommonalityScore ?? metadata?.retail_commonality_score ?? input?.retailCommonalityScore),
+  )
+    ? Number(metadata?.retailCommonalityScore ?? metadata?.retail_commonality_score ?? input?.retailCommonalityScore)
+    : null;
+  const rabbitHoleScore = Number.isFinite(
+    Number(metadata?.rabbitHoleScore ?? metadata?.rabbit_hole_score ?? input?.rabbitHoleScore),
+  )
+    ? Number(metadata?.rabbitHoleScore ?? metadata?.rabbit_hole_score ?? input?.rabbitHoleScore)
+    : null;
+  const visualClarityScore = Number.isFinite(
+    Number(metadata?.visualClarityScore ?? metadata?.visual_clarity_score ?? input?.visualClarityScore),
+  )
+    ? Number(metadata?.visualClarityScore ?? metadata?.visual_clarity_score ?? input?.visualClarityScore)
+    : null;
+  const savePotentialScore = Number.isFinite(
+    Number(metadata?.savePotentialScore ?? metadata?.save_potential_score ?? input?.savePotentialScore),
+  )
+    ? Number(metadata?.savePotentialScore ?? metadata?.save_potential_score ?? input?.savePotentialScore)
+    : null;
+  const amazonDiscoveryScore = Number.isFinite(
+    Number(metadata?.amazonDiscoveryScore ?? metadata?.amazon_discovery_score ?? input?.amazonDiscoveryScore),
+  )
+    ? Number(metadata?.amazonDiscoveryScore ?? metadata?.amazon_discovery_score ?? input?.amazonDiscoveryScore)
+    : null;
+  const seasonalityScore = Number.isFinite(
+    Number(metadata?.seasonalityScore ?? metadata?.seasonality_score ?? input?.seasonalityScore),
+  )
+    ? Number(metadata?.seasonalityScore ?? metadata?.seasonality_score ?? input?.seasonalityScore)
+    : null;
+  const landingPageMatchScore = Number.isFinite(
+    Number(metadata?.landingPageMatchScore ?? metadata?.landing_page_match_score ?? input?.landingPageMatchScore),
+  )
+    ? Number(metadata?.landingPageMatchScore ?? metadata?.landing_page_match_score ?? input?.landingPageMatchScore)
+    : null;
+  const landingPageMatchReason = String(
+    metadata?.landingPageMatchReason || metadata?.landing_page_match_reason || input?.landingPageMatchReason || "",
+  ).trim();
+  const productFitScore = Number.isFinite(
+    Number(metadata?.productFitScore ?? metadata?.product_fit_score ?? input?.productFitScore),
+  )
+    ? Number(metadata?.productFitScore ?? metadata?.product_fit_score ?? input?.productFitScore)
+    : null;
+  const productFitState = String(
+    metadata?.productFitState || metadata?.product_fit_state || input?.productFitState || "",
+  ).trim();
+  const productFitReasons = toTextArray(
+    metadata?.productFitReasons || metadata?.product_fit_reasons || input?.productFitReasons,
+  );
+  const productFitRecommended =
+    typeof metadata?.productFitRecommended === "boolean"
+      ? metadata.productFitRecommended
+      : typeof metadata?.product_fit_recommended === "boolean"
+        ? metadata.product_fit_recommended
+        : null;
+  const productFitBlocked =
+    typeof metadata?.productFitBlocked === "boolean"
+      ? metadata.productFitBlocked
+      : typeof metadata?.product_fit_blocked === "boolean"
+        ? metadata.product_fit_blocked
+        : null;
 
   return {
     productProfileId: productProfileId || null,
@@ -182,5 +356,24 @@ export function inferPinterestQueueIdentity(input = {}, options = {}) {
     evergreenScore,
     jtbd: jtbd || null,
     pinAngle: pinAngle || null,
+    identityArchetype: identityArchetype || null,
+    ecosystemCluster: ecosystemCluster || null,
+    futureSelfSignal: futureSelfSignal || null,
+    saveReason: saveReason || null,
+    utilityType: utilityType || null,
+    discoveryScore,
+    retailCommonalityScore,
+    rabbitHoleScore,
+    visualClarityScore,
+    savePotentialScore,
+    amazonDiscoveryScore,
+    seasonalityScore,
+    landingPageMatchScore,
+    landingPageMatchReason: landingPageMatchReason || null,
+    productFitScore,
+    productFitState: productFitState || null,
+    productFitReasons,
+    productFitRecommended,
+    productFitBlocked,
   };
 }

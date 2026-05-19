@@ -5,6 +5,7 @@ import { readStoreSnapshot, replaceStoreSnapshot } from "../../utils/localDb.mjs
 const DEFAULT_SLOTS_UTC = ["15:00", "15:20", "15:40", "16:00"];
 const DEFAULT_DAILY_PLAN = ["amazon-a", "amazon-b", "digital", "wildcard"];
 const DEFAULT_MAX_SAME_PRODUCT_PER_DAY = 2;
+const DEFAULT_MEDIA_COOLDOWN_SLOTS = 6;
 
 function parseArgs(argv = process.argv.slice(2)) {
 	const args = {
@@ -13,6 +14,7 @@ function parseArgs(argv = process.argv.slice(2)) {
 		slotsUtc: DEFAULT_SLOTS_UTC,
 		dailyPlan: DEFAULT_DAILY_PLAN,
 		maxSameProductPerDay: DEFAULT_MAX_SAME_PRODUCT_PER_DAY,
+		mediaCooldownSlots: DEFAULT_MEDIA_COOLDOWN_SLOTS,
 	};
 
 	for (let index = 0; index < argv.length; index += 1) {
@@ -45,6 +47,11 @@ function parseArgs(argv = process.argv.slice(2)) {
 		if (arg === "--max-same-product") {
 			args.maxSameProductPerDay = Number(argv[index + 1] || DEFAULT_MAX_SAME_PRODUCT_PER_DAY);
 			index += 1;
+			continue;
+		}
+		if (arg === "--media-cooldown-slots") {
+			args.mediaCooldownSlots = Number(argv[index + 1] || DEFAULT_MEDIA_COOLDOWN_SLOTS);
+			index += 1;
 		}
 	}
 
@@ -62,6 +69,9 @@ function parseArgs(argv = process.argv.slice(2)) {
 	}
 	if (!Number.isFinite(args.maxSameProductPerDay) || args.maxSameProductPerDay < 1) {
 		throw new Error("--max-same-product must be 1 or greater");
+	}
+	if (!Number.isFinite(args.mediaCooldownSlots) || args.mediaCooldownSlots < 0) {
+		throw new Error("--media-cooldown-slots must be 0 or greater");
 	}
 	return args;
 }
@@ -104,6 +114,10 @@ function productText(post) {
 }
 
 function isAmazonPost(post) {
+	const productId = String(post?.metadata?.productProfileId || "").toLowerCase();
+	if (productId.startsWith("amazon-")) {
+		return true;
+	}
 	return [
 		post?.canonicalUrl,
 		post?.affiliateUrl,
@@ -280,15 +294,31 @@ function totalRemainingBuckets(buckets) {
 	return total;
 }
 
+function recentMediaHitCount(recentMediaFamilies, family, lookback = DEFAULT_MEDIA_COOLDOWN_SLOTS) {
+	if (!family) return 0;
+	let count = 0;
+	for (
+		let index = Math.max(0, recentMediaFamilies.length - lookback);
+		index < recentMediaFamilies.length;
+		index += 1
+	) {
+		if (recentMediaFamilies[index] === family) count += 1;
+	}
+	return count;
+}
+
 function takeFromBuckets(
 	buckets,
 	preferred,
 	dayCounts,
+	dayMediaCounts,
 	lastGroup,
 	lastMedia,
 	recentDays,
+	recentMediaFamilies,
 	globalCounts,
 	maxSameProductPerDay,
+	mediaCooldownSlots,
 ) {
 	const choices = [];
 	for (const bucket of buckets.values()) {
@@ -304,11 +334,13 @@ function takeFromBuckets(
 			family,
 			preferredMatch: categoryMatches(bucket.category, preferred),
 			sameGroupToday: dayCounts.has(bucket.group),
+			sameMediaToday: Boolean(family && (dayMediaCounts.get(family) || 0) > 0),
 			sameCategoryToday: Array.from(dayCounts.keys()).some(
 				(group) => buckets.get(group)?.category === bucket.category,
 			),
 			recentGroupHits: recentHitCount(recentDays, bucket.group, 3),
 			recentCategoryHits: categoryRecentHitCount(recentDays, bucket.category, buckets, 2),
+			recentMediaHits: recentMediaHitCount(recentMediaFamilies, family, mediaCooldownSlots),
 			globalCount: globalCounts.get(bucket.group) || 0,
 			sameAsLastGroup: bucket.group === lastGroup,
 			sameAsLastMedia: Boolean(family && family === lastMedia),
@@ -317,6 +349,8 @@ function takeFromBuckets(
 	}
 
 	choices.sort((a, b) => {
+		if (a.sameMediaToday !== b.sameMediaToday) return a.sameMediaToday ? 1 : -1;
+		if (a.recentMediaHits !== b.recentMediaHits) return a.recentMediaHits - b.recentMediaHits;
 		if (a.sameGroupToday !== b.sameGroupToday) return a.sameGroupToday ? 1 : -1;
 		if (a.recentGroupHits !== b.recentGroupHits) return a.recentGroupHits - b.recentGroupHits;
 		if (a.globalCount !== b.globalCount) return a.globalCount - b.globalCount;
@@ -343,26 +377,35 @@ export function rebalancePinterestMix(posts, options = {}) {
 	const { buckets, initialCategoryCounts } = buildProductBuckets(candidates);
 	const maxSameProductPerDay =
 		options.maxSameProductPerDay || DEFAULT_MAX_SAME_PRODUCT_PER_DAY;
+	const mediaCooldownSlots =
+		Number.isFinite(Number(options.mediaCooldownSlots))
+			? Number(options.mediaCooldownSlots)
+			: DEFAULT_MEDIA_COOLDOWN_SLOTS;
 
 	let dayIndex = 0;
 	let moved = 0;
 	let lastGroup = null;
 	let lastMedia = "";
 	const recentDays = [];
+	const recentMediaFamilies = [];
 	const globalCounts = new Map();
 
 	while (totalRemainingBuckets(buckets) > 0) {
 		const dayCounts = new Map();
+		const dayMediaCounts = new Map();
 		for (let slotIndex = 0; slotIndex < slotsUtc.length && totalRemainingBuckets(buckets) > 0; slotIndex += 1) {
 			const selected = takeFromBuckets(
 				buckets,
 				dailyPlan[slotIndex] || "wildcard",
 				dayCounts,
+				dayMediaCounts,
 				lastGroup,
 				lastMedia,
 				recentDays,
+				recentMediaFamilies,
 				globalCounts,
 				maxSameProductPerDay,
+				mediaCooldownSlots,
 			);
 			if (!selected) break;
 			const nextScheduledAt = isoFor(startDate, dayIndex, slotsUtc[slotIndex]);
@@ -371,9 +414,18 @@ export function rebalancePinterestMix(posts, options = {}) {
 			selected.post.updatedAt = new Date().toISOString();
 			delete selected.post.scheduled_at;
 			dayCounts.set(selected.group, (dayCounts.get(selected.group) || 0) + 1);
+			if (selected.family) {
+				dayMediaCounts.set(selected.family, (dayMediaCounts.get(selected.family) || 0) + 1);
+			}
 			globalCounts.set(selected.group, (globalCounts.get(selected.group) || 0) + 1);
 			lastGroup = selected.group;
 			lastMedia = selected.family || lastMedia;
+			if (selected.family) {
+				recentMediaFamilies.push(selected.family);
+				if (recentMediaFamilies.length > Math.max(1, mediaCooldownSlots)) {
+					recentMediaFamilies.shift();
+				}
+			}
 		}
 		recentDays.push(new Set(dayCounts.keys()));
 		dayIndex += 1;
@@ -389,6 +441,7 @@ export function rebalancePinterestMix(posts, options = {}) {
 			dailyPlan,
 			slotsUtc,
 			maxSameProductPerDay,
+			mediaCooldownSlots,
 			initialCategoryCounts,
 		},
 	};

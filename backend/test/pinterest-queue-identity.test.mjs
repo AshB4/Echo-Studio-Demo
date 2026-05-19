@@ -1,6 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { inferPinterestQueueIdentity } from "../utils/pinterestQueueIdentity.mjs";
+import {
+  inferPinterestQueueIdentity,
+  inferStartAnywayIdentity,
+} from "../utils/pinterestQueueIdentity.mjs";
 
 test("inferPinterestQueueIdentity ignores goblin batch labels when product signals point elsewhere", () => {
   const result = inferPinterestQueueIdentity(
@@ -57,5 +60,59 @@ test("inferPinterestQueueIdentity prefers specific non-goblin signals over gobli
   );
 
   assert.equal(promptStorm.productProfileId, "prompt-storm");
-  assert.equal(frog.productProfileId, "start-anyway-frog");
+  assert.equal(frog.productProfileId, "start-anyway-frog-tee");
+});
+
+test("inferStartAnywayIdentity separates hoodie from tee variants", () => {
+  const hoodie = inferStartAnywayIdentity(
+    "quiet chaos energy hoodie cozy outfit goblin core",
+    "https://mockup-api.teespring.com/v3/image/hdkE-Y7DfD6OE9-4yGl0A8YCwBU/800/800.jpg",
+  );
+  const tee = inferStartAnywayIdentity(
+    "minimal graphic tee start anyway frog shirt",
+    "https://mockup-api.teespring.com/v3/image/fEaLBX6CWYMipUEzreinLgq6sK8/1200/1200.jpg",
+  );
+
+  assert.equal(hoodie.productProfileId, "start-anyway-frog-hoodie");
+  assert.equal(tee.productProfileId, "start-anyway-frog-tee");
+});
+
+test("inferPinterestQueueIdentity respects sewing folder families", () => {
+  const aluminum = inferPinterestQueueIdentity({
+    title: "Why Some Sewers Prefer Metal Bobbins",
+    mediaPath: "frontend/assets/spring2026/Sewing/AluminumBobbin.jpg",
+  });
+  const victorian = inferPinterestQueueIdentity({
+    title: "The Cozy Sewing Kit That Feels Like Cottagecore Treasure",
+    mediaPath: "frontend/assets/spring2026/Sewing/victorianSewingKit.jpg",
+  });
+
+  assert.equal(aluminum.productProfileId, "amazon-sewing-aluminum-bobbins");
+  assert.equal(aluminum.batchLabel, "spring2026-sewing");
+  assert.equal(victorian.productProfileId, "amazon-victorian-sewing-kit");
+  assert.equal(victorian.batchLabel, "spring2026-sewing");
+});
+
+test("inferPinterestQueueIdentity respects GoblinTees subfamilies from folder paths", () => {
+  const tee = inferPinterestQueueIdentity({
+    title: "Chaos But Make It Fashion",
+    mediaPath: "frontend/assets/goblinaffs/GoblinTees/BlackCLLTee.jpg",
+  });
+  const hoodie = inferPinterestQueueIdentity({
+    title: "Gray Hoodie For Socially Tired Humans",
+    mediaPath: "frontend/assets/goblinaffs/GoblinTees/DGrayCLL.jpg",
+  });
+  const tank = inferPinterestQueueIdentity({
+    title: "Summer Gremlin Tank",
+    mediaPath: "frontend/assets/goblinaffs/GoblinTees/TankGrayCLL.jpg",
+  });
+  const baby = inferPinterestQueueIdentity({
+    title: "Baby Goblin Starter Pack",
+    mediaPath: "frontend/assets/goblinaffs/GoblinTees/BlackBabyOnsie.jpg",
+  });
+
+  assert.equal(tee.productProfileId, "goblin-dark-tees");
+  assert.equal(hoodie.productProfileId, "goblin-hoodies");
+  assert.equal(tank.productProfileId, "goblin-tanks");
+  assert.equal(baby.productProfileId, "goblin-certified-baby");
 });
