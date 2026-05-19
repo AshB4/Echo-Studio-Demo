@@ -55,6 +55,52 @@ function buildPinAnalyticsUrl(pinId = "") {
 		: "";
 }
 
+function collectPinIds(value = "") {
+	const matches = String(value || "").match(/\/pin\/(\d+)/gi) || [];
+	const ids = new Set();
+	for (const match of matches) {
+		const pinId = extractPinId(match);
+		if (pinId) ids.add(pinId);
+	}
+	const nakedIds = String(value || "").match(/\bpin[_\s-]?id["':=\s]+(\d{8,})\b/gi) || [];
+	for (const match of nakedIds) {
+		const pinId = String(match).match(/(\d{8,})/);
+		if (pinId?.[1]) ids.add(pinId[1]);
+	}
+	return [...ids];
+}
+
+function createPinPublishTracker(page, debug) {
+	const seenPinIds = new Set();
+	const rememberPinIds = async (source, value) => {
+		const pinIds = collectPinIds(value);
+		for (const pinId of pinIds) seenPinIds.add(pinId);
+		if (pinIds.length > 0) {
+			await debug?.log("pin-id-candidate", { source, pinIds });
+		}
+	};
+	page.on("response", async (response) => {
+		try {
+			const url = response.url();
+			await rememberPinIds("response-url", url);
+			if (!/pinterest\.com/i.test(url)) return;
+			const contentType = String(response.headers()["content-type"] || "").toLowerCase();
+			if (!/(json|javascript|html|text)/.test(contentType)) return;
+			const text = await response.text().catch(() => "");
+			if (text) {
+				await rememberPinIds("response-body", text.slice(0, 200000));
+			}
+		} catch {
+			// continue
+		}
+	});
+	return {
+		getCandidates() {
+			return [...seenPinIds].map((pinId) => buildPinUrl(pinId));
+		},
+	};
+}
+
 function requiredEnv(name) {
 	const value = process.env[name];
 	if (!value || !String(value).trim()) {
@@ -214,7 +260,35 @@ function getPinterestBrowserOptions() {
 async function copyDirectory(source, destination) {
 	await mkdir(path.dirname(destination), { recursive: true });
 	await fs.promises.rm(destination, { recursive: true, force: true });
-	await cp(source, destination, { recursive: true });
+	const skipSegments = new Set([
+		"Code Cache",
+		"Cache",
+		"GPUCache",
+		"GrShaderCache",
+		"GraphiteDawnCache",
+		"DawnCache",
+		"Crashpad",
+	]);
+	const shouldInclude = (entryPath) => {
+		const parts = String(entryPath || "").split(path.sep).filter(Boolean);
+		return !parts.some((part) => skipSegments.has(part));
+	};
+	for (let attempt = 0; attempt < 3; attempt += 1) {
+		try {
+			await cp(source, destination, {
+				recursive: true,
+				filter: shouldInclude,
+				force: true,
+				errorOnExist: false,
+			});
+			return;
+		} catch (error) {
+			if (error?.code !== "ENOENT" || attempt === 2) {
+				throw error;
+			}
+			await fs.promises.rm(destination, { recursive: true, force: true });
+		}
+	}
 }
 
 async function preparePinterestProfileLaunch(options) {
@@ -266,7 +340,31 @@ function resolveLocalMediaPath(post) {
 	const mediaPath = post?.mediaPath || "";
 	if (!mediaPath) return null;
 	if (/^https?:\/\//i.test(mediaPath)) return mediaPath;
-	if (path.isAbsolute(mediaPath)) return mediaPath;
+	const workspaceRoot = path.join(BACKEND_ROOT, "..");
+	const candidatePaths = [];
+	if (path.isAbsolute(mediaPath)) {
+		candidatePaths.push(mediaPath);
+		const frontendIndex = mediaPath.lastIndexOf("/frontend/");
+		if (frontendIndex >= 0) {
+			candidatePaths.push(path.join(workspaceRoot, mediaPath.slice(frontendIndex + 1)));
+		}
+		const assetsIndex = mediaPath.lastIndexOf("/assets/");
+		if (assetsIndex >= 0) {
+			candidatePaths.push(
+				path.join(workspaceRoot, "frontend", mediaPath.slice(assetsIndex + 1)),
+			);
+		}
+	} else {
+		candidatePaths.push(path.join(workspaceRoot, mediaPath));
+		if (mediaPath.startsWith("backend/frontend/")) {
+			candidatePaths.push(
+				path.join(workspaceRoot, mediaPath.replace(/^backend\/frontend\//, "frontend/")),
+			);
+		}
+	}
+	for (const candidate of candidatePaths) {
+		if (candidate && fs.existsSync(candidate)) return candidate;
+	}
 	const projectRootPath = path.join(BACKEND_ROOT, "..", mediaPath);
 	if (fs.existsSync(projectRootPath)) {
 		return projectRootPath;
@@ -860,32 +958,76 @@ async function publishPin(page, debug) {
 	await debug?.screenshot(page, "after-publish");
 }
 
-async function findPublishedPinUrl(page, debug) {
-	const currentUrl = page.url();
-	const currentPinId = extractPinId(currentUrl);
-	if (currentPinId) {
-		return buildPinUrl(currentPinId);
+async function findPublishedPinUrl(page, debug, tracker = null) {
+	const tryExtractPinUrl = async () => {
+		const currentUrl = page.url();
+		const currentPinId = extractPinId(currentUrl);
+		if (currentPinId) {
+			return buildPinUrl(currentPinId);
+		}
+
+		const hrefs = await page
+			.evaluate(() =>
+				Array.from(document.querySelectorAll('a[href*="/pin/"]'))
+					.map((anchor) => anchor.href || anchor.getAttribute("href") || "")
+					.filter(Boolean),
+			)
+			.catch(() => []);
+		for (const href of hrefs) {
+			const pinId = extractPinId(href);
+			if (pinId) return buildPinUrl(pinId);
+		}
+
+		const bodyText = await page.locator("body").innerText().catch(() => "");
+		for (const pinId of collectPinIds(bodyText)) {
+			return buildPinUrl(pinId);
+		}
+
+		const html = await page.content().catch(() => "");
+		for (const pinId of collectPinIds(html)) {
+			return buildPinUrl(pinId);
+		}
+
+		for (const candidate of tracker?.getCandidates?.() || []) {
+			const pinId = extractPinId(candidate);
+			if (pinId) return buildPinUrl(pinId);
+		}
+
+		return "";
+	};
+
+	const postPublishSelectors = [
+		'a[href*="/pin/"]:has-text("View")',
+		'button:has-text("View")',
+		'div[role="button"]:has-text("View")',
+		'button:has-text("See it now")',
+		'div[role="button"]:has-text("See it now")',
+		'button:has-text("Done")',
+		'div[role="button"]:has-text("Done")',
+		'button:has-text("Close")',
+		'div[role="button"]:has-text("Close")',
+		'button:has-text("Not now")',
+		'div[role="button"]:has-text("Not now")',
+	];
+
+	for (let attempt = 0; attempt < 5; attempt += 1) {
+		const pinUrl = await tryExtractPinUrl();
+		if (pinUrl) return pinUrl;
+		const clicked = await clickFirst(page, postPublishSelectors, debug, `post-publish-followup-${attempt + 1}`);
+		await debug?.log("pin-url-followup", {
+			attempt: attempt + 1,
+			clicked,
+			currentUrl: page.url(),
+			trackerCandidates: tracker?.getCandidates?.() || [],
+		});
+		await page.waitForLoadState("domcontentloaded").catch(() => {});
+		await page.waitForTimeout(1500);
 	}
 
-	const hrefs = await page
-		.evaluate(() =>
-			Array.from(document.querySelectorAll('a[href*="/pin/"]'))
-				.map((anchor) => anchor.href || anchor.getAttribute("href") || "")
-				.filter(Boolean),
-		)
-		.catch(() => []);
-	for (const href of hrefs) {
-		const pinId = extractPinId(href);
-		if (pinId) return buildPinUrl(pinId);
-	}
-
-	const bodyText = await page.locator("body").innerText().catch(() => "");
-	const inlineMatch = String(bodyText || "").match(/https?:\/\/www\.pinterest\.com\/pin\/(\d+)/i);
-	if (inlineMatch?.[1]) {
-		return buildPinUrl(inlineMatch[1]);
-	}
-
-	await debug?.log("pin-url-not-found", { currentUrl });
+	await debug?.log("pin-url-not-found", {
+		currentUrl: page.url(),
+		trackerCandidates: tracker?.getCandidates?.() || [],
+	});
 	return "";
 }
 
@@ -1024,6 +1166,7 @@ export default async function postToPinterest(post, _context = {}) {
 		executablePath,
 	});
 	const page = context.pages()[0] || (await context.newPage());
+	const publishTracker = createPinPublishTracker(page, debug);
 
 	try {
 		await debug.log("start", {
@@ -1182,11 +1325,16 @@ export default async function postToPinterest(post, _context = {}) {
 				}`,
 			);
 		}
-		await publishPin(page, debug);
-		await commitDraftBatchIfPresent(page, debug);
-		await page.waitForLoadState("domcontentloaded").catch(() => {});
-		await page.waitForTimeout(1500);
-		const pinUrl = await findPublishedPinUrl(page, debug);
+			await publishPin(page, debug);
+			await commitDraftBatchIfPresent(page, debug);
+			await page.waitForLoadState("domcontentloaded").catch(() => {});
+			await page.waitForTimeout(1500);
+			const pinUrl = await findPublishedPinUrl(page, debug, publishTracker);
+			if (!pinUrl) {
+				throw new Error(
+					"Pinterest publish could not verify a pin URL after publish; treating this run as unconfirmed.",
+			);
+		}
 		const pinId = extractPinId(pinUrl);
 		const analyticsUrl = buildPinAnalyticsUrl(pinId);
 		await persistPinMapping(post, pinUrl, debug);
