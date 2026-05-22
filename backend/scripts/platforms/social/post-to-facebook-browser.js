@@ -105,18 +105,7 @@ function shouldSkipExistingFeedCheck() {
 }
 
 function getFacebookPostText(post) {
-	const baseText = String(post?.body || post?.title || "").trim();
-	const productLabel = String(
-		post?.metadata?.productProfileLabel ||
-			post?.metadata?.productProfileId ||
-			post?.productProfileLabel ||
-			post?.productProfileId ||
-			"",
-	).trim();
-	if (!productLabel) return baseText;
-	const productLine = `Product: ${productLabel}`;
-	if (baseText.includes(productLine)) return baseText;
-	return baseText ? `${baseText}\n\n${productLine}` : productLine;
+	return String(post?.body || post?.title || "").trim();
 }
 
 function createDebugRecorder(enabled) {
@@ -379,7 +368,60 @@ async function prepareChromeProfile(config) {
 function resolveLocalMediaPath(post) {
 	const mediaPath = post?.mediaPath || "";
 	if (!mediaPath) return null;
-	if (path.isAbsolute(mediaPath)) return mediaPath;
+	if (/^https?:\/\//i.test(mediaPath)) return mediaPath;
+	const workspaceRoot = path.join(BACKEND_ROOT, "..");
+	const candidatePaths = [];
+	if (path.isAbsolute(mediaPath)) {
+		candidatePaths.push(mediaPath);
+		const frontendIndex = mediaPath.lastIndexOf("/frontend/");
+		if (frontendIndex >= 0) {
+			candidatePaths.push(path.join(workspaceRoot, mediaPath.slice(frontendIndex + 1)));
+		}
+		const assetsIndex = mediaPath.lastIndexOf("/assets/");
+		if (assetsIndex >= 0) {
+			candidatePaths.push(
+				path.join(workspaceRoot, "frontend", mediaPath.slice(assetsIndex + 1)),
+			);
+		}
+	} else {
+		candidatePaths.push(path.join(workspaceRoot, mediaPath));
+		if (mediaPath.startsWith("backend/frontend/")) {
+			candidatePaths.push(
+				path.join(workspaceRoot, mediaPath.replace(/^backend\/frontend\//, "frontend/")),
+			);
+		}
+	}
+	for (const candidate of candidatePaths) {
+		if (candidate && fs.existsSync(candidate)) return candidate;
+	}
+	const assetBasename = path.basename(mediaPath);
+	if (assetBasename) {
+		const assetSearchRoots = [
+			path.join(workspaceRoot, "frontend", "assets"),
+			path.join(workspaceRoot, "backend", "media"),
+		];
+		const stack = [...assetSearchRoots];
+		while (stack.length > 0) {
+			const current = stack.pop();
+			if (!current || !fs.existsSync(current)) continue;
+			let entries = [];
+			try {
+				entries = fs.readdirSync(current, { withFileTypes: true });
+			} catch {
+				continue;
+			}
+			for (const entry of entries) {
+				const fullPath = path.join(current, entry.name);
+				if (entry.isDirectory()) {
+					stack.push(fullPath);
+					continue;
+				}
+				if (entry.isFile() && entry.name === assetBasename) {
+					return fullPath;
+				}
+			}
+		}
+	}
 	const workspacePath = path.join(BACKEND_ROOT, "..", mediaPath);
 	if (fs.existsSync(workspacePath)) {
 		return workspacePath;
@@ -388,6 +430,25 @@ function resolveLocalMediaPath(post) {
 		return path.join(BACKEND_ROOT, mediaPath.slice(1));
 	}
 	return path.join(BACKEND_ROOT, mediaPath);
+}
+
+async function downloadRemoteMediaToTemp(mediaUrl) {
+	const url = new URL(mediaUrl);
+	const extFromPath = path.extname(url.pathname) || ".jpg";
+	const safeExt = /^\.[a-z0-9]+$/i.test(extFromPath) ? extFromPath : ".jpg";
+	const tempPath = path.join(
+		os.tmpdir(),
+		`postpunk-facebook-${Date.now()}${safeExt}`,
+	);
+	const response = await fetch(mediaUrl);
+	if (!response.ok) {
+		throw new Error(
+			`Failed to download remote media (${response.status} ${response.statusText})`,
+		);
+	}
+	const buffer = Buffer.from(await response.arrayBuffer());
+	await fs.promises.writeFile(tempPath, buffer);
+	return tempPath;
 }
 
 function resolveTargetUrl(account = {}) {
@@ -417,22 +478,43 @@ function normalizeSnippet(text) {
 		.slice(0, 120);
 }
 
-async function extractPublishedPostPermalink(page, text) {
-	const snippet = normalizeSnippet(text);
-	if (!snippet) return "";
+function buildVerificationSnippets(value) {
+	const candidate =
+		value && typeof value === "object"
+			? [
+				value?.title,
+				String(value?.body || "").split("\n").filter(Boolean)[0] || "",
+				String(value?.body || "").split(/[.!?]/).filter(Boolean)[0] || "",
+				value?.body,
+			]
+			: [value];
+	return Array.from(
+		new Set(
+			candidate
+				.map((item) => normalizeSnippet(item))
+				.filter((item) => item.length >= 16),
+		),
+	).slice(0, 4);
+}
+
+async function extractPublishedPostPermalink(page, value) {
+	const snippets = buildVerificationSnippets(value);
+	if (!snippets.length) return "";
 	try {
-		const href = await page.evaluate((targetSnippet) => {
+		const href = await page.evaluate((targetSnippets) => {
 			const normalize = (value) => String(value || "").replace(/\s+/g, " ").trim();
 			const candidates = Array.from(document.querySelectorAll('div[role="article"]'));
 			const article = candidates.find((node) =>
-				normalize(node.innerText || "").includes(targetSnippet),
+				targetSnippets.some((snippet) =>
+					normalize(node.innerText || "").includes(snippet),
+				),
 			);
 			if (!article) return "";
 			const links = Array.from(article.querySelectorAll("a[href]"))
 				.map((node) => node.getAttribute("href") || "")
 				.filter((href) => /\/posts\/|\/permalink\/|story\.php|\/photos\//i.test(href));
 			return links[0] || "";
-		}, snippet);
+		}, snippets);
 		if (!href) return "";
 		return new URL(href, page.url()).toString();
 	} catch (error) {
@@ -779,7 +861,7 @@ async function sharePostToConfiguredAccounts(page, post, account) {
 	}
 
 	const shareText = getFacebookPostText(post);
-	const permalink = await extractPublishedPostPermalink(page, shareText);
+	const permalink = await extractPublishedPostPermalink(page, post);
 	if (!permalink) {
 		return shareToAccountIds.map((accountId) => ({
 			accountId,
@@ -1212,6 +1294,84 @@ async function fillComposer(page, text) {
 	return null;
 }
 
+async function findVisibleComposerEditor(page) {
+	const selectors = [
+		'div[role="dialog"] [contenteditable="true"][role="textbox"]',
+		'div[role="dialog"] [data-lexical-editor="true"]',
+		'div[role="dialog"] textarea',
+		'[role="main"] [contenteditable="true"][role="textbox"]',
+		'[role="main"] [data-lexical-editor="true"]',
+		'[role="main"] textarea',
+		'div[contenteditable="true"][role="textbox"]',
+		'div[data-lexical-editor="true"]',
+		'textarea',
+	];
+
+	for (const selector of selectors) {
+		try {
+			const locator = page.locator(selector).first();
+			if ((await locator.count().catch(() => 0)) === 0) continue;
+			if (await locator.isVisible().catch(() => false)) {
+				return selector;
+			}
+		} catch {
+			// continue
+		}
+	}
+
+	return null;
+}
+
+async function waitForComposerEditor(page, timeoutMs = 5000) {
+	const deadline = Date.now() + timeoutMs;
+	while (Date.now() < deadline) {
+		const selector = await findVisibleComposerEditor(page);
+		if (selector) return selector;
+		await page.waitForTimeout(250);
+	}
+	return null;
+}
+
+async function waitForFacebookComposerSurface(page, timeoutMs = 12000) {
+	const deadline = Date.now() + timeoutMs;
+	const selectors = [
+		'div[role="button"]:has-text("What\'s on your mind?")',
+		'div[role="button"]:has-text("What\'s on your mind")',
+		'span:has-text("What\'s on your mind?")',
+		'span:has-text("What\'s on your mind")',
+		'div[role="button"]:has-text("Write something")',
+		'div[role="button"]:has-text("Create post")',
+		'[role="main"] [contenteditable="true"]',
+		'[role="main"] [data-lexical-editor="true"]',
+	];
+
+	while (Date.now() < deadline) {
+		for (const selector of selectors) {
+			try {
+				const locator = page.locator(selector).first();
+				if ((await locator.count().catch(() => 0)) === 0) continue;
+				if (await locator.isVisible().catch(() => false)) {
+					return selector;
+				}
+			} catch {
+				// continue
+			}
+		}
+
+		const hasMeaningfulBody = await page
+			.evaluate(() => String(document.body?.innerText || "").replace(/\s+/g, " ").trim().length > 80)
+			.catch(() => false);
+		if (hasMeaningfulBody) {
+			const readyEditor = await findVisibleComposerEditor(page);
+			if (readyEditor) return readyEditor;
+		}
+
+		await page.waitForTimeout(400);
+	}
+
+	return null;
+}
+
 async function openFacebookComposer(page) {
 	const selectors = [
 		'div[role="button"]:has-text("What\'s on your mind?")',
@@ -1234,8 +1394,11 @@ async function openFacebookComposer(page) {
 		try {
 			const locator = page.locator(selector).first();
 			if ((await locator.count()) > 0) {
-				await locator.click({ timeout: 4000 });
-				return selector;
+				await locator.click({ timeout: 4000, force: true });
+				const readySelector = await waitForComposerEditor(page, 2500);
+				if (readySelector) {
+					return `${selector} -> ${readySelector}`;
+				}
 			}
 		} catch {
 			// continue
@@ -1266,6 +1429,8 @@ async function openFacebookComposer(page) {
 							current.getAttribute("tabindex") === "0" ||
 							current.tagName === "BUTTON")
 					) {
+						current.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+						current.dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
 						current.click();
 						return "dom-ancestor-whats-on-your-mind";
 					}
@@ -1274,7 +1439,12 @@ async function openFacebookComposer(page) {
 			}
 			return null;
 		});
-		if (clicked) return clicked;
+		if (clicked) {
+			const readySelector = await waitForComposerEditor(page, 2500);
+			if (readySelector) {
+				return `${clicked} -> ${readySelector}`;
+			}
+		}
 	} catch {
 		// continue
 	}
@@ -1403,10 +1573,13 @@ async function attachMedia(page, mediaPath) {
 
 	for (const selector of addPhotoSelectors) {
 		try {
-			const chooserPromise = page.waitForEvent("filechooser", { timeout: 3500 });
+			const chooserPromise = page
+				.waitForEvent("filechooser", { timeout: 3500 })
+				.catch(() => null);
 			const clicked = await clickFirst(page, [selector], 2000);
 			if (!clicked) continue;
 			const chooser = await chooserPromise;
+			if (!chooser) continue;
 			await chooser.setFiles(mediaPath);
 			return `filechooser:${selector}`;
 		} catch {
@@ -1432,6 +1605,12 @@ async function confirmPostSubmitted(page) {
 		page.locator('text=/Post published/i').first(),
 		page.locator('text=/Shared successfully/i').first(),
 	];
+	const dialogComposerLocator = page.locator(
+		'div[role="dialog"] [contenteditable="true"][role="textbox"], div[role="dialog"] div[contenteditable="true"], div[role="dialog"] textarea',
+	);
+	const mainComposerLocator = page.locator(
+		'[role="main"] div[role="button"]:has-text("What\'s on your mind?"), div[role="button"]:has-text("What\'s on your mind?"), [role="main"] [contenteditable="true"][role="textbox"]',
+	);
 
 	for (let attempt = 0; attempt < 24; attempt += 1) {
 		await dismissInterruptivePopups(page);
@@ -1441,23 +1620,39 @@ async function confirmPostSubmitted(page) {
 			.first()
 			.isVisible()
 			.catch(() => false);
-		for (const signal of successSignals) {
-			if (await signal.isVisible().catch(() => false)) {
+			for (const signal of successSignals) {
+				if (await signal.isVisible().catch(() => false)) {
+					return true;
+				}
+			}
+			const dialogComposerVisible = await dialogComposerLocator
+				.first()
+				.isVisible()
+				.catch(() => false);
+			const mainComposerVisible = await mainComposerLocator
+				.first()
+				.isVisible()
+				.catch(() => false);
+			if (!dialogVisible) {
 				return true;
 			}
-		}
-		if (!dialogVisible) {
-			return true;
-		}
-		if (postButtonVisible || ariaSubmitVisible) {
-			await clickFacebookFinalPostButton(page).catch(() => null);
-			await page.waitForTimeout(1200);
-			continue;
-		}
+			if (!postButtonVisible && !ariaSubmitVisible && !dialogComposerVisible && mainComposerVisible) {
+				return true;
+			}
+			if (postButtonVisible || ariaSubmitVisible) {
+				await clickFacebookFinalPostButton(page).catch(() => null);
+				await page.waitForTimeout(1200);
+				continue;
+			}
 		await page.waitForTimeout(1000);
 	}
 
 	return false;
+}
+
+function isClosedTargetError(error) {
+	const message = String(error?.message || error || "");
+	return /target page, context or browser has been closed/i.test(message);
 }
 
 async function getPublishSignalCount(page) {
@@ -1472,21 +1667,25 @@ async function waitForPublishSignal(page, baselineCount = 0) {
 		"text=/Your post is now published|Your post was shared|Post published|Shared successfully/i",
 	);
 	for (let attempt = 0; attempt < 20; attempt += 1) {
-		await dismissInterruptivePopups(page);
+		if (page.isClosed()) return false;
+		await dismissInterruptivePopups(page).catch((error) => {
+			if (isClosedTargetError(error)) return;
+			throw error;
+		});
 		const visible = await signalLocator.first().isVisible().catch(() => false);
 		const count = await signalLocator.count().catch(() => 0);
 		if (visible && count > baselineCount) return true;
-		await page.waitForTimeout(500);
+		await page.waitForTimeout(500).catch((error) => {
+			if (isClosedTargetError(error)) return;
+			throw error;
+		});
 	}
 	return false;
 }
 
-async function verifyPostVisibleOnFeed(page, text) {
-	const snippet = String(text || "")
-		.replace(/\s+/g, " ")
-		.trim()
-		.slice(0, 80);
-	if (!snippet) return false;
+async function verifyPostVisibleOnFeed(page, value) {
+	const snippets = buildVerificationSnippets(value).map((snippet) => snippet.slice(0, 80));
+	if (!snippets.length) return false;
 	for (let attempt = 0; attempt < 8; attempt += 1) {
 		try {
 			await page.goto(page.url(), { waitUntil: "domcontentloaded", timeout: 45000 });
@@ -1494,9 +1693,17 @@ async function verifyPostVisibleOnFeed(page, text) {
 			// continue
 		}
 		const visible = await page
-			.locator(`text=${snippet}`)
-			.first()
-			.isVisible()
+			.evaluate((targetSnippets) => {
+				const normalize = (value) =>
+					String(value || "")
+						.replace(/\s+/g, " ")
+						.trim();
+				const articles = Array.from(document.querySelectorAll('div[role="article"]'));
+				return articles.some((node) => {
+					const text = normalize(node.innerText || "");
+					return targetSnippets.some((snippet) => text.includes(snippet));
+				});
+			}, snippets)
 			.catch(() => false);
 		if (visible) return true;
 		await page.waitForTimeout(3000);
@@ -1539,11 +1746,140 @@ async function clickDialogActionByText(page, label) {
 	}
 }
 
+async function clickInlineFacebookSubmitButton(page) {
+	const directSelectors = [
+		'[role="main"] button[aria-label="Post"]',
+		'[role="main"] button[aria-label="Post now"]',
+		'[role="main"] button[aria-label="Share now"]',
+		'[role="main"] button[aria-label="Send"]',
+		'[role="main"] [role="button"][aria-label="Post"]',
+		'[role="main"] [role="button"][aria-label="Post now"]',
+		'[role="main"] [role="button"][aria-label="Share now"]',
+		'[role="main"] [role="button"][aria-label="Send"]',
+	];
+
+	for (const selector of directSelectors) {
+		try {
+			const locator = page.locator(selector).last();
+			if ((await locator.count().catch(() => 0)) === 0) continue;
+			if (!(await locator.isVisible().catch(() => false))) continue;
+			const disabled = await locator.getAttribute("aria-disabled").catch(() => null);
+			if (String(disabled || "").toLowerCase() === "true") continue;
+			await locator.click({ timeout: 4000, force: true });
+			return selector;
+		} catch {
+			// continue
+		}
+	}
+
+	try {
+		const roleButton = page
+			.getByRole("button", { name: /^(Post|Post now|Share now|Send)$/i })
+			.last();
+		if ((await roleButton.count().catch(() => 0)) > 0) {
+			await roleButton.click({ timeout: 4000, force: true });
+			return 'role=button[name~="Post|Post now|Share now|Send"]';
+		}
+	} catch {
+		// continue
+	}
+
+	try {
+		const target = await page.evaluate(() => {
+			const isVisible = (node) => {
+				if (!(node instanceof HTMLElement)) return false;
+				const style = window.getComputedStyle(node);
+				if (!style || style.visibility === "hidden" || style.display === "none") return false;
+				const rect = node.getBoundingClientRect();
+				return rect.width > 0 && rect.height > 0;
+			};
+			const isEditable = (node) =>
+				node instanceof HTMLElement &&
+				(node.tagName === "TEXTAREA" ||
+					node.tagName === "INPUT" ||
+					node.isContentEditable ||
+					node.getAttribute("contenteditable") === "true");
+			const normalize = (value) =>
+				String(value || "")
+					.replace(/\s+/g, " ")
+					.trim()
+					.toLowerCase();
+			const editorCandidates = Array.from(
+				document.querySelectorAll(
+					'[role="main"] [contenteditable="true"], [role="main"] textarea, [contenteditable="true"], textarea',
+				),
+			).filter((node) => isEditable(node) && isVisible(node));
+			const editor =
+				(isEditable(document.activeElement) && isVisible(document.activeElement)
+					? document.activeElement
+					: null) || editorCandidates[0];
+			if (!editor) return null;
+
+			let container = editor.parentElement;
+			for (let depth = 0; depth < 6 && container; depth += 1) {
+				const rect = container.getBoundingClientRect();
+				if (rect.width >= 300 && rect.height >= 120) break;
+				container = container.parentElement;
+			}
+			if (!container) return null;
+
+			const buttons = Array.from(
+				container.querySelectorAll('button, div[role="button"], a[role="button"], [tabindex="0"]'),
+			).filter((node) => isVisible(node));
+			const editorRect = editor.getBoundingClientRect();
+			const candidates = buttons
+				.map((node) => {
+					const rect = node.getBoundingClientRect();
+					const text = normalize(node.textContent);
+					const aria = normalize(node.getAttribute?.("aria-label"));
+					const combined = `${text} ${aria}`.trim();
+					const disabled = normalize(node.getAttribute?.("aria-disabled")) === "true";
+					if (disabled) return null;
+
+					let score = 0;
+					if (/(post|publish|share now|send)/.test(combined)) score += 10;
+					if (/(photo|video|reel|live|emoji|gif|feeling|tag|location|background|boost)/.test(combined)) score -= 8;
+					if (rect.top >= editorRect.bottom - 20) score += 2;
+					score += rect.left > editorRect.left ? 1 : 0;
+					score += rect.left > editorRect.right ? 2 : 0;
+					score += rect.top > editorRect.top ? 1 : 0;
+					score += rect.width <= 80 && rect.height <= 80 ? 1 : 0;
+					score += rect.left / 1000;
+
+					return {
+						x: Math.round(rect.left + rect.width / 2),
+						y: Math.round(rect.top + rect.height / 2),
+						score,
+						label: combined || "inline-submit-candidate",
+					};
+				})
+				.filter(Boolean)
+				.sort((a, b) => b.score - a.score);
+
+			return candidates[0] || null;
+		});
+
+		if (target?.x && target?.y && target?.score > 1) {
+			await page.mouse.click(target.x, target.y, { delay: 40 });
+			return `inline-mouse:${target.label}`;
+		}
+	} catch {
+		// continue
+	}
+
+	return null;
+}
+
 async function clickFacebookSubmitButton(page) {
 	const nextClicked = await clickDialogActionByText(page, "Next");
 	if (nextClicked) {
 		await page.waitForTimeout(2000);
 		return nextClicked;
+	}
+
+	const inlineClicked = await clickInlineFacebookSubmitButton(page);
+	if (inlineClicked) {
+		return inlineClicked;
 	}
 
 	const postButtons = page
@@ -1565,6 +1901,16 @@ async function clickFacebookSubmitButton(page) {
 	const postClicked = await clickDialogActionByText(page, "Post");
 	if (postClicked) {
 		return postClicked;
+	}
+
+	const inlineComposer = page
+		.locator('[role="main"] [contenteditable="true"], [role="main"] textarea')
+		.first();
+	if ((await inlineComposer.count().catch(() => 0)) > 0) {
+		await inlineComposer.click({ timeout: 3000 }).catch(() => {});
+		await page.keyboard.press("Meta+Enter").catch(() => {});
+		await page.keyboard.press("Control+Enter").catch(() => {});
+		return "inline-keyboard-submit";
 	}
 
 	return null;
@@ -1693,7 +2039,11 @@ async function handlePageIdentitySwitch(page) {
 export default async function postToFacebookBrowser(post, context = {}) {
 	const account = context?.account || context?.target?.account || context || {};
 	const targetUrl = resolveTargetUrl(account);
-	const mediaPath = resolveLocalMediaPath(post);
+	const mediaPathRaw = resolveLocalMediaPath(post);
+	const mediaPath =
+		/^https?:\/\//i.test(mediaPathRaw || "")
+			? await downloadRemoteMediaToTemp(mediaPathRaw)
+			: mediaPathRaw;
 	const config = resolveProfileConfig(account);
 	const debug = createDebugRecorder(boolFromEnv("FACEBOOK_DEBUG", true));
 	let browserContext = null;
@@ -1720,8 +2070,22 @@ export default async function postToFacebookBrowser(post, context = {}) {
 			page.goto(targetUrl, { waitUntil: "domcontentloaded", timeout: 45000 }),
 		);
 		await page.waitForTimeout(2500);
+		await page.waitForLoadState("networkidle", { timeout: 10000 }).catch(() => {});
 		await dismissFacebookLoginOverlay(page);
 		await dismissInterruptivePopups(page);
+		let initialComposerSurface = await waitForFacebookComposerSurface(page, 9000);
+		if (!initialComposerSurface) {
+			logStep("surface:reload-for-composer");
+			await page.reload({ waitUntil: "domcontentloaded", timeout: 45000 }).catch(() => {});
+			await page.waitForTimeout(2500);
+			await page.waitForLoadState("networkidle", { timeout: 10000 }).catch(() => {});
+			await dismissFacebookLoginOverlay(page);
+			await dismissInterruptivePopups(page);
+			initialComposerSurface = await waitForFacebookComposerSurface(page, 9000);
+		}
+		if (initialComposerSurface) {
+			logStep("surface:composer-ready", initialComposerSurface);
+		}
 		logStep("page:url", page.url());
 		await debug.log("page:open", { targetUrl, finalUrl: page.url() });
 		await dumpFacebookSurface(page, "after-open");
@@ -1741,6 +2105,7 @@ export default async function postToFacebookBrowser(post, context = {}) {
 			}
 			await dismissInterruptivePopups(page);
 			await dismissFacebookLoginOverlay(page);
+			await waitForFacebookComposerSurface(page, 12000).catch(() => null);
 			logStep("auth-required:resolved", page.url());
 			await dumpFacebookSurface(page, "after-auth");
 			await debug.screenshot(page, "after-auth");
@@ -1753,6 +2118,7 @@ export default async function postToFacebookBrowser(post, context = {}) {
 			);
 			if (profileSwitchSelector) {
 				logStep("profile-switch:clicked", profileSwitchSelector);
+				await waitForFacebookComposerSurface(page, 12000).catch(() => null);
 				await dumpFacebookSurface(page, "after-profile-switch");
 			}
 		}
@@ -1762,11 +2128,12 @@ export default async function postToFacebookBrowser(post, context = {}) {
 			logStep("page-switch:clicked", switchSelector);
 			logStep("page-switch:url", page.url());
 			await dismissInterruptivePopups(page);
+			await waitForFacebookComposerSurface(page, 12000).catch(() => null);
 		}
 
 		const facebookPostText = getFacebookPostText(post);
 		if (!shouldSkipExistingFeedCheck()) {
-		if (await verifyPostVisibleOnFeed(page, facebookPostText)) {
+		if (await verifyPostVisibleOnFeed(page, post)) {
 			logStep("already-visible");
 			return {
 					type: "browser-post",
@@ -1881,8 +2248,33 @@ export default async function postToFacebookBrowser(post, context = {}) {
 			logStep("post-button:final-clicked", finalPostButtonSelector);
 		}
 
-		await page.waitForTimeout(2000);
-		const submitted = await confirmPostSubmitted(page);
+		let pageClosedAfterSubmit = false;
+		try {
+			await page.waitForTimeout(2000);
+		} catch (error) {
+			if (isClosedTargetError(error)) {
+				pageClosedAfterSubmit = true;
+				logStep("post-submit:page-closed-after-click");
+			} else {
+				throw error;
+			}
+		}
+		let submitted = false;
+		if (!pageClosedAfterSubmit) {
+			try {
+				submitted = await confirmPostSubmitted(page);
+			} catch (error) {
+				if (isClosedTargetError(error)) {
+					pageClosedAfterSubmit = true;
+					submitted = true;
+					logStep("post-submit:page-closed-during-confirm");
+				} else {
+					throw error;
+				}
+			}
+		} else {
+			submitted = true;
+		}
 		if (!submitted) {
 			keepWindowOpen = config.keepOpenOnPostFailure && !config.useCdp;
 			logStep("post-submit:not-confirmed");
@@ -1891,12 +2283,34 @@ export default async function postToFacebookBrowser(post, context = {}) {
 				"Facebook browser fallback clicked Post, but the composer did not close.",
 			);
 		}
-		const publishSeen = await waitForPublishSignal(page, publishSignalBaseline);
+		let publishSeen = false;
+		if (!pageClosedAfterSubmit) {
+			try {
+				publishSeen = await waitForPublishSignal(page, publishSignalBaseline);
+			} catch (error) {
+				if (isClosedTargetError(error)) {
+					pageClosedAfterSubmit = true;
+					logStep("post-submit:page-closed-during-publish-wait");
+				} else {
+					throw error;
+				}
+			}
+		}
 		let feedVisible = false;
 		if (!publishSeen) {
-			feedVisible = await verifyPostVisibleOnFeed(page, facebookPostText);
+			if (!pageClosedAfterSubmit) {
+				feedVisible = await verifyPostVisibleOnFeed(page, post);
+			}
+			if (pageClosedAfterSubmit) {
+				logStep("post-submit:assuming-success-after-page-close");
+				feedVisible = true;
+			}
 			if (feedVisible) {
-				logStep("done:feed-visible-no-signal");
+				logStep(
+					pageClosedAfterSubmit
+						? "done:page-closed-after-submit"
+						: "done:feed-visible-no-signal",
+				);
 			} else {
 				keepWindowOpen = config.keepOpenOnPostFailure && !config.useCdp;
 				logStep("post-submit:no-publish-signal");
@@ -1905,7 +2319,11 @@ export default async function postToFacebookBrowser(post, context = {}) {
 				);
 			}
 		} else {
-			feedVisible = await verifyPostVisibleOnFeed(page, facebookPostText);
+			if (!pageClosedAfterSubmit) {
+				feedVisible = await verifyPostVisibleOnFeed(page, post);
+			} else {
+				feedVisible = true;
+			}
 		}
 		if (!feedVisible) {
 			keepWindowOpen = config.keepOpenOnPostFailure && !config.useCdp;
