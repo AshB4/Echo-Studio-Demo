@@ -8,7 +8,7 @@
       "angle": "beginner",
       "title": "How to Use a Lip Sleeping Mask (Correct Way)",
       "description": "Most people use lip masks wrong. This simple step makes a big difference overnight.",
-      "image": "frontend/assets/spring2026/LipLaneigeHowToUse.jpg",
+      "image": "frontend/assets/spring2026/liplaniage/LipLaneigeHowToUse.jpg",
       "board": "Beautiful me.",
       "boards": ["Beautiful me.", "Home spa"],
       "tags": ["lip care", "how to use", "skincare routine", "beauty tips", "lip mask"]
@@ -18,7 +18,7 @@
       "angle": "routine",
       "title": "Night Routine Step You're Probably Skipping",
       "description": "Add this one step before bed and wake up with softer lips instantly.",
-      "image": "frontend/assets/spring2026/LipLaneigeHowToUse.jpg",
+      "image": "frontend/assets/spring2026/liplaniage/LipLaneigeHowToUse.jpg",
       "board": "Home spa",
       "boards": ["Home spa", "Beautiful me."],
       "tags": ["night routine", "lip care", "self care", "skincare", "beauty"]
@@ -28,7 +28,7 @@
       "angle": "problem",
       "title": "Why Your Lip Balm Isn't Working Overnight",
       "description": "Lip balm fades fast. This works while you sleep so results actually last.",
-      "image": "frontend/assets/spring2026/LipLaneigeHowToUse.jpg",
+      "image": "frontend/assets/spring2026/liplaniage/LipLaneigeHowToUse.jpg",
       "board": "Beautiful me.",
       "boards": ["Beautiful me.", "Fun Ideas"],
       "tags": ["dry lips", "lip balm", "lip care", "skincare", "beauty tips"]
@@ -38,7 +38,7 @@
       "angle": "educational",
       "title": "How to Apply Lip Mask for Best Results",
       "description": "Use it the right way and you'll see a noticeable difference by morning.",
-      "image": "frontend/assets/spring2026/LipLaneigeHowToUse.jpg",
+      "image": "frontend/assets/spring2026/liplaniage/LipLaneigeHowToUse.jpg",
       "board": "Beautiful me.",
       "boards": ["Beautiful me.", "Home spa"],
       "tags": ["lip mask", "beauty routine", "skincare tips", "self care", "lip care"]
@@ -48,7 +48,7 @@
       "angle": "lazy",
       "title": "Easiest Lip Care Step Before Bed",
       "description": "No complicated routine. Just apply and wake up with softer lips.",
-      "image": "frontend/assets/spring2026/LipLaneigeHowToUse.jpg",
+      "image": "frontend/assets/spring2026/liplaniage/LipLaneigeHowToUse.jpg",
       "board": "Home spa",
       "boards": ["Home spa", "Beautiful me."],
       "tags": ["easy routine", "self care", "lip care", "skincare", "beauty"]
@@ -208,7 +208,7 @@
       "angle": "transformation",
       "title": "Lip Mask Before and After Results",
       "description": "See the difference overnight hydration can make.",
-      "image": "frontend/assets/spring2026/LipPlumper3Stack.jpg",
+      "image": "frontend/assets/spring2026/liplaniage/LipPlumper3Stack.jpg",
       "board": "Beautiful me.",
       "boards": ["Beautiful me.", "Home spa"],
       "tags": ["before after", "lip care", "beauty", "skincare", "results"]
@@ -218,7 +218,7 @@
       "angle": "problem",
       "title": "Fix Dry Lips Overnight",
       "description": "Stop dealing with cracked lips-this simple fix works while you sleep.",
-      "image": "frontend/assets/spring2026/LipPlumper3Stack.jpg",
+      "image": "frontend/assets/spring2026/liplaniage/LipPlumper3Stack.jpg",
       "board": "Beautiful me.",
       "boards": ["Beautiful me.", "Home spa"],
       "tags": ["dry lips", "lip care", "overnight", "skincare", "beauty"]
@@ -228,7 +228,7 @@
       "angle": "visual proof",
       "title": "Real Lip Hydration Results",
       "description": "Visible improvement after consistent use.",
-      "image": "frontend/assets/spring2026/LipPlumper3Stack.jpg",
+      "image": "frontend/assets/spring2026/liplaniage/LipPlumper3Stack.jpg",
       "board": "Beautiful me.",
       "boards": ["Beautiful me.", "Fun Ideas"],
       "tags": ["hydration", "results", "lip care", "beauty", "skincare"]
@@ -238,7 +238,7 @@
       "angle": "curiosity",
       "title": "What Happens When You Use Lip Mask",
       "description": "The results might surprise you after just one night.",
-      "image": "frontend/assets/spring2026/LipPlumper3Stack.jpg",
+      "image": "frontend/assets/spring2026/liplaniage/LipPlumper3Stack.jpg",
       "board": "Beautiful me.",
       "boards": ["Beautiful me.", "Fun Ideas"],
       "tags": ["lip mask", "results", "beauty", "skincare", "self care"]
@@ -248,7 +248,7 @@
       "angle": "high intent",
       "title": "Best Product for Chapped Lips",
       "description": "If your lips are always dry, this is one of the best fixes.",
-      "image": "frontend/assets/spring2026/LipPlumper3Stack.jpg",
+      "image": "frontend/assets/spring2026/liplaniage/LipPlumper3Stack.jpg",
       "board": "Beautiful me.",
       "boards": ["Beautiful me.", "Home spa"],
       "tags": ["chapped lips", "lip care", "skincare", "beauty", "hydration"]

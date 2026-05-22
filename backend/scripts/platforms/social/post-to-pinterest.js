@@ -369,18 +369,33 @@ function resolveLocalMediaPath(post) {
 	if (fs.existsSync(projectRootPath)) {
 		return projectRootPath;
 	}
+
 	// Some queued paths drift across asset subfolders; recover by basename before failing.
 	const assetBasename = path.basename(mediaPath);
 	if (assetBasename) {
-		const assetDirs = [
-			path.join(BACKEND_ROOT, "..", "frontend", "assets", "BuzzingBees"),
-			path.join(BACKEND_ROOT, "..", "frontend", "assets", "spring26"),
-			path.join(BACKEND_ROOT, "..", "frontend", "assets"),
+		const assetSearchRoots = [
+			path.join(workspaceRoot, "frontend", "assets"),
+			path.join(workspaceRoot, "backend", "media"),
 		];
-		for (const assetDir of assetDirs) {
-			const candidate = path.join(assetDir, assetBasename);
-			if (fs.existsSync(candidate)) {
-				return candidate;
+		const stack = [...assetSearchRoots];
+		while (stack.length > 0) {
+			const current = stack.pop();
+			if (!current || !fs.existsSync(current)) continue;
+			let entries = [];
+			try {
+				entries = fs.readdirSync(current, { withFileTypes: true });
+			} catch {
+				continue;
+			}
+			for (const entry of entries) {
+				const fullPath = path.join(current, entry.name);
+				if (entry.isDirectory()) {
+					stack.push(fullPath);
+					continue;
+				}
+				if (entry.isFile() && entry.name === assetBasename) {
+					return fullPath;
+				}
 			}
 		}
 	}
