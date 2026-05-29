@@ -20,6 +20,7 @@ function parseArgs(argv = process.argv.slice(2)) {
     randomMin: 4,
     randomMax: 6,
     randomSeed: "postpunk-remote-import",
+    maxSameProductPerDay: 2,
     dryRun: false,
   };
 
@@ -60,6 +61,11 @@ function parseArgs(argv = process.argv.slice(2)) {
       index += 1;
       continue;
     }
+    if (arg === "--max-same-product-per-day") {
+      args.maxSameProductPerDay = Number(argv[index + 1] || args.maxSameProductPerDay);
+      index += 1;
+      continue;
+    }
     if (arg === "--dry-run") {
       args.dryRun = true;
       continue;
@@ -72,6 +78,9 @@ function parseArgs(argv = process.argv.slice(2)) {
   }
   if (!/^\d{4}-\d{2}-\d{2}$/.test(args.startDate)) {
     throw new Error("--start-date must use YYYY-MM-DD");
+  }
+  if (!Number.isFinite(args.maxSameProductPerDay) || args.maxSameProductPerDay < 1) {
+    throw new Error("--max-same-product-per-day must be 1 or greater");
   }
   return args;
 }
@@ -120,15 +129,21 @@ function buildSchedulePlan(totalRows, startDate, options = {}) {
   const randomMax = Number(options.randomMax || 6);
   const randomSeed = String(options.randomSeed || "postpunk-4-6");
   const defaultPostsPerDay = Number(options.defaultPostsPerDay || 4);
+  const uniqueMixKeyCount = Number(options.uniqueMixKeyCount || 0);
+  const maxSameProductPerDay = Math.max(1, Number(options.maxSameProductPerDay || 1));
   const plan = [];
   let cursorDate = startDate;
   let rowIndex = 0;
 
   while (rowIndex < totalRows) {
-    const postsPerDay =
+    const requestedPostsPerDay =
       cadenceMode === "random_4_6"
         ? randomIntInclusive(`${randomSeed}:${cursorDate}`, randomMin, randomMax)
         : defaultPostsPerDay;
+    const dailyProductCapacity = uniqueMixKeyCount > 0
+      ? Math.max(1, uniqueMixKeyCount * maxSameProductPerDay)
+      : requestedPostsPerDay;
+    const postsPerDay = Math.min(requestedPostsPerDay, dailyProductCapacity);
     const slots = buildTimesForCount(postsPerDay);
     for (const time of slots) {
       if (rowIndex >= totalRows) break;
@@ -188,8 +203,29 @@ function buildRows(batchData) {
   }));
 }
 
+function inferRowIdentity(row) {
+  return inferPinterestQueueIdentity(row, {
+    batchLabel: row.batchLabel,
+    batchFile: row.batchFile,
+    campaign: row.batchLabel,
+    keyword: row.keyword,
+    angle: row.angle,
+    cluster: row.cluster,
+    productLink: row.productLink,
+    tags: row.tags,
+    image: row.image,
+  });
+}
+
 function buildMixKey(row) {
-  return canonicalizeProductLink(row.productLink || "") || row.keyword || row.title || "default";
+  const identity = inferRowIdentity(row);
+  return (
+    String(identity?.productProfileId || "").trim() ||
+    canonicalizeProductLink(row.productLink || "") ||
+    row.keyword ||
+    row.title ||
+    "default"
+  );
 }
 
 function mixRows(rows) {
@@ -251,6 +287,48 @@ function groupScheduleByDay(schedule = []) {
   return days;
 }
 
+function mediaKey(row) {
+  const raw = String(row?.image || "").trim();
+  if (!raw) return "";
+  return raw
+    .split("?")[0]
+    .split("/")
+    .pop()
+    .replace(/\.[a-z0-9]+$/i, "")
+    .replace(/_pinterest_\d+x\d+$/i, "")
+    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+function boardKey(row) {
+  return String(row?.board || "").trim().toLowerCase();
+}
+
+function takeBestRow(bucket, dayMedia, dayBoards, recentMedia) {
+  if (!bucket?.length) return null;
+
+  let bestIndex = 0;
+  let bestScore = Number.POSITIVE_INFINITY;
+  for (let index = 0; index < bucket.length; index += 1) {
+    const row = bucket[index];
+    const media = mediaKey(row);
+    const board = boardKey(row);
+    let score = index;
+    if (media && dayMedia.has(media)) score += 1000;
+    if (board && dayBoards.has(board)) score += 500;
+    if (media && recentMedia.includes(media)) score += 100;
+    if (score < bestScore) {
+      bestScore = score;
+      bestIndex = index;
+    }
+  }
+
+  const [selected] = bucket.splice(bestIndex, 1);
+  return selected || null;
+}
+
 function spreadRowsAcrossSchedule(rows, schedule = []) {
   const days = groupScheduleByDay(schedule);
   const buckets = new Map();
@@ -264,16 +342,21 @@ function spreadRowsAcrossSchedule(rows, schedule = []) {
   const keys = [...buckets.keys()].sort();
   const ordered = [];
   let rotationIndex = 0;
+  const recentKeys = [];
+  const recentMedia = [];
+  const recentWindow = 2;
 
   for (const daySlots of days) {
     const usedToday = new Set();
+    const dayMedia = new Set();
+    const dayBoards = new Set();
     for (let slotIndex = 0; slotIndex < daySlots.length; slotIndex += 1) {
       let selectedKey = null;
 
       for (let offset = 0; offset < keys.length; offset += 1) {
         const key = keys[(rotationIndex + offset) % keys.length];
         const bucket = buckets.get(key);
-        if (bucket?.length && !usedToday.has(key)) {
+        if (bucket?.length && !usedToday.has(key) && !recentKeys.includes(key)) {
           selectedKey = key;
           rotationIndex = (rotationIndex + offset + 1) % keys.length;
           break;
@@ -293,8 +376,20 @@ function spreadRowsAcrossSchedule(rows, schedule = []) {
       }
 
       if (!selectedKey) break;
-      ordered.push(buckets.get(selectedKey).shift());
+      const selectedRow = takeBestRow(buckets.get(selectedKey), dayMedia, dayBoards, recentMedia);
+      if (!selectedRow) break;
+      ordered.push(selectedRow);
       usedToday.add(selectedKey);
+      recentKeys.push(selectedKey);
+      if (recentKeys.length > recentWindow) recentKeys.shift();
+      const selectedMedia = mediaKey(selectedRow);
+      const selectedBoard = boardKey(selectedRow);
+      if (selectedMedia) {
+        dayMedia.add(selectedMedia);
+        recentMedia.push(selectedMedia);
+        if (recentMedia.length > 6) recentMedia.shift();
+      }
+      if (selectedBoard) dayBoards.add(selectedBoard);
     }
   }
 
@@ -303,17 +398,7 @@ function spreadRowsAcrossSchedule(rows, schedule = []) {
 
 function buildPost(row, scheduledAt) {
   const contentTags = ["affiliate", "amazon", ...row.tags];
-  const identity = inferPinterestQueueIdentity(row, {
-    batchLabel: row.batchLabel,
-    batchFile: row.batchFile,
-    campaign: row.batchLabel,
-    keyword: row.keyword,
-    angle: row.angle,
-    cluster: row.cluster,
-    productLink: row.productLink,
-    tags: row.tags,
-    image: row.image,
-  });
+  const identity = inferRowIdentity(row);
   return {
     id: makeId(),
     title: row.title,
@@ -372,7 +457,10 @@ async function main() {
   const existingPosts = await listPosts();
   const batches = await Promise.all(args.batchFiles.map(readBatchFile));
   const mixedRows = mixRows(batches.flatMap(buildRows));
-  const schedule = buildSchedulePlan(mixedRows.length, args.startDate, args);
+  const schedule = buildSchedulePlan(mixedRows.length, args.startDate, {
+    ...args,
+    uniqueMixKeyCount: new Set(mixedRows.map(buildMixKey)).size,
+  });
   const scheduledRows = spreadRowsAcrossSchedule(mixedRows, schedule);
   const created = [];
   const skipped = [];
@@ -417,7 +505,11 @@ async function main() {
   );
 }
 
-main().catch((error) => {
-  console.error(error?.stack || String(error));
-  process.exitCode = 1;
-});
+if (import.meta.url === `file://${process.argv[1]}`) {
+  main().catch((error) => {
+    console.error(error?.stack || String(error));
+    process.exitCode = 1;
+  });
+}
+
+export { buildMixKey, buildSchedulePlan, mixRows, spreadRowsAcrossSchedule };

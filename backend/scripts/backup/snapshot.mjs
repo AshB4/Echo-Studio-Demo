@@ -1,6 +1,6 @@
 /** @format */
 
-import { cp, mkdir, readdir, rm } from "fs/promises";
+import { copyFile, mkdir, readdir, rm } from "fs/promises";
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -14,6 +14,16 @@ const SOURCE_DIRS = [
 ];
 const BACKUP_ROOT = path.join(BACKEND_ROOT, "backups");
 const RETENTION = Number(process.env.POSTPUNK_BACKUP_RETENTION || 14);
+const EXCLUDED_DIR_NAMES = new Set([
+	"Cache",
+	"Code Cache",
+	"GPUCache",
+	"GraphiteDawnCache",
+	"ShaderCache",
+	"GrShaderCache",
+	"optimization_guide_model_store",
+	"BrowserMetrics",
+]);
 
 function stamp() {
 	const now = new Date();
@@ -41,6 +51,41 @@ async function enforceRetention() {
 	return toDelete.length;
 }
 
+function shouldExcludeBackupPath(sourcePath) {
+	const parts = String(sourcePath || "").split(path.sep).filter(Boolean);
+	return parts.some((part) => EXCLUDED_DIR_NAMES.has(part));
+}
+
+async function copyFiltered(source, target) {
+	if (shouldExcludeBackupPath(source)) return { copiedFiles: 0, skippedDirs: 1 };
+
+	const entries = await readdir(source, { withFileTypes: true });
+	await mkdir(target, { recursive: true });
+	let copiedFiles = 0;
+	let skippedDirs = 0;
+
+	for (const entry of entries) {
+		const sourceChild = path.join(source, entry.name);
+		const targetChild = path.join(target, entry.name);
+		if (entry.isSymbolicLink()) continue;
+		if (entry.isDirectory()) {
+			if (shouldExcludeBackupPath(sourceChild)) {
+				skippedDirs += 1;
+				continue;
+			}
+			const result = await copyFiltered(sourceChild, targetChild);
+			copiedFiles += result.copiedFiles;
+			skippedDirs += result.skippedDirs;
+			continue;
+		}
+		if (!entry.isFile()) continue;
+		await copyFile(sourceChild, targetChild);
+		copiedFiles += 1;
+	}
+
+	return { copiedFiles, skippedDirs };
+}
+
 async function main() {
 	const dryRun = process.argv.includes("--dry-run");
 	await mkdir(BACKUP_ROOT, { recursive: true });
@@ -48,12 +93,18 @@ async function main() {
 
 	if (!dryRun) {
 		await mkdir(targetDir, { recursive: true });
+		let copiedFiles = 0;
+		let skippedDirs = 0;
 		for (const source of SOURCE_DIRS) {
 			const name = path.basename(source);
-			await cp(source, path.join(targetDir, name), { recursive: true, force: true });
+			const result = await copyFiltered(source, path.join(targetDir, name));
+			copiedFiles += result.copiedFiles;
+			skippedDirs += result.skippedDirs;
 		}
 		const deleted = await enforceRetention();
 		console.log(`Backup created: ${targetDir}`);
+		console.log(`Copied files: ${copiedFiles}`);
+		console.log(`Excluded cache/model dirs: ${skippedDirs}`);
 		console.log(`Retention cleanup removed: ${deleted} old backup(s).`);
 		return;
 	}
@@ -63,10 +114,17 @@ async function main() {
 	for (const source of SOURCE_DIRS) {
 		console.log(`- ${source}`);
 	}
+	console.log("Excluded directory names:");
+	for (const name of EXCLUDED_DIR_NAMES) {
+		console.log(`- ${name}`);
+	}
 }
 
-main().catch((error) => {
-	console.error("Backup snapshot failed:", error?.message || error);
-	process.exitCode = 1;
-});
+if (import.meta.url === `file://${process.argv[1]}`) {
+	main().catch((error) => {
+		console.error("Backup snapshot failed:", error?.message || error);
+		process.exitCode = 1;
+	});
+}
 
+export { EXCLUDED_DIR_NAMES, shouldExcludeBackupPath };
