@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { shouldExcludeBackupPath } from "../scripts/backup/snapshot.mjs";
+import { selectRetentionNames, shouldExcludeBackupPath } from "../scripts/backup/snapshot.mjs";
 
 test("backup snapshot excludes browser cache and model directories", () => {
 	const excluded = [
@@ -32,4 +32,47 @@ test("backup snapshot keeps session and auth-bearing profile data", () => {
 	for (const item of included) {
 		assert.equal(shouldExcludeBackupPath(item), false, item);
 	}
+});
+
+test("backup retention keeps manual backups, newest week, and one monthly for three months", () => {
+	const dirs = [
+		"20260301-020000",
+		"20260315-020000",
+		"20260401-020000",
+		"20260415-020000",
+		"20260501-020000",
+		"20260520-020000",
+		"20260521-020000",
+		"20260522-020000",
+		"20260523-020000",
+		"20260524-020000",
+		"20260525-020000",
+		"20260526-020000",
+		"20260527-020000",
+		"manual-2026-05-19",
+	];
+
+	const plan = selectRetentionNames(dirs, {
+		dailyRetention: 7,
+		monthlyRetention: 3,
+	});
+
+	assert.deepEqual(plan.keep, [
+		"20260315-020000",
+		"20260415-020000",
+		"20260521-020000",
+		"20260522-020000",
+		"20260523-020000",
+		"20260524-020000",
+		"20260525-020000",
+		"20260526-020000",
+		"20260527-020000",
+		"manual-2026-05-19",
+	]);
+	assert.deepEqual(plan.delete, [
+		"20260301-020000",
+		"20260401-020000",
+		"20260501-020000",
+		"20260520-020000",
+	]);
 });

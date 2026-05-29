@@ -13,7 +13,8 @@ const SOURCE_DIRS = [
 	path.join(BACKEND_ROOT, "config"),
 ];
 const BACKUP_ROOT = path.join(BACKEND_ROOT, "backups");
-const RETENTION = Number(process.env.POSTPUNK_BACKUP_RETENTION || 14);
+const DAILY_RETENTION = Number(process.env.POSTPUNK_BACKUP_DAILY_RETENTION || 7);
+const MONTHLY_RETENTION = Number(process.env.POSTPUNK_BACKUP_MONTHLY_RETENTION || 3);
 const EXCLUDED_DIR_NAMES = new Set([
 	"Cache",
 	"Code Cache",
@@ -36,19 +37,68 @@ function stamp() {
 	return `${y}${m}${d}-${hh}${mm}${ss}`;
 }
 
+function parseSnapshotName(name) {
+	const match = String(name || "").match(/^(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})(\d{2})$/);
+	if (!match) return null;
+	const [, year, month, day, hour, minute, second] = match;
+	const date = new Date(
+		Date.UTC(Number(year), Number(month) - 1, Number(day), Number(hour), Number(minute), Number(second)),
+	);
+	if (Number.isNaN(date.getTime())) return null;
+	return {
+		name,
+		date,
+		monthKey: `${year}-${month}`,
+	};
+}
+
+function selectRetentionNames(dirNames, options = {}) {
+	const dailyRetention = Math.max(0, Number(options.dailyRetention ?? DAILY_RETENTION));
+	const monthlyRetention = Math.max(0, Number(options.monthlyRetention ?? MONTHLY_RETENTION));
+	const keep = new Set();
+	const snapshots = [];
+
+	for (const name of dirNames) {
+		const parsed = parseSnapshotName(name);
+		if (!parsed) {
+			keep.add(name);
+			continue;
+		}
+		snapshots.push(parsed);
+	}
+
+	const newestFirst = snapshots.sort((a, b) => b.date - a.date || b.name.localeCompare(a.name));
+	for (const snapshot of newestFirst.slice(0, dailyRetention)) {
+		keep.add(snapshot.name);
+	}
+
+	const keptMonths = new Set();
+	for (const snapshot of newestFirst) {
+		if (keptMonths.has(snapshot.monthKey)) continue;
+		keptMonths.add(snapshot.monthKey);
+		if (keptMonths.size <= monthlyRetention) {
+			keep.add(snapshot.name);
+		}
+		if (keptMonths.size >= monthlyRetention) break;
+	}
+
+	return {
+		keep: [...keep].sort(),
+		delete: dirNames.filter((name) => !keep.has(name)).sort(),
+	};
+}
+
 async function enforceRetention() {
 	const entries = await readdir(BACKUP_ROOT, { withFileTypes: true }).catch(() => []);
 	const dirs = entries
 		.filter((entry) => entry.isDirectory())
 		.map((entry) => entry.name)
 		.sort();
-	const excess = dirs.length - RETENTION;
-	if (excess <= 0) return 0;
-	const toDelete = dirs.slice(0, excess);
-	for (const dir of toDelete) {
+	const plan = selectRetentionNames(dirs);
+	for (const dir of plan.delete) {
 		await rm(path.join(BACKUP_ROOT, dir), { recursive: true, force: true });
 	}
-	return toDelete.length;
+	return plan.delete.length;
 }
 
 function shouldExcludeBackupPath(sourcePath) {
@@ -118,6 +168,7 @@ async function main() {
 	for (const name of EXCLUDED_DIR_NAMES) {
 		console.log(`- ${name}`);
 	}
+	console.log(`Retention: keep newest ${DAILY_RETENTION} daily backups and one monthly backup for ${MONTHLY_RETENTION} month(s).`);
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
@@ -127,4 +178,4 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 	});
 }
 
-export { EXCLUDED_DIR_NAMES, shouldExcludeBackupPath };
+export { EXCLUDED_DIR_NAMES, parseSnapshotName, selectRetentionNames, shouldExcludeBackupPath };
