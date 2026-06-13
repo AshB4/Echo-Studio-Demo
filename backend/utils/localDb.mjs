@@ -293,6 +293,7 @@ const DEFAULT_ROTATION_SETTINGS = {
     "product-strategy-25",
     "kawaii-coloring-series",
     "buzzing-adventures-coloring-book",
+    "not-sure-bad-enough-book",
   ],
   customProducts: [],
 };

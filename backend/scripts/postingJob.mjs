@@ -20,6 +20,7 @@ import {
 	getSetting,
 	setSetting,
 } from "../utils/localDb.mjs";
+import { generateRssFeeds } from "./rss/generate-feeds.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -85,7 +86,7 @@ const INVENTORY_RUNWAY_THRESHOLD_DEVTO = Number(
 );
 const DEVTO_DAILY_RATE = Number(process.env.POSTPUNK_DEVTO_POSTS_PER_DAY || 1 / 7);
 const ACTIVE_PLATFORM_LIST = String(
-	process.env.POSTPUNK_ACTIVE_PLATFORMS || "facebook,pinterest",
+	process.env.POSTPUNK_ACTIVE_PLATFORMS || "facebook,pinterest,devto",
 )
 	.split(",")
 	.map((item) => String(item || "").trim().toLowerCase())
@@ -232,6 +233,26 @@ async function sendWorkerAlert(message) {
 	}
 	console.warn("[telegram] alert send failed", result);
 	return result;
+}
+
+function boolFromEnv(name, fallback = true) {
+	const value = process.env[name];
+	if (value === undefined) return fallback;
+	return !["0", "false", "off", "no"].includes(String(value).toLowerCase());
+}
+
+async function maybeGenerateRssFeeds() {
+	if (!boolFromEnv("POSTPUNK_RSS_AUTOGENERATE", true)) return null;
+	try {
+		const result = await generateRssFeeds();
+		console.log(
+			`RSS feeds generated: ${result.publicCount} public, ${result.devtoCount} devto.`,
+		);
+		return result;
+	} catch (error) {
+		console.warn("RSS feed generation failed:", error?.message || error);
+		return null;
+	}
 }
 
 function sanitizeFailureReason(message) {
@@ -1163,6 +1184,14 @@ function collectMediaCandidates(post, productId, mediaPools) {
 	return Array.from(new Set(seeded)).filter((value) => mediaPathUsable(value));
 }
 
+function fixedPinterestMediaForPost(post) {
+	const productId = productIdFor(post);
+	if (productId !== "goblin-coloring-affirmations") return null;
+	const pinned = String(post?.image || post?.metadata?.image || "").trim();
+	if (!pinned || !mediaPathUsable(pinned)) return null;
+	return pinned;
+}
+
 function pickRotatedMedia(candidates, usageCounts, lastMedia) {
 	if (!candidates.length) return null;
 	const order = new Map(candidates.map((candidate, index) => [candidate, index]));
@@ -1235,6 +1264,18 @@ function rebalancePinterestMedia(queue, postedLog, mediaPools) {
 		}
 
 		for (const post of posts) {
+			const pinnedMedia = fixedPinterestMediaForPost(post);
+			if (pinnedMedia) {
+				if (post.mediaPath !== pinnedMedia) {
+					post.mediaPath = pinnedMedia;
+					post.mediaType = "image";
+					post.updatedAt = new Date().toISOString();
+					changedCount += 1;
+				}
+				productUsageCounts.set(pinnedMedia, (productUsageCounts.get(pinnedMedia) || 0) + 1);
+				productLastMedia = pinnedMedia;
+				continue;
+			}
 			const candidates = collectMediaCandidates(post, productId, mediaPools);
 			if (!candidates.length) continue;
 			const selected = pickRotatedMedia(
@@ -1656,6 +1697,7 @@ export async function processQueue() {
 		postedLog,
 		rejections: rejectedLog,
 	});
+	await maybeGenerateRssFeeds();
 	await maybeSendInventoryRunwayAlert(remainingQueue);
 
 	console.log(

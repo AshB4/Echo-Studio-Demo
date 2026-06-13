@@ -217,6 +217,7 @@ const isAmazonConfigured = () => {
 
 export const normalizeTargets = (input) => {
 	if (!Array.isArray(input)) return [];
+	const seen = new Set();
 	return input
 		.map((entry) => {
 			if (!entry) return null;
@@ -242,7 +243,13 @@ export const normalizeTargets = (input) => {
 			}
 			return null;
 		})
-		.filter((entry) => entry && entry.platform);
+		.filter((entry) => {
+			if (!entry || !entry.platform) return false;
+			const key = `${entry.platform}:${entry.accountId ?? ""}`;
+			if (seen.has(key)) return false;
+			seen.add(key);
+			return true;
+		});
 };
 
 /**

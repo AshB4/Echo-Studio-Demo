@@ -50,14 +50,21 @@ export function buildAstroFrontmatter(content = {}) {
 	const lineage = normalizeContentLineage(content.lineage, {
 		canonicalSource: content.canonicalSource || metadata.canonicalSource,
 	});
-	const canonicalUrl = content.canonicalUrl || metadata.canonicalSource || content.canonicalSource || null;
+	const canonicalUrl =
+		content.canonicalUrl || metadata.canonicalUrl || metadata.canonicalSource || content.canonicalSource || null;
+	const publishDate = content.publishDate || content.publishedAt || metadata.publishDate || null;
 
 	return {
 		title: content.title || "Untitled",
-		description: content.description || content.excerpt || "",
+		description: content.description || content.excerpt || metadata.excerpt || "",
+		excerpt: content.excerpt || metadata.excerpt || null,
+		publishDate,
 		state: lifecycleState,
-		canonicalURL: canonicalUrl,
+		canonicalURL: content.canonicalUrl || metadata.canonicalUrl || canonicalUrl,
 		canonicalSource: metadata.canonicalSource || null,
+		externalUrls: metadata.externalUrls || content.externalUrls || null,
+		syndicationStatus: metadata.syndicationStatus || content.syndicationStatus || null,
+		platformIds: metadata.platformIds || content.platformIds || null,
 		artifactType: metadata.artifactType || null,
 		searchIntent: metadata.searchIntent || null,
 		intentPrimary: metadata.intentPrimary || null,
@@ -85,6 +92,25 @@ export function buildAstroFrontmatter(content = {}) {
 		curiosityScore: metadata.curiosityScore ?? null,
 		saveScore: metadata.saveScore ?? null,
 		shareScore: metadata.shareScore ?? null,
+		identityArchetype: metadata.identityArchetype || null,
+		ecosystemCluster: metadata.ecosystemCluster || null,
+		futureSelfSignal: metadata.futureSelfSignal || null,
+		saveReason: metadata.saveReason || null,
+		utilityType: metadata.utilityType || null,
+		discoveryScore: metadata.discoveryScore ?? null,
+		retailCommonalityScore: metadata.retailCommonalityScore ?? null,
+		rabbitHoleScore: metadata.rabbitHoleScore ?? null,
+		visualClarityScore: metadata.visualClarityScore ?? null,
+		savePotentialScore: metadata.savePotentialScore ?? null,
+		amazonDiscoveryScore: metadata.amazonDiscoveryScore ?? null,
+		seasonalityScore: metadata.seasonalityScore ?? null,
+		landingPageMatchScore: metadata.landingPageMatchScore ?? null,
+		landingPageMatchReason: metadata.landingPageMatchReason || null,
+		productFitScore: metadata.productFitScore ?? null,
+		productFitState: metadata.productFitState || null,
+		productFitReasons: metadata.productFitReasons || [],
+		productFitRecommended: typeof metadata.productFitRecommended === "boolean" ? metadata.productFitRecommended : null,
+		productFitBlocked: typeof metadata.productFitBlocked === "boolean" ? metadata.productFitBlocked : null,
 		painProximity: metadata.painProximity ?? null,
 		commercialityScore: metadata.commercialityScore ?? null,
 		emotionTags: metadata.emotionTags || [],
