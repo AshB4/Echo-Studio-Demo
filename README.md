@@ -66,6 +66,16 @@ For full runbooks (macOS launchd, Linux systemd, queue/worker ops, backups, heal
 
 ---
 
+## AI Tooling Workflows
+Phase 1 adoption docs for PostPunk AI tooling:
+
+- [Manual Content Workflow](./Docs/workflows/manual-content-workflow.md)
+- [Style Training Prep](./content/style/README.md)
+- [Stop Slop Integration Plan](./Docs/tooling/stop-slop-integration.md)
+- [Remotion MVP Roadmap](./Docs/roadmap/remotion-mvp.md)
+
+---
+
 ## 🧠 Discoverability Model
 PostPunk is not:
 - a generic social media scheduler
