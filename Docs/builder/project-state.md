@@ -1,487 +1,272 @@
 # Project State
 
-This file is the handoff doc for the current working state of PostPunk/N8tiveFlow.
+This is the operational handoff for the current N8tiveFlow / PostPunk repository state.
 
-If you come back later, this is the file to read first.
+Read this when you need the short version of what actually exists today.
 
-## Current Strategic Focus
+## 1. Strategic Focus
 
-Canonical publishing layer:
+Current strategic boundary, as implemented in the repo:
 
-- `AshB4 Studio`
-- Astro-based static publishing site
-- markdown-first publishing
-- SEO-first publishing
-- canonical authority source
-- searchable engineering notebook
+- Astro / AshB4 Studio remains the canonical publishing layer outside this repo
+- PostPunk remains the workflow, queue, syndication, and automation layer
+- content should be modeled as metadata-aware artifacts, not just draft/published blobs
+- the system is optimized for discoverability, archive-aware reuse, and platform-specific distribution
 
-PostPunk role:
+Current practical emphasis:
 
-- queue
-- scheduler
-- syndication system
-- metadata system
-- discoverability operations layer
-- evergreen content infrastructure
+- keep the queue reliable
+- keep the proven distribution lanes working
+- keep the article/portfolio/RSS pipeline coherent
+- avoid broad platform expansion unless a lane is clearly operational
 
-Primary publishing/distribution platforms:
+## 2. What PostPunk Is Today
+
+PostPunk is currently:
+
+- a SQLite-backed queue and scheduling system
+- a platform dispatch layer for multiple posting adapters
+- a content metadata system with lifecycle-aware fields
+- a portfolio/article export pipeline
+- an RSS feed generator for public and DEV-oriented feeds
+- a manual-assist surface for unstable or partially proven platforms
+- an operational dashboard for queue recovery, analytics, and affiliate workflows
+
+PostPunk is not:
+
+- the canonical publishing site
+- a generic CMS
+- a fully automatic multi-platform autoposter
+- a finished attribution or analytics platform
+
+## 3. Proven Working Features
+
+The following are implemented and should be treated as real, working capability:
+
+- frontend routing through `frontend/main.jsx`
+- calendar, composer, batch, today ops, charts, archive, setup, affiliate, and pSEO pages
+- SQLite queue storage in `backend/data/postpunk.sqlite`
+- JSON queue mirrors for compatibility
+- post create/edit/save/schedule flows
+- archive/history logging
+- platform/account health checks
+- queue duplicate and schedule guardrails
+- Telegram alerts from the worker
+- Pinterest queue remixing through the calendar action and backend route
+- portfolio generation into the external AshB4 GitHub Pages repo
+- RSS feed generation for public and DEV import feeds
+- article metadata normalization for canonical URL, excerpt, tags, publish date, external URLs, and platform IDs
+- DEV cover image prompt generation
+- Astro markdown/frontmatter export helpers
+- Amazon affiliate batch planning and builder flows
+
+Platform lanes that have been proven live in practice:
+
+- `Dev.to`
+- `Facebook`
+- `Pinterest`
+
+Operationally proven but still less central:
+
+- browser-based Facebook lane
+- Pinterest single-pin Playwright lane
+- remote/SSH-based queue recovery and rebuild work on HP
+
+## 4. Experimental Features
+
+These exist in code, but they should still be treated carefully:
+
+- Prisma-backed content API under `backend/routes/content/*`
+- attribution event tracking and journey stitching
+- RSS auto-generation triggered from the worker
+- DEV draft publication automation
+- portfolio commit/push automation from the pipeline scripts
+- broader platform adapters that are present in code but not operationally proven
+- browser-based fallbacks for unstable social lanes beyond the core proven paths
+
+The rule here is simple:
+
+- if it exists only as an adapter or helper, do not assume it is production reliable
+- if it is not tied to a known-good flow, treat it as experimental until verified
+
+## 5. Planned or Incomplete Areas
+
+These are not finished:
+
+- full canonical publication living inside PostPunk
+- broad multi-platform autopublishing
+- fully trusted Reddit automation
+- Instagram, Threads, LinkedIn, X, Substack, Tumblr, Ko-fi, Discord, Product Hunt, Hashnode, and Amazon as unattended lanes
+- richer Pinterest capabilities like alt text, publish-later, and topic/tag support
+- fully integrated attribution reporting
+- a single unified content store that replaces both queue storage and Prisma content records
+- automatic end-to-end publish-once / syndicate-everywhere behavior without operator review
+
+If a feature sounds nice but has not been tied to a real route, script, or testable flow, it belongs here.
+
+## 6. Platform Status
+
+### Proven working
 
 - `Facebook`
 - `Dev.to`
 - `Pinterest`
+
+### Working in code, but still cautious
+
 - `Reddit`
-
-De-prioritized / non-core platforms right now:
-
-- `X`
-- `LinkedIn`
+- `Substack`
 - `Instagram`
 - `Threads`
-- `Substack`
-- broad all-platform autoposting
+- `X`
+- `LinkedIn`
+- `Tumblr`
+- `Ko-fi`
+- `Discord`
+- `Hashnode`
+- `Product Hunt`
+- `Amazon`
 
-Architecture philosophy:
+### Notes that matter
 
-- Astro owns canonical publishing and SEO authority
-- PostPunk owns workflows, metadata, lineage, syndication, and scheduling
-- PostPunk should feed the Astro site later through markdown/content export
-- keep the systems loosely coupled and maintainable
+- Facebook token expiry is less central than it used to be because the browser lane exists, but credential health still matters
+- Pinterest is the most operationally mature evergreen lane after DEV and Facebook
+- Reddit should still be treated as a lane to prove, not a lane to assume
+- DEV is the trusted canonical article syndication lane
 
-Content philosophy:
+## 7. Current Sources of Truth
 
-- build logs
-- operational lessons
-- automation observations
-- SEO/discoverability insights
-- engineering notebook style
-- searchable problem-solving content
+### Primary queue store
 
-Avoid:
+- `backend/data/postpunk.sqlite`
 
-- corporate thought leadership
-- generic SaaS blogging
-- empty productivity fluff
-- AI spam tooling
-- trend-chasing systems
-- video-first systems
+This is the main operational store for:
 
-## Recent Updates
+- queue posts
+- posted log
+- rejections
+- settings
+- Pinterest metrics snapshots
 
-- Added CTR / intent metadata to the shared content schema, SEO generation, Astro export, composer UI, and prompt-building flow.
-- Restored two previously failed queue items and moved them back into the rotation:
-  - `This Explains Too Much` on `2026-06-30T15:00:00.000Z`
-  - `Laneige Lip Mask Flavors You Can Try` on `2026-06-30T15:20:00.000Z`
-- Synced the restored queue state to HP so the Mac and server snapshot match again.
-- The composer now exposes intent and CTR fields in the UI, including headline, curiosity, trust, save/share, and score fields.
-- The builder docs now have a dedicated terminal command reference instead of scattering command snippets across strategy docs.
+### Compatibility mirrors
 
-## What This App Is Right Now
+- `backend/queue/postQueue.json`
+- `backend/queue/postedLog.json`
+- `backend/queue/rejections.json`
 
-PostPunk is currently:
+These exist for compatibility and backup-style mirroring, not as primary truth.
 
-- a working queue and scheduling system
-- a manual-post assistant for unstable platforms
-- a partially automated publishing tool
-- a proven automatic `Dev.to` lane
-- a proven automatic `Facebook` lane for page posts
-- a proven automatic `Facebook` lane for personal-profile posts
-- a proven automatic `Pinterest` lane for single pins
-- an affiliate planning and batch-building system for Amazon-to-Pinterest workflows
-- a local-first app using SQLite as the real store
-- a JSON-mirrored system where `backend/queue/*.json` exists for compatibility, not as the primary source of truth
-- an import-first workflow for AI-written content via `/batch`
-- a workflow/distribution layer, not the canonical publishing home
+### Structured content store
 
-It is not yet a fully automatic multi-platform autoposter.
+- Prisma schema: `backend/prisma/schema.prisma`
+- content API routes: `backend/routes/content/*`
+- backing DB is whatever `DATABASE_URL` points to
 
-## What Exists
+This is a separate content system, not the queue store.
 
-These pieces are built and in active use:
+### Generated outputs
 
-- post composer with queue saving
-- approval workflow using `draft`, `approved`, `posted`, `failed`
-- bulk scheduling in the library
-- auto-schedule-after-last-date flow in the library
-- weekday presets like `MWF` and `MWFSu`
-- Today Ops page at `/today`
-- Batch import page at `/batch`
-- Posted archive page at `/archive`
-- Pinterest analytics dashboard at `/charts`
-- Rotation/settings page at `/setup`
-- Affiliate strategy page at `/affiliate`
-- Affiliate batch builder at `/affiliate/builder`
-- retry and failure handling
-- failed-post visibility on the calendar with retry support
-- day-level affiliate markers on the calendar
-- calendar day-post ordering that prioritizes social (`facebook`/`instagram`) above affiliate Amazon/Pinterest pins
-- calendar-side Pinterest queue remixing through the `Remix Pinterest` button
-- product profiles
-- platform writing guidance
-- AI SEO generation with product and platform context
-- campaign planning/generation backend route
-- visible AI result trays on `/compose` and `/batch`
-- image planning fields:
-  - `imageStatus`
-  - `imageConcept`
-  - `imagePrompt`
-- manual metrics logging in the library for charts
-- product link injection for punch posts
-- Amazon affiliate tagging for Amazon product links
-- Telegram success and failure alerts
-- Telegram inventory/runway alerts and schedule-gap alerting are now wired into the worker
-- token-health visibility on `/setup`
+- `backend/public/portfolio/blog/*`
+- `backend/public/rss/*`
+- `backend/stats/*`
+- `backend/media/*`
+- `backend/tmp/*`
+- `backend/backups/*`
 
-## What Is Proven Working
+These are derived outputs, not canonical source.
 
-- frontend build passes
-- backend core/unit tests pass; full `npm test` includes live platform checks and can fail when network/auth/browser prerequisites are not available
-- queue save and edit flow works
-- SQLite persistence and JSON mirroring work
-- launchd worker files exist and the worker can run successfully on this Mac
-- `Dev.to` automatic posting has been proven live
-- `Facebook` page posting has been proven live for text and image posts
-- `Pinterest` posting has been proven live for single pins through Playwright + saved session
-- affiliate builder rows can now be queued into the main PostPunk schedule with default `3/day` cadence and sale-window overrides
-- affiliate builder now understands a primary board plus alternate boards per row and suggests saved Pinterest board names from config
-- affiliate batch JSON can now be imported headlessly on remote machines with `backend/scripts/import-affiliate-batch.mjs`, including mixed-batch scheduling at `4-6/day`
-- affiliate scheduling now spreads same-product rows across different days before it repeats a product on the same day, when enough other product lanes exist
-- Product profile lifecycle status is now tracked. The shipped Gumroad/Amazon products are marked `live`, while `PostPunk Core` is `in-progress` and the memoir/Reddit product remain `planned`.
-- Telegram alerts fire for both success and failure
-- the worker now emits inventory and schedule-gap alerts when the queue has empty near-term days
-- Pinterest queue remixing has been proven through the backend route and calendar button path
-- current Pinterest queue mix supports `amazon-a`, `amazon-b`, `digital`, and `wildcard` daily slots, with a max of 2 posts from the same product group per day
-- headless Linux fallback is now wired for the browser-based Pinterest and Facebook posting lanes so HP-style no-`DISPLAY` servers do not die at Chrome launch
+### Configuration and workflow inputs
 
-## What Is Not Reliable Yet
+- `backend/config/settings.json`
+- `backend/config/accounts.json`
+- `backend/config/pinterest-boards.json`
+- `backend/config/product-media-pools.json`
+- `backend/config/affiliate-batches/*`
+- `backend/config/recycle.js`
+- `backend/config/2BpostedQ.js`
+- `backend/config/rejected-log.js`
+- `backend/config/posted-log.js`
 
-- `Reddit` is wired in code, but it is not yet a proven live posting lane in the same way `Facebook`, `Dev.to`, and `Pinterest` have been proven
-- `X` is not a trusted posting lane and is not a current focus
-- `LinkedIn` is not a current focus
-- `Facebook` token expiry is still an operational risk, but the lane itself is working
-- the proven Facebook posting path is now browser-only and does not rely on daily token refreshes
-- `Instagram` token state has been a blocker and Instagram is not a current focus
-- `Threads` is incomplete and not a current focus
-- `Pinterest` works for single live pins, but batch posting, topics/tags, alt text, and publish-later are not wired yet
-- `Amazon` now has a usable planning/builder workflow, but it is not a proven unattended posting lane yet
-- built-in AI generation is not a trusted daily workflow yet; external GPT output + `/batch` import is the practical path
-- `Facebook Stories` and `Facebook video` are not wired yet; they are a future Meta lane worth adding because Stories likely matter for reach, but current focus should remain on regular image posts first
-- Astro export helpers exist in the codebase, but the Astro site is not online yet and Astro is not a live publishing lane yet
-- schedule integrity is still not fully trustworthy; the worker can be healthy while the queue itself is missing expected days or was rewritten incorrectly
-- Chrome profile cloning can still be operationally fragile on Linux if session data is being mutated underneath the clone, but transient WAL/lock files are now treated as ignorable instead of hard-failing the lane
+### External repository target
 
-## Current Operating Model
+- AshB4 GitHub Pages repo at `/Users/ash/Desktop/Portfolio/AshB4.github.io`
 
-Use the system like this:
+That repo is the portfolio deployment target for the article pipeline.
 
-1. Publish canonical markdown-first content in Astro / `AshB4 Studio`.
-2. Adapt that source material into PostPunk distribution variants where needed.
-3. Generate content externally or in-app, then bring batches into `/batch`.
-4. Save selected items into the queue.
-5. Approve and schedule from `/batch`.
-6. Let `Dev.to` auto-post when due.
-7. Let `Facebook` auto-post when due through the browser-only lane.
-8. Use the Pinterest Playwright lane for single-pin posting when needed.
-9. Use `/today` for manual posting, retries, and Reddit/manual-assist workflows until Reddit is proven.
-10. Use `/affiliate` to keep the affiliate rules and research prompts visible while planning.
-11. Use `/affiliate/builder` to import/build affiliate rows, mix them, and queue them into the main schedule.
-12. Review posted items in `/archive` and log metrics from `/charts`.
-13. Mark posts `posted` or `failed` as needed.
+## 8. Major Data Flows
 
-## Current System Notes
+### Queue to platform
 
-- Scheduling defaults are conservative in some UI flows, but live usage is mixed. Affiliate and Pinterest scheduling often run at `3/day`, and specific windows can be denser.
-- Product mixing is now supported so batches from multiple products can be interleaved across days.
-- Pinterest queue remixing is now available from the calendar. It calls the backend rebalance route and refreshes the queue after it runs.
-- Remote Pinterest affiliate queue loading now has a no-UI path: copy repo-native batch files to the target host, then run `backend/scripts/import-affiliate-batch.mjs` over SSH.
-- The active Pinterest rebalance plan is `amazon-a`, `amazon-b`, `digital`, `wildcard`. The two Amazon slots are flexible labels and can pull from any `amazon-*` category, not only beauty/kids.
-- The Montessori egg / Easter-stuffer product was removed from the future approved Pinterest queue. Future approved Easter/stuffer/Montessori egg matches were verified at `0` after cleanup.
-- `/archive` is the single posted-history surface now; `/lib` was removed to avoid duplicate navigation.
-- Scheduled items are not selectable in the library bulk-select flow.
-- Batch imports can be saved, approved, and chained after the current last scheduled date.
-- Archive entries now store full post bodies going forward.
-- `/setup` now shows platform token/credential health so auth failures are visible before they become mysteries.
-- `/setup` reflects platform/account health from `/api/platform-health`, but health visibility does not guarantee that a queue day is populated.
-- Facebook browser posting is now proven live against:
-  - the personal profile (`SanguineQueen`)
-  - the `Color With Ash` page
-- Facebook page posting for `Color With Ash` now uses a two-step composer flow where the page submit path is `Next -> Post`.
-- Reddit has an adapter file and routing through `post-to-all.js`, but it should still be treated as a lane to prove operationally rather than an already-proven automation lane.
-- Pinterest Playwright posting is now proven for single live pins using the saved Pinterest session/profile.
-- Pinterest queueing is now actively used for multi-day scheduled runs, but publish-later inside Pinterest itself is still not wired.
-- `backend/scripts/queue/rebalance-pinterest-mix.mjs` owns the current Pinterest queue remix logic.
-- `POST /api/queue/rebalance-pinterest` exposes that remix logic to the app. It supports a `startDate` body field and optional `dryRun`.
-- OpenAI is the practical in-app AI default. Ollama remains optional but is not the trusted path on this Mac.
-- `/affiliate` now holds the working Amazon affiliate framework, including signal rules, sale-mode reminders, angle-stack logic, and GPT research prompts.
-- `/affiliate/builder` now supports:
-  - row-based affiliate pin building
-  - bulk GPT JSON import
-  - local autosave
-  - one immediate board plus optional alternate boards per row
-  - saved-board autocomplete from the Pinterest board config
-  - selected-row queueing
-  - mixed scheduling by product/link to avoid clumping one product repeatedly
-  - default `3/day` cadence with date-range sale overrides such as `25th-30th -> 6/day`
-- JSON shape reminder:
-  - `/affiliate/builder` expects the grouped affiliate import shape with `productLink`, `board`, optional `publishAt`, and `items[]`
-  - PostPunk queue storage uses a different internal post shape with `platforms`, `targets`, `scheduledAt`, `mediaPath`, and `metadata.pinterestBoard`
-  - the copy-pasteable examples for both live in `docs/code-map.md`
-- calendar month cells now show a small filled `🛒` badge next to the date number when affiliate posts are scheduled that day, with badge color following workflow state
-- day-detail ordering now prioritizes social posts (`facebook`/`instagram`) before affiliate Amazon/Pinterest pins
-- Meta-related future work should be prioritized in this order:
-  - add explicit account targeting defaults so generic `facebook` targets stop guessing between profile and page
-  - stabilize Facebook image posting
-  - add Facebook Stories support
-  - add Facebook video support
-  - then revisit Instagram/Threads once the credential flow is clearer
-- Reddit near-term next step:
-  - decide the operational model first: fully automated posting vs manual-assist posting with subreddit-aware variants
-  - prove one or two subreddit-safe posting workflows before treating Reddit as a trusted lane
-  - keep Reddit value-first and context-aware rather than generic promo distribution
-- Substack current state:
-  - platform wiring is in place across backend and frontend
-  - posting is browser-only through Playwright with a dedicated persistent profile
-  - the remaining blocker is auth: the Substack automation profile has not been fully signed in yet
-  - resume point: open the dedicated Substack automation browser, complete email login there once, then rerun `backend/test-substack.js` to continue editor selector work
-- Pinterest near-term next step:
-  - keep using the calendar `Remix Pinterest` button after adding/removing product batches
-  - support sequential batch pin posting in one reused Pinterest session instead of one pin per run
-  - then add Pinterest-specific fields like topics/tags, alt text, and publish-later scheduling
-- Affiliate near-term next step:
-  - use the builder to research and queue real product batches
-  - then add deeper winner-cloning and posting helpers only after the manual process stabilizes
+1. content is created or edited in the UI
+2. it is saved to SQLite through the backend
+3. the worker reads due approved items
+4. `post-to-all.js` normalizes target/platform dispatch
+5. platform adapters post to external services
+6. results are archived back into SQLite
+7. Telegram notifications are sent for success/failure
 
-## Current Queue Snapshot
+### Article to portfolio/RSS
 
-This snapshot changes quickly now and should be checked live in the app or DB instead of trusted as a static count.
+1. a queue article is normalized as an article record
+2. the article pipeline writes portfolio data to the external Astro repo
+3. the portfolio repo is committed and pushed
+4. RSS feeds are generated from the normalized records
+5. DEV-specific feed items and external URLs/platform IDs are preserved
 
-What matters operationally:
+### Pinterest recovery flow
 
-- the queue is real, not fake seed content
-- scheduling currently stretches into May 2026
-- cadence is mixed by workflow: some lanes remain sparse, while Pinterest/affiliate runs can be `3/day` or higher
-- the app now supports multiple live products in one rotating schedule
-- affiliate scheduling can now be built separately with its own cadence defaults inside `/affiliate/builder`
-- Pinterest schedule is currently balanced by the remix script/button with no more than 2 posts from the same product group per day
-- Easter-specific approved Pinterest content should stay out of the queue unless intentionally re-added for a future seasonal window
+1. the calendar page or backend route triggers Pinterest rebalance
+2. the mix logic reorders or reschedules approved Pinterest posts
+3. queue state is rewritten in SQLite
+4. the worker later consumes the updated schedule
 
-## Dev.to Plan
+### Affiliate flow
 
-`Dev.to` is the first trusted automation lane.
+1. product and angle research is prepared
+2. the affiliate builder creates pin-oriented rows
+3. rows are mixed and queued into the main schedule
+4. Pinterest-specific behavior is applied during dispatch
 
-Current `Dev.to` queue strategy:
+## 9. Recent Architectural Decisions
 
-- once per week
-- article-length posts
-- insight first, product link second
+The repo currently reflects these decisions:
 
-Current `Dev.to` queued articles:
+- SQLite is the real queue source of truth
+- JSON queue files are compatibility mirrors, not the primary store
+- the portfolio/RSS/article pipeline is real and should stay separate from normal queue dispatch
+- the content API is a separate Prisma-backed system, not the queue store
+- the frontend router lives in `frontend/main.jsx`, not the deprecated `frontend/app.jsx`
+- `frontend/UXUI/Pages/PostLib.jsx` is legacy; `/archive` is the active archive route
+- `backend/scripts/postingJob.mjs` is the worker entrypoint and is also responsible for RSS auto-generation when enabled
+- `backend/scripts/platforms/post-to-all.js` remains the dispatch layer for all adapters
+- `backend/utils/contentModel.mjs` now carries the centralized metadata normalization rules
+- `backend/utils/rssSyndication.mjs` is the core RSS/article selector and feed builder
+- `backend/utils/articlePipeline.mjs` is the core portfolio export pipeline
 
-- `2026-03-30`: `What Building a Social Scheduler Taught Me About Reliability`
-- `2026-04-06`: `Most Founders Do Not Need More Ideas. They Need Better Filters`
-- `2026-04-13`: `Prompt Packs Are Not Magic. They Are Starting Systems`
+## 10. Immediate Next Constraints
 
-## Product Profiles In Use
+These are the constraints that matter right now:
 
-Current product profiles include:
+- do not assume a lane is proven just because an adapter file exists
+- do not assume `Docs/` and `docs/` are already consolidated; both trees still exist
+- do not treat queue JSON files as editable primary state
+- do not rewrite the Prisma content API as if it were the queue store
+- do not expand the platform surface until the current proven lanes stay healthy
+- do not change article/portfolio/RSS behavior without checking the external repo path and feed outputs
+- keep worker changes conservative because schedule integrity is still the easiest thing to break
 
-- `PostPunk Core`
-- `Gumroad Devtools`
-- `Kawaii Coloring Series`
-- `Goblin Self-Care Coloring Book`
-- `Goblin Core Coloring Affirmations`
-- `AI Powered Grad`
-- `100 Prompt Storm`
-- `Product Strategy 25`
-- `Buzzing Adventures Coloring Book`
-- `Memoir`
-- `Reddit Product`
+## Operational Summary
 
-The memoir exists as a placeholder profile but is not an active promotion focus yet.
-The currently active digital-product promotion set is effectively:
+The current system is stable enough to run, but not finished enough to stop being cautious.
 
-- `AI Powered Grad`
-- `100 Prompt Storm`
-- `Product Strategy 25`
-- `Goblin Core Coloring Affirmations`
+If you are touching the core path, inspect these first:
 
-The currently active visual/product Pinterest set also includes `Kawaii Coloring Series`.
-
-## Important Files To Check First
-
-If you need to understand the system quickly, check these first:
-
-- `docs/code-map.md`
-- `docs/project-state.md`
-- `frontend/main.jsx`
 - `backend/utils/localDb.mjs`
-- `backend/server.mjs`
 - `backend/scripts/postingJob.mjs`
 - `backend/scripts/platforms/post-to-all.js`
-- `frontend/UXUI/Components/PostComposer/usePostComposerState.jsx`
-- `frontend/UXUI/Pages/PostLib.jsx`
-- `frontend/UXUI/Pages/BatchPage.jsx`
-- `frontend/UXUI/Pages/AffiliateEnginePage.jsx`
-- `frontend/UXUI/Pages/AffiliateBuilderPage.jsx`
-- `frontend/UXUI/Pages/ArchivePage.jsx`
-- `frontend/UXUI/Pages/SetupPage.jsx`
-- `frontend/UXUI/Pages/TodayQueue.jsx`
-- `backend/scripts/platforms/social/post-to-facebook.js`
-- `backend/scripts/platforms/social/post-to-facebook-browser.js`
-- `backend/scripts/platforms/social/post-to-pinterest.js`
-- `backend/scripts/platforms/social/post-to-substack.js`
-- `backend/scripts/platforms/social/capture-pinterest-state.js`
-- `backend/test-substack.js`
+- `backend/server.mjs`
+- `backend/utils/rssSyndication.mjs`
+- `backend/utils/articlePipeline.mjs`
+- `backend/utils/contentModel.mjs`
+- `frontend/main.jsx`
 
-## Commands To Check Health
-
-Backend tests:
-
-```bash
-cd backend
-npm test
-```
-
-Frontend build:
-
-```bash
-cd frontend
-npm run build
-```
-
-Run backend server:
-
-```bash
-cd backend
-npm run start
-```
-
-Run frontend dev server:
-
-```bash
-cd frontend
-npm run dev
-```
-
-Check worker logs:
-
-```bash
-tail -f /Users/ash/Desktop/N8tiveFlow/backend/worker.log
-tail -f /Users/ash/Desktop/N8tiveFlow/backend/worker.err.log
-```
-
-Check launchd worker:
-
-```bash
-launchctl list | rg postpunk
-```
-
-Check platform health:
-
-```bash
-cd backend
-npm run health:tokens -- --live
-```
-
-Preview the next 24 hours of approved queue items:
-
-```bash
-cd backend
-npm run queue:dry-run
-```
-
-Remix the Pinterest queue from the command line:
-
-```bash
-cd backend
-npm run queue:rebalance-pinterest -- --start-date 2026-04-19 --dry-run
-npm run queue:rebalance-pinterest -- --start-date 2026-04-19
-```
-
-Inspect SQLite directly:
-
-```bash
-cd backend
-sqlite3 data/postpunk.sqlite "select count(*) from posts;"
-sqlite3 data/postpunk.sqlite "select count(*) from posts where json_extract(payload, '$.scheduledAt') is not null;"
-```
-
-## What To Say Next Time
-
-If you want me to pick up quickly later, say something like:
-
-- `check project state`
-- `read the handoff docs and continue`
-- `check code map and current queue`
-- `what is the current PostPunk state`
-
-That should be enough for me to reload context fast.
-
-## Next Practical Priorities
-
-The right order is:
-
-1. Use `/batch` + `/lib` + `/today` as the main operating loop.
-2. Keep filling the content queue across the live products.
-3. Log manual performance metrics in the library.
-4. Notice actual friction in `/today`, batch import, and library scheduling.
-5. Only automate more after the manual workflow proves where the pain is.
-
-Most likely future automation targets:
-
-- refresh Facebook and Instagram credentials
-- improve Pinterest handling
-- decide whether X is worth manual-assist or browser automation later
-- build a real bulk import/setup product layer instead of relying on ad hoc operator help
-
-## Browser Scheduling Fallback
-
-There is a practical fallback strategy for platforms that already support native scheduling in their own UI.
-
-For platforms like `Facebook`, `X`, and `LinkedIn`, a browser-automation path may be more realistic in the near term than fighting each API integration.
-
-The idea:
-
-- log in with Playwright or browser session reuse
-- open the native compose flow
-- paste the final post copy
-- attach media if present
-- set the publish date and time using the platform's own scheduler
-- submit the scheduled post in the platform UI
-
-This is more brittle than a clean API integration, but it may still be the better short-term business choice when:
-
-- the API is paid, restricted, or unstable
-- credentials are hard to keep healthy
-- native scheduling already exists in the platform UI
-
-Current recommendation:
-
-- keep `Dev.to` on direct automation
-- keep `/today` manual-assist for unstable platforms
-- consider browser-scheduling automation as a next-step fallback for `Facebook`, `X`, and `LinkedIn`
-
-## Important Notes
-
-- `X` should be treated as unreliable for now.
-- `Dev.to` should stay weekly, not daily.
-- `PostPunk` itself should be described honestly as a project in progress, not as a finished polished product.
-- Avoid adding duplicate queue, tag, or profile logic. Use the existing shared helpers instead.
-- Frontend routes live in `frontend/main.jsx`. That is the file to update when routes change.
-- Local Ollama default is set to `stable-code:3b-code-q4_0` as the lightest installed model for code-path testing on this Mac.
-- Ollama requests now use a longer backend timeout. If local generation still stalls, the app should surface a direct timeout message instead of a vague `500`.
-- SQLite is now the real source of truth. The legacy JSON files still exist, but they are mirrors, not the primary store.
-- The practical content workflow right now is import-first: generate externally if needed, then bring batches into `/batch`.
-
-## Ko-fi Webhook Integration (Future Plan)
-- **Webhook URL**: Must start with `https://` (e.g., `https://YourApplicationURL.com`)
-- **Data Format**: Sent as `application/x-www-form-urlencoded`; the `data` field contains payment info as a JSON string.
-- **Response Requirement**: Listener must return `200` status code to confirm receipt. If not received, the same `message_id` will be retried.
-- **Type Field Values**: `Tip`, `Subscription`, `Commission`, `Shop Order`.
-- **Subscription-Specific Fields**:
-  - `is_subscription_payment`: `true` for monthly payments.
-  - `is_first_subscription_payment`: `true` on the first payment.
-  - `tier_name`: Contains the membership tier name.
-- **Shop Order Details**: `shop_items` contains details of each item in the order, including `direct_link_code`.
-- **Public Display Note**: Check the `is_public` field when displaying payments publicly; hide the message when it is `false`.
-- **Testing**: Use [webhook.site](https://webhook.site/) to inspect incoming requests if no server is set up yet.
-- **Zapier Integration**: Connect Ko-fi to hundreds of apps via Zapier for no-code workflows (add note to integrate later).

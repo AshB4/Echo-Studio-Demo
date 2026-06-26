@@ -101,7 +101,27 @@ function shouldUseManualShareMode() {
 }
 
 function shouldSkipExistingFeedCheck() {
-	return boolFromEnv("FACEBOOK_SKIP_EXISTING_CHECK", true);
+	return boolFromEnv("FACEBOOK_SKIP_EXISTING_CHECK", false);
+}
+
+function shouldCommentAfterFacebookPost() {
+	return boolFromEnv("FACEBOOK_COMMENT_AFTER_POST", true);
+}
+
+function getFacebookAfterPostCommentText() {
+	return String(
+		process.env.FACEBOOK_AFTER_POST_COMMENT_TEXT ||
+			process.env.FACEBOOK_POST_COMMENT_TEXT ||
+			"@followers @ashleybroussard",
+	).trim();
+}
+
+function getFacebookAfterPostCommentDelayMs() {
+	const min = Number(process.env.FACEBOOK_AFTER_POST_COMMENT_DELAY_MIN_MS || 18000);
+	const max = Number(process.env.FACEBOOK_AFTER_POST_COMMENT_DELAY_MAX_MS || 42000);
+	const low = Number.isFinite(min) && min >= 0 ? min : 18000;
+	const high = Number.isFinite(max) && max >= low ? max : low;
+	return Math.floor(low + Math.random() * (high - low + 1));
 }
 
 function getFacebookPostText(post) {
@@ -521,6 +541,122 @@ async function extractPublishedPostPermalink(page, value) {
 		logStep("share:permalink-failed", error?.message || String(error));
 		return "";
 	}
+}
+
+async function findPublishedPostArticle(page, value) {
+	const snippets = buildVerificationSnippets(value);
+	if (!snippets.length) {
+		return page.locator('div[role="article"]').first();
+	}
+	for (const snippet of snippets) {
+		const article = page
+			.locator('div[role="article"]')
+			.filter({ hasText: snippet })
+			.first();
+		if ((await article.count().catch(() => 0)) > 0) {
+			return article;
+		}
+	}
+	return page.locator('div[role="article"]').first();
+}
+
+async function findVisibleCommentBox(scope) {
+	const selectors = [
+		'div[contenteditable="true"][role="textbox"][aria-label*="comment"]',
+		'div[contenteditable="true"][aria-label*="Write a comment"]',
+		'div[contenteditable="true"][aria-label*="Comment"]',
+		'div[contenteditable="true"][role="textbox"]',
+		'div[contenteditable="true"][data-lexical-editor="true"]',
+	];
+	for (const selector of selectors) {
+		const candidates = scope.locator(selector);
+		const count = await candidates.count().catch(() => 0);
+		for (let index = 0; index < count; index += 1) {
+			const candidate = candidates.nth(index);
+			if (await candidate.isVisible({ timeout: 500 }).catch(() => false)) {
+				return candidate;
+			}
+		}
+	}
+	return null;
+}
+
+async function clickCommentControl(scope) {
+	const controls = [
+		scope.getByRole("button", { name: /^comment$/i }).first(),
+		scope.locator('[aria-label="Comment"]').first(),
+		scope.locator('text=/^Comment$/i').first(),
+	];
+	for (const control of controls) {
+		if ((await control.count().catch(() => 0)) === 0) continue;
+		if (!(await control.isVisible({ timeout: 700 }).catch(() => false))) continue;
+		await control.click({ timeout: 3000 }).catch(() => {});
+		return true;
+	}
+	return false;
+}
+
+async function submitComment(page, scope) {
+	const submitButtons = [
+		scope.locator('[aria-label="Post comment"][role="button"]').first(),
+		page.locator('[aria-label="Post comment"][role="button"]').first(),
+		scope.getByRole("button", { name: /^Post comment$/i }).first(),
+		page.getByRole("button", { name: /^Post comment$/i }).first(),
+	];
+	for (const button of submitButtons) {
+		if ((await button.count().catch(() => 0)) === 0) continue;
+		if (!(await button.isVisible({ timeout: 700 }).catch(() => false))) continue;
+		const disabled = await button
+			.getAttribute("aria-disabled", { timeout: 700 })
+			.catch(() => null);
+		if (disabled === "true") continue;
+		await button.click({ timeout: 3000 });
+		return "button";
+	}
+	await page.keyboard.press("Enter");
+	return "enter";
+}
+
+async function commentOnPublishedFacebookPost(page, post, commentText, debug) {
+	const text = String(commentText || "").trim();
+	if (!text) return { skipped: true, reason: "empty-comment" };
+
+	const delayMs = getFacebookAfterPostCommentDelayMs();
+	logStep("comment:delay", `${delayMs}ms`);
+	await page.waitForTimeout(delayMs);
+
+	const permalink = await extractPublishedPostPermalink(page, post);
+	if (permalink) {
+		logStep("comment:permalink", permalink);
+		await page.goto(permalink, { waitUntil: "domcontentloaded", timeout: 45000 });
+		await page.waitForTimeout(2500);
+		await page.waitForLoadState("networkidle", { timeout: 10000 }).catch(() => {});
+		await dismissInterruptivePopups(page);
+	}
+
+	const article = await findPublishedPostArticle(page, post);
+	const scope = (await article.count().catch(() => 0)) > 0 ? article : page;
+	await clickCommentControl(scope);
+	await page.waitForTimeout(1000);
+
+	const textbox = await findVisibleCommentBox(scope) || await findVisibleCommentBox(page);
+	if (!textbox) {
+		await debug?.screenshot(page, "comment-box-missing");
+		throw new Error("Facebook comment box not found after publish");
+	}
+
+	await textbox.click({ timeout: 5000 });
+	await page.keyboard.type(text, { delay: 35 });
+	await page.waitForTimeout(800);
+	const submitMode = await submitComment(page, scope);
+	await page.waitForTimeout(2500);
+	logStep("comment:submitted", submitMode);
+	return {
+		ok: true,
+		permalink,
+		submitMode,
+		text,
+	};
 }
 
 async function shareLinkToFacebookFeed(account, message, link) {
@@ -2133,9 +2269,9 @@ export default async function postToFacebookBrowser(post, context = {}) {
 
 		const facebookPostText = getFacebookPostText(post);
 		if (!shouldSkipExistingFeedCheck()) {
-		if (await verifyPostVisibleOnFeed(page, post)) {
-			logStep("already-visible");
-			return {
+			if (await verifyPostVisibleOnFeed(page, post)) {
+				logStep("already-visible");
+				return {
 					type: "browser-post",
 					via: config.useCdp ? "playwright-cdp" : "playwright",
 					targetUrl,
@@ -2333,6 +2469,29 @@ export default async function postToFacebookBrowser(post, context = {}) {
 				"Facebook browser fallback could not verify the new post on feed after publish.",
 			);
 		}
+		let afterPostComment = null;
+		if (shouldCommentAfterFacebookPost()) {
+			const commentText = getFacebookAfterPostCommentText();
+			if (commentText) {
+				try {
+					afterPostComment = await commentOnPublishedFacebookPost(
+						page,
+						post,
+						commentText,
+						debug,
+					);
+					await debug.log("comment:success", afterPostComment);
+				} catch (error) {
+					afterPostComment = {
+						ok: false,
+						error: error?.message || String(error),
+					};
+					logStep("comment:failed", afterPostComment.error);
+					await debug.log("comment:failed", afterPostComment);
+					await debug.screenshot(page, "comment-failed").catch(() => {});
+				}
+			}
+		}
 		const manualShareMode = shouldUseManualShareMode();
 		let shareResults = [];
 		if (manualShareMode) {
@@ -2348,6 +2507,7 @@ export default async function postToFacebookBrowser(post, context = {}) {
 		await debug.log("post-success", {
 			finalUrl: page.url(),
 			manualShareMode,
+			afterPostComment,
 			shareResults,
 		});
 		await page.waitForTimeout(POST_SETTLE_MS);
@@ -2361,6 +2521,7 @@ export default async function postToFacebookBrowser(post, context = {}) {
 			composerSelector,
 			postButtonSelector,
 			manualShareMode,
+			afterPostComment,
 			shareResults,
 		};
 	} finally {

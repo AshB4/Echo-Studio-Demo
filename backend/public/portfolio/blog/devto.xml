@@ -1,0 +1,2365 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:postpunk="https://postpunk.local/rss/ns#">
+  <channel>
+    <title>Ash B4 Blog DEV Import</title>
+    <link>https://ashb4.github.io/blog</link>
+    <description>DEV import feed for Ash B4 Blog.</description>
+    <language>en-us</language>
+    <lastBuildDate>Fri, 12 Jun 2026 04:32:11 GMT</lastBuildDate>
+    <atom:link href="https://ashb4.github.io/blog/devto.xml" rel="self" type="application/rss+xml" />
+    <generator>PostPunk RSS Syndication</generator>
+    <item>
+      <title>Ideas Are Cheap. Attention Is Expensive.</title>
+      <link>https://ashb4.github.io/blog/ideas-are-cheap-attention-is-expensive/</link>
+      <guid isPermaLink="false">p_20260727_devto_ideas_attention_01</guid>
+      <pubDate>Mon, 27 Jul 2026 15:00:00 GMT</pubDate>
+      <description><![CDATA[Ideas Are Cheap. Attention Is Expensive. For a long time, I thought ideas were valuable. Now I think attention is. Ideas are everywhere. I have more ideas than I could build in ten lifetimes. Apps. Books. Automation too...]]></description>
+      <content:encoded><![CDATA[<h1>Ideas Are Cheap. Attention Is Expensive.</h1>
+<p>For a long time, I thought ideas were valuable.</p>
+<p>Now I think attention is.</p>
+<p>Ideas are everywhere.</p>
+<p>I have more ideas than I could build in ten lifetimes.</p>
+<p>Apps.</p>
+<p>Books.</p>
+<p>Automation tools.</p>
+<p>AI projects.</p>
+<p>Business ideas.</p>
+<p>Side projects.</p>
+<p>Random notes scattered across notebooks and text files.</p>
+<p>The older I get, the less impressed I am by ideas.</p>
+<p>Because ideas are cheap.</p>
+<p>Attention is expensive.</p>
+<h2>The Problem Was Never Ideas</h2>
+<p>Whenever a project stalled, I used to think I needed a better idea.</p>
+<p>Something more exciting.</p>
+<p>More original.</p>
+<p>More ambitious.</p>
+<p>Then a funny thing would happen.</p>
+<p>I'd get a new idea.</p>
+<p>I'd be excited for a few days.</p>
+<p>Then I'd discover the same problem.</p>
+<p>The new idea still needed attention.</p>
+<p>The new idea still needed effort.</p>
+<p>The new idea still needed execution.</p>
+<p>I wasn't solving the problem.</p>
+<p>I was changing the scenery.</p>
+<h2>New Ideas Feel Like Progress</h2>
+<p>This is the trap.</p>
+<p>A new idea feels productive.</p>
+<p>You can spend hours planning.</p>
+<p>Researching.</p>
+<p>Sketching.</p>
+<p>Naming things.</p>
+<p>Imagining features.</p>
+<p>Your brain gets rewarded before you've built anything.</p>
+<p>Meanwhile the current project is sitting in the corner wondering why you've abandoned it again.</p>
+<p>Ask me how I know.</p>
+<h2>Attention Is The Real Currency</h2>
+<p>I've started looking at projects differently.</p>
+<p>When a new idea shows up, I don't ask:</p>
+<p>&quot;Is this a good idea?&quot;</p>
+<p>Most ideas are good enough.</p>
+<p>Instead I ask:</p>
+<p>&quot;Does this deserve my attention right now?&quot;</p>
+<p>That's a much harder question.</p>
+<p>Because attention is limited.</p>
+<p>Every hour spent on a new project is an hour not spent improving an existing one.</p>
+<p>Every new idea creates an opportunity cost.</p>
+<h2>The Internet Taught Me This</h2>
+<p>Building content systems taught me something I didn't expect.</p>
+<p>The bottleneck isn't content.</p>
+<p>The bottleneck isn't ideas.</p>
+<p>The bottleneck is attention.</p>
+<p>My attention.</p>
+<p>The audience's attention.</p>
+<p>Everyone's attention.</p>
+<p>There are more ideas than any of us could ever consume.</p>
+<p>The challenge is deciding what deserves focus.</p>
+<h2>What Changed For Me</h2>
+<p>I still collect ideas.</p>
+<p>I'm never going to stop.</p>
+<p>That's how my brain works.</p>
+<p>But I don't treat every idea like an emergency anymore.</p>
+<p>Most ideas can wait.</p>
+<p>Some ideas should wait.</p>
+<p>A few ideas deserve immediate attention.</p>
+<p>Learning the difference has probably saved me more time than any productivity system I've ever built.</p>
+<h2>Final Thought</h2>
+<p>Ideas feel valuable because they're exciting.</p>
+<p>Attention feels ordinary because we spend it every day.</p>
+<p>But if you gave me a choice between one great idea and six months of focused attention, I'd take the attention every time.</p>
+<p>Ideas are abundant.</p>
+<p>Execution is scarce.</p>
+<p>And attention is the bridge between the two.</p>
+<h2>P.S.</h2>
+<p>If you have too many ideas and need help turning the useful ones into actual publishable angles, I built a prompt pack around that problem:</p>
+<p>👉 <a href="https://fleurdevie.gumroad.com/l/100prompt-storm">100 Prompt Storm on Gumroad</a></p>]]></content:encoded>
+      <postpunk:canonicalUrl>https://ashb4.github.io/blog/ideas-are-cheap-attention-is-expensive/</postpunk:canonicalUrl>
+      <postpunk:syndicationStatus>ready</postpunk:syndicationStatus>
+      <postpunk:image>frontend/assets/devto/HPLaptopIntoaLinuxAutomationServer.png</postpunk:image>
+      <category>productivity</category>
+      <category>creativity</category>
+      <category>buildinpublic</category>
+      <category>webdev</category>
+      <postpunk:platform>devto</postpunk:platform>
+    </item>
+    <item>
+      <title>The Day I Realized I Wasn&apos;t Building Apps</title>
+      <link>https://ashb4.github.io/blog/the-day-i-realized-i-wasnt-building-apps/</link>
+      <guid isPermaLink="false">p_20260720_devto_systems_builder_01</guid>
+      <pubDate>Mon, 20 Jul 2026 15:00:00 GMT</pubDate>
+      <description><![CDATA[The Day I Realized I Wasn't Building Apps For years, I thought I was building apps. That's what I called them anyway. A scheduler. A job bot. A healthcare platform. An AI project. A content tool. A browser automation sy...]]></description>
+      <content:encoded><![CDATA[<h1>The Day I Realized I Wasn't Building Apps</h1>
+<p>For years, I thought I was building apps.</p>
+<p>That's what I called them anyway.</p>
+<p>A scheduler.</p>
+<p>A job bot.</p>
+<p>A healthcare platform.</p>
+<p>An AI project.</p>
+<p>A content tool.</p>
+<p>A browser automation system.</p>
+<p>Looking at my GitHub, they seem completely unrelated.</p>
+<p>Honestly, that's something I've worried about before.</p>
+<p>I have over a hundred repositories.</p>
+<p>If someone spends thirty seconds scrolling through them, I can imagine them thinking:</p>
+<p>&quot;Wow. This person is all over the place.&quot;</p>
+<p>The funny thing is that I eventually realized the opposite was true.</p>
+<p>My GitHub is here: <a href="https://github.com/ashb4">https://github.com/ashb4</a></p>
+<h2>The Scheduler That Wasn't A Scheduler</h2>
+<p>One of my projects started life as a simple scheduler.</p>
+<p>That was the goal.</p>
+<p>I hated posting content manually.</p>
+<p>Open platform.</p>
+<p>Paste content.</p>
+<p>Upload image.</p>
+<p>Repeat.</p>
+<p>Again.</p>
+<p>And again.</p>
+<p>And again.</p>
+<p>It felt repetitive.</p>
+<p>It felt annoying.</p>
+<p>Most of all, it felt like something a computer should be doing instead of me.</p>
+<p>So I built a scheduler.</p>
+<p>At least, that's what I thought I was building.</p>
+<h2>Then Things Got Weird</h2>
+<p>The scheduler worked.</p>
+<p>But now I needed content.</p>
+<p>Then I needed analytics.</p>
+<p>Then I needed to know what content was working.</p>
+<p>Then I needed a way to track winners.</p>
+<p>Then I needed a way to reuse content.</p>
+<p>Then I needed platform-specific strategies.</p>
+<p>At some point I looked up and realized I wasn't building a scheduler anymore.</p>
+<p>I was building a system.</p>
+<p>A system for discovering, creating, publishing, measuring, and improving content.</p>
+<p>The scheduler was just one piece.</p>
+<h2>Then I Started Looking At Everything Else</h2>
+<p>That's when I noticed the same thing happening in almost every project I'd ever built.</p>
+<p>My job application tools weren't really job application tools.</p>
+<p>They were systems designed to reduce repetitive effort.</p>
+<p>My automation projects weren't really automation projects.</p>
+<p>They were systems designed to reduce repetitive effort.</p>
+<p>Even my AI projects weren't really about AI.</p>
+<p>They were systems designed to reduce repetitive effort.</p>
+<p>Different technologies.</p>
+<p>Different domains.</p>
+<p>Same obsession.</p>
+<h2>The Pattern I Couldn't See</h2>
+<p>For a long time I thought I had a focus problem.</p>
+<p>Too many ideas.</p>
+<p>Too many projects.</p>
+<p>Too many directions.</p>
+<p>Then I started looking at the actual problems I was solving.</p>
+<p>Almost all of them started with the same thought:</p>
+<p>&quot;This is stupid. There has to be a better way.&quot;</p>
+<p>Job applications.</p>
+<p>Content posting.</p>
+<p>Data entry.</p>
+<p>Decision making.</p>
+<p>Workflow management.</p>
+<p>The technology changed.</p>
+<p>The frustration stayed the same.</p>
+<h2>I Think I'm A Systems Builder</h2>
+<p>This realization changed how I think about my work.</p>
+<p>When people ask what I build, I still usually undersell it.</p>
+<p>I'll say:</p>
+<p>&quot;It's a scheduler.&quot;</p>
+<p>Or:</p>
+<p>&quot;It's a content tool.&quot;</p>
+<p>Or:</p>
+<p>&quot;It's an automation project.&quot;</p>
+<p>Technically those answers are correct.</p>
+<p>They're also incomplete.</p>
+<p>Because what I'm usually building is a system.</p>
+<p>A collection of tools, workflows, feedback loops, and automation working together to solve a problem.</p>
+<p>The app is just the visible part.</p>
+<h2>The Lesson</h2>
+<p>For a long time I thought my projects looked random.</p>
+<p>Now I think they look consistent.</p>
+<p>Not because they use the same technology.</p>
+<p>Because they're all trying to solve the same problem.</p>
+<p>Reducing repetitive human effort.</p>
+<p>Helping people make decisions.</p>
+<p>Creating systems that keep moving even when motivation disappears.</p>
+<p>Once I saw that pattern, a lot of things suddenly made sense.</p>
+<h2>Final Thought</h2>
+<p>I still build apps.</p>
+<p>At least that's what I tell people.</p>
+<p>But somewhere along the way I realized the apps were never the interesting part.</p>
+<p>The interesting part was always the system behind them.</p>
+<p>And once I saw that, I started understanding my own projects a lot better.</p>
+<p>Maybe even myself.</p>]]></content:encoded>
+      <postpunk:canonicalUrl>https://ashb4.github.io/blog/the-day-i-realized-i-wasnt-building-apps/</postpunk:canonicalUrl>
+      <postpunk:syndicationStatus>ready</postpunk:syndicationStatus>
+      <postpunk:image>frontend/assets/devto/IDeasPostsPins.png</postpunk:image>
+      <category>webdev</category>
+      <category>automation</category>
+      <category>productivity</category>
+      <category>buildinpublic</category>
+      <postpunk:platform>devto</postpunk:platform>
+    </item>
+    <item>
+      <title>I Thought I Needed More Motivation. I Actually Needed Better Systems.</title>
+      <link>https://ashb4.github.io/blog/i-thought-i-needed-more-motivation-i-actually-needed-better-systems/</link>
+      <guid isPermaLink="false">p_20260713_devto_motivation_systems_01</guid>
+      <pubDate>Mon, 13 Jul 2026 15:00:00 GMT</pubDate>
+      <description><![CDATA[I Thought I Needed More Motivation. I Actually Needed Better Systems. For a long time, I thought my problem was motivation. I thought I needed more discipline. More willpower. More consistency. More grit. The internet c...]]></description>
+      <content:encoded><![CDATA[<h1>I Thought I Needed More Motivation. I Actually Needed Better Systems.</h1>
+<p>For a long time, I thought my problem was motivation.</p>
+<p>I thought I needed more discipline.</p>
+<p>More willpower.</p>
+<p>More consistency.</p>
+<p>More grit.</p>
+<p>The internet certainly seemed convinced that was the answer.</p>
+<p>Every productivity video felt like some variation of:</p>
+<p>&quot;Wake up earlier.&quot;</p>
+<p>&quot;Want it more.&quot;</p>
+<p>&quot;Work harder.&quot;</p>
+<p>&quot;Stay disciplined.&quot;</p>
+<p>So naturally, I blamed myself whenever I wasn't making progress.</p>
+<p>Then I noticed something.</p>
+<p>Some days I was incredibly productive.</p>
+<p>Other days I got almost nothing done.</p>
+<p>The difference wasn't motivation.</p>
+<p>The difference was friction.</p>
+<h2>Motivation Is A Terrible Dependency</h2>
+<p>Motivation is great when it shows up.</p>
+<p>The problem is that it doesn't always show up.</p>
+<p>Some days you're excited.</p>
+<p>Some days you're tired.</p>
+<p>Some days you're distracted.</p>
+<p>Some days you'd rather do literally anything else.</p>
+<p>If your entire system depends on motivation, eventually the system fails.</p>
+<p>Not because you're lazy.</p>
+<p>Because you're human...Yes, we are allowed to be human.</p>
+<h2>The Job Application Problem</h2>
+<p>Job hunting taught me this lesson better than anything else.</p>
+<p>I've applied to a ridiculous number of jobs over the years.</p>
+<p>And every application seemed to ask for the same information.</p>
+<p>Upload resume.</p>
+<p>Re-enter resume.</p>
+<p>Answer questions.</p>
+<p>Repeat.</p>
+<p>At first I relied on motivation.</p>
+<p>Eventually I realized motivation wasn't the bottleneck.</p>
+<p>The process was.</p>
+<p>The more friction I removed, the easier it became to keep going.</p>
+<h2>The Content Problem</h2>
+<p>The same thing happened with content creation.</p>
+<p>I don't mind creating.</p>
+<p>I actually enjoy it.</p>
+<p>What I hate is repetitive posting.</p>
+<p>Copy.</p>
+<p>Paste.</p>
+<p>Upload.</p>
+<p>Repeat.</p>
+<p>Every platform.</p>
+<p>Every day.</p>
+<p>That's not creativity.</p>
+<p>That's data entry.</p>
+<p>Once I started building systems to handle the repetitive parts, I spent more time creating and less time maintaining.</p>
+<h2>The Myth Of Consistency</h2>
+<p>People often talk about consistency as if it's a personality trait.</p>
+<p>I don't think it is.</p>
+<p>I think consistency is often the result of good systems.</p>
+<p>A bad system requires constant effort.</p>
+<p>A good system reduces effort.</p>
+<p>One depends on motivation.</p>
+<p>The other survives without it.</p>
+<h2>The Real Goal</h2>
+<p>The goal isn't to become a productivity machine.</p>
+<p>The goal is to make the right thing easier.</p>
+<p>When something important depends entirely on my mood, I know the system is broken.</p>
+<p>When the process keeps moving even on low-energy days, I know the system is improving.</p>
+<p>That's the difference.</p>
+<h2>What Changed For Me</h2>
+<p>Once I stopped chasing motivation and started building systems, things got easier.</p>
+<p>Not perfect.</p>
+<p>Just easier.</p>
+<p>Projects moved forward more consistently.</p>
+<p>Content got published more consistently.</p>
+<p>Job applications happened more consistently.</p>
+<p>The work didn't disappear.</p>
+<p>The friction did.</p>
+<p>And that turned out to matter far more than motivation ever did.</p>
+<h2>Final Thought</h2>
+<p>I still like motivation.</p>
+<p>It's fun when it shows up.</p>
+<p>But I don't trust it anymore.</p>
+<p>Motivation is a bonus.</p>
+<p>Systems are infrastructure.</p>
+<p>And if I have to choose between feeling motivated and having a system that works?</p>
+<p>I'll take the system every time.</p>]]></content:encoded>
+      <postpunk:canonicalUrl>https://ashb4.github.io/blog/i-thought-i-needed-more-motivation-i-actually-needed-better-systems/</postpunk:canonicalUrl>
+      <postpunk:syndicationStatus>ready</postpunk:syndicationStatus>
+      <postpunk:image>frontend/assets/devto/Chaos2clarity.png</postpunk:image>
+      <category>productivity</category>
+      <category>automation</category>
+      <category>career</category>
+      <category>buildinpublic</category>
+      <postpunk:platform>devto</postpunk:platform>
+    </item>
+    <item>
+      <title>Most Automation Tools Feel Impressive Right Up Until You Trust Them</title>
+      <link>https://ashb4.github.io/blog/most-automation-tools-feel-impressive-right-up-until-you-trust-them/</link>
+      <guid isPermaLink="false">p_20260706_devto_automation_trust_01</guid>
+      <pubDate>Mon, 06 Jul 2026 15:00:00 GMT</pubDate>
+      <description><![CDATA[Most Automation Tools Feel Impressive Right Up Until You Trust Them Automation is easy. Trust is hard. I can build a demo in an afternoon. I can make a script work once. I can record a video and make everything look mag...]]></description>
+      <content:encoded><![CDATA[<h1>Most Automation Tools Feel Impressive Right Up Until You Trust Them</h1>
+<p>Automation is easy.</p>
+<p>Trust is hard.</p>
+<p>I can build a demo in an afternoon.</p>
+<p>I can make a script work once.</p>
+<p>I can record a video and make everything look magical.</p>
+<p>The real challenge starts when I stop watching.</p>
+<p>Because that's the moment automation becomes either useful or dangerous.</p>
+<p>And I've learned those are very different things.</p>
+<h2>The Demo Phase</h2>
+<p>Every automation project looks impressive during a demo.</p>
+<p>Click button.</p>
+<p>Thing happens.</p>
+<p>Everyone claps.</p>
+<p>You feel like a magical wizard.</p>
+<p>The problem is that demos happen under perfect conditions.</p>
+<p>You know exactly when to click.</p>
+<p>The website hasn't changed.</p>
+<p>The network isn't slow.</p>
+<p>Nothing unexpected happens.</p>
+<p>Real life is less cooperative.</p>
+<h2>The First Time It Fails</h2>
+<p>The first failure is always educational.</p>
+<p>Maybe a website changes.</p>
+<p>Maybe a selector breaks.</p>
+<p>Maybe an API times out.</p>
+<p>Maybe a browser decides today is a great day to behave differently.</p>
+<p>Suddenly the magical automation becomes a support ticket.</p>
+<p>Now you're not building features.</p>
+<p>You're debugging assumptions.</p>
+<h2>Trust Changes Everything</h2>
+<p>When I'm actively watching an automation, failure isn't a big deal.</p>
+<p>I can step in.</p>
+<p>Fix it.</p>
+<p>Restart it.</p>
+<p>Move on.</p>
+<p>But the moment I want to walk away?</p>
+<p>Everything changes.</p>
+<p>Now I care about:</p>
+<ul>
+<li>retries</li>
+<li>logging</li>
+<li>error handling</li>
+<li>recovery</li>
+<li>monitoring</li>
+</ul>
+<p>The boring stuff.</p>
+<p>The stuff nobody puts in YouTube thumbnails.</p>
+<h2>The Bug That Changed My Perspective</h2>
+<p>One of my favorite bugs only appeared when I wasn't watching.</p>
+<p>Seriously.</p>
+<p>The automation worked when I monitored it.</p>
+<p>The automation worked when I tested it.</p>
+<p>The automation worked when I expected it to run.</p>
+<p>Then it failed when left alone.</p>
+<p>Those are the bugs that teach humility.</p>
+<p>Because they force you to stop asking:</p>
+<p>&quot;Does it work?&quot;</p>
+<p>And start asking:</p>
+<p>&quot;Will it keep working?&quot;</p>
+<p>Those are very different questions.</p>
+<h2>Reliability Is A Feature</h2>
+<p>I think a lot of developers underestimate this.</p>
+<p>The most valuable automation isn't usually the smartest.</p>
+<p>It's the one that quietly does its job every day.</p>
+<p>No drama.</p>
+<p>No intervention.</p>
+<p>No surprises.</p>
+<p>Just consistent execution.</p>
+<p>That's what creates trust.</p>
+<p>And trust is what creates value.</p>
+<h2>What I Look For Now</h2>
+<p>Whenever I build automation today, I think less about features and more about confidence.</p>
+<p>Can it recover?</p>
+<p>Can it retry?</p>
+<p>Can it explain what happened?</p>
+<p>Can it fail safely?</p>
+<p>Can I leave it alone for a week?</p>
+<p>Those questions matter more than almost any feature request.</p>
+<h2>Final Thought</h2>
+<p>Most automation tools look impressive the first time they run.</p>
+<p>The real test comes six months later.</p>
+<p>When you've forgotten about them.</p>
+<p>When you're busy doing something else.</p>
+<p>When you're depending on them.</p>
+<p>That's when you discover whether you built a demo or a system.</p>
+<p>And honestly?</p>
+<p>The difference is trust.</p>]]></content:encoded>
+      <postpunk:canonicalUrl>https://ashb4.github.io/blog/most-automation-tools-feel-impressive-right-up-until-you-trust-them/</postpunk:canonicalUrl>
+      <postpunk:syndicationStatus>ready</postpunk:syndicationStatus>
+      <postpunk:image>frontend/assets/devto/DevRage.png</postpunk:image>
+      <category>automation</category>
+      <category>webdev</category>
+      <category>productivity</category>
+      <category>buildinpublic</category>
+      <postpunk:platform>devto</postpunk:platform>
+    </item>
+    <item>
+      <title>AI Didn&apos;t Make Me Lazy. It Made Me Dangerous.</title>
+      <link>https://ashb4.github.io/blog/ai-didnt-make-me-lazy-it-made-me-dangerous/</link>
+      <guid isPermaLink="false">p_20260629_devto_ai_dangerous_01</guid>
+      <pubDate>Mon, 29 Jun 2026 15:00:00 GMT</pubDate>
+      <description><![CDATA[AI Didn't Make Me Lazy. It Made Me Dangerous. Every time I hear someone say AI is making developers lazy, I laugh. Not because they're completely wrong. Because my experience has been the exact opposite. AI didn't make...]]></description>
+      <content:encoded><![CDATA[<h1>AI Didn't Make Me Lazy. It Made Me Dangerous.</h1>
+<p>Every time I hear someone say AI is making developers lazy, I laugh.</p>
+<p>Not because they're completely wrong.</p>
+<p>Because my experience has been the exact opposite.</p>
+<p>AI didn't make me lazy.</p>
+<p>It made me dangerous.</p>
+<h2>The Problem Was Never Ideas</h2>
+<p>I've always had ideas.</p>
+<p>Too many ideas, honestly.</p>
+<p>Stories.</p>
+<p>Books.</p>
+<p>Automation tools.</p>
+<p>Apps.</p>
+<p>Side projects.</p>
+<p>Business ideas.</p>
+<p>Marketing experiments.</p>
+<p>For years, most of them ended up in one of three places:</p>
+<ul>
+<li>abandoned</li>
+<li>half-finished</li>
+<li>buried in a notebook somewhere</li>
+</ul>
+<p>Not because I didn't care about them.</p>
+<p>Because there are only so many hours in a day.</p>
+<p>I could imagine faster than I could build.</p>
+<h2>Before AI</h2>
+<p>Before AI, my process looked something like this:</p>
+<p>Get excited about an idea.</p>
+<p>Start building.</p>
+<p>Hit a roadblock.</p>
+<p>Research.</p>
+<p>Rewrite.</p>
+<p>Research again.</p>
+<p>Get distracted by another idea.</p>
+<p>Repeat.</p>
+<p>Some projects survived.</p>
+<p>A lot didn't.</p>
+<p>I used to write stories and poetry.</p>
+<p>I started books I never finished.</p>
+<p>I built prototypes that never became products.</p>
+<p>Not because the ideas were bad.</p>
+<p>Because execution takes time.</p>
+<p>And time is expensive.</p>
+<h2>Then Something Changed</h2>
+<p>The first thing AI changed wasn't my code.</p>
+<p>It was my momentum.</p>
+<p>Suddenly I could:</p>
+<ul>
+<li>prototype in hours instead of weeks</li>
+<li>explore ideas faster</li>
+<li>debug faster</li>
+<li>write faster</li>
+<li>organize my thoughts faster</li>
+</ul>
+<p>I wasn't spending all my energy fighting blank pages anymore.</p>
+<p>I could focus on building.</p>
+<p>For the first time, my execution speed started getting closer to the speed of my ideas.</p>
+<p>That's when things got interesting.</p>
+<h2>The AI Guru Problem</h2>
+<p>One funny side effect of all this is watching AI productivity videos.</p>
+<p>Sometimes I watch them and think:</p>
+<p>&quot;Yeah, I've been doing that for years.&quot;</p>
+<p>Other times I watch them and immediately steal the idea.</p>
+<p>Some of those creators have genuinely improved how I work.</p>
+<p>But the biggest realization wasn't learning a specific trick.</p>
+<p>It was realizing I finally had leverage.</p>
+<h2>The Output Difference Is Ridiculous</h2>
+<p>I've written books in a weekend.</p>
+<p>I've written one in a day.</p>
+<p>I've created over a hundred content assets in a single session.</p>
+<p>I've built prototypes that would've taken me months a few years ago.</p>
+<p>And here's the important part:</p>
+<p>The ideas were already there.</p>
+<p>AI didn't give me the ideas.</p>
+<p>It gave me the ability to execute them.</p>
+<h2>The Real Superpower</h2>
+<p>People think AI is about generating content.</p>
+<p>For me, it's about reducing friction.</p>
+<p>The biggest benefit isn't code generation.</p>
+<p>It's organization.</p>
+<p>It's helping me gather scattered thoughts.</p>
+<p>It's helping me turn rough concepts into plans.</p>
+<p>It's helping me finish things.</p>
+<p>That's the part nobody talks about enough.</p>
+<p>Finishing matters.</p>
+<p>Ideas are everywhere.</p>
+<p>Finished projects are rare.</p>
+<h2>If AI Disappeared Tomorrow</h2>
+<p>I'd survive.</p>
+<p>I'd still build things.</p>
+<p>I'd probably paint more.</p>
+<p>Maybe crochet.</p>
+<p>Maybe go back to filling notebooks with half-finished ideas.</p>
+<p>But I'd miss the partnership.</p>
+<p>I'd miss having something that helps me organize chaos.</p>
+<p>I'd miss the momentum.</p>
+<p>Most of all, I'd miss finishing projects at the rate I've become used to.</p>
+<h2>Final Thought</h2>
+<p>AI didn't make me creative.</p>
+<p>I was creative before AI.</p>
+<p>AI didn't give me ideas.</p>
+<p>I had plenty of those already.</p>
+<p>What AI gave me was leverage.</p>
+<p>For the first time in my life, my ability to execute started catching up with my imagination.</p>
+<p>And that's why I don't feel less capable because of AI.</p>
+<p>I feel more capable.</p>
+<p>A lot more.</p>
+<p>Which is exactly why it feels dangerous.</p>
+<h2>P.S.</h2>
+<p>If you're trying to turn a pile of ideas into actual finished posts, I built a prompt pack for that exact kind of momentum:</p>
+<p>👉 <a href="https://fleurdevie.gumroad.com/l/100prompt-storm">100 Prompt Storm on Gumroad</a></p>]]></content:encoded>
+      <postpunk:canonicalUrl>https://ashb4.github.io/blog/ai-didnt-make-me-lazy-it-made-me-dangerous/</postpunk:canonicalUrl>
+      <postpunk:syndicationStatus>ready</postpunk:syndicationStatus>
+      <postpunk:image>frontend/assets/devto/HPLaptopIntoaLinuxAutomationServer.png</postpunk:image>
+      <category>ai</category>
+      <category>productivity</category>
+      <category>buildinpublic</category>
+      <category>webdev</category>
+      <postpunk:platform>devto</postpunk:platform>
+    </item>
+    <item>
+      <title>I Started Automating Content and Discovered I Had No Idea What People Wanted</title>
+      <link>https://ashb4.github.io/blog/i-started-automating-content-and-discovered-i-had-no-idea-what-people-wanted/</link>
+      <guid isPermaLink="false">p_20260622_devto_content_automation_goblins_01</guid>
+      <pubDate>Mon, 22 Jun 2026 15:00:00 GMT</pubDate>
+      <description><![CDATA[I Started Automating Content and Discovered I Had No Idea What People Wanted I originally thought I was building a scheduler. I wasn't. I just didn't know it yet. Like a lot of developers, I have more ideas than time. C...]]></description>
+      <content:encoded><![CDATA[<h1>I Started Automating Content and Discovered I Had No Idea What People Wanted</h1>
+<p>I originally thought I was building a scheduler.</p>
+<p>I wasn't.</p>
+<p>I just didn't know it yet.</p>
+<p>Like a lot of developers, I have more ideas than time.</p>
+<p>Coloring books.</p>
+<p>Digital products.</p>
+<p>Experiments.</p>
+<p>Tools.</p>
+<p>Projects that seemed brilliant at 2 AM and questionable by lunchtime.</p>
+<p>The problem wasn't coming up with ideas.</p>
+<p>The problem was getting anyone to see them.</p>
+<p>So I started building what eventually became PostPunk.</p>
+<p>At first, the goal was simple:</p>
+<p>Create content.</p>
+<p>Schedule content.</p>
+<p>Post content.</p>
+<p>Hopefully sell something.</p>
+<p>Easy, right?</p>
+<p>Yeah. Not even close.</p>
+<h2>I Thought Posting Was the Problem</h2>
+<p>My assumption was that marketing failed because I wasn't posting enough.</p>
+<p>That seemed logical.</p>
+<p>If nobody sees your stuff, post more.</p>
+<p>If posting takes too much time, automate it.</p>
+<p>Problem solved.</p>
+<p>So I started building tools to help with scheduling, queues, publishing, and content management.</p>
+<p>The engineering part made sense.</p>
+<p>The marketing part did not.</p>
+<h2>Then I Learned Every Platform Wants Something Different</h2>
+<p>Pinterest isn't Facebook.</p>
+<p>Facebook isn't LinkedIn.</p>
+<p>LinkedIn isn't <a href="http://Dev.to">Dev.to</a>.</p>
+<p>Every platform has its own weird personality.</p>
+<p>Pinterest wants visuals.</p>
+<p>LinkedIn wants insights.</p>
+<p><a href="http://Dev.to">Dev.to</a> wants stories.</p>
+<p>And the same piece of content can perform completely differently depending on where it lands.</p>
+<p>I thought I was building a posting engine.</p>
+<p>Instead, I accidentally started studying platform behavior.</p>
+<p>Then audience behavior.</p>
+<p>Then content behavior.</p>
+<p>Then discoverability.</p>
+<p>The scheduler became one small piece of a much larger problem.</p>
+<h2>The Audience Kept Proving Me Wrong</h2>
+<p>This was probably the most humbling lesson.</p>
+<p>I thought I knew what people would like.</p>
+<p>I was wrong.</p>
+<p>Repeatedly.</p>
+<p>I'd spend time on something I thought was clever.</p>
+<p>Nothing.</p>
+<p>Then I'd post something weird and watch it take off.</p>
+<p>Which brings us to the goblins.</p>
+<h2>The Goblin Chaos</h2>
+<p>One of my strangest content experiments involved chaotic goblin-themed humor.</p>
+<p>If I'm being honest, I wasn't sure anyone would care.</p>
+<p>It was weird.</p>
+<p>A little niche.</p>
+<p>Definitely not something I expected to outperform more practical ideas.</p>
+<p>Then people started clicking.</p>
+<p>Saving.</p>
+<p>Sharing.</p>
+<p>Engaging.</p>
+<p>My first reaction wasn't:</p>
+<p>&quot;I have successfully validated a market opportunity.&quot;</p>
+<p>My first reaction was:</p>
+<p>&quot;Well shit... that was unexpected.&quot;</p>
+<p>The goblin content wasn't just getting attention.</p>
+<p>People actually liked it.</p>
+<p>That surprised me because it felt so specific and strange.</p>
+<p>But it also taught me something important.</p>
+<p>The audience doesn't care what I think should work.</p>
+<p>The audience decides what works.</p>
+<h2>The Scheduler Was Never The Product</h2>
+<p>Looking back, the scheduler wasn't the interesting part.</p>
+<p>The interesting part was learning.</p>
+<p>Learning what people click.</p>
+<p>Learning what people ignore.</p>
+<p>Learning what gets shared.</p>
+<p>Learning how often my assumptions are wrong.</p>
+<p>I started this project because I wanted to automate content distribution.</p>
+<p>What I ended up building was a feedback loop.</p>
+<p>A system that constantly reminds me:</p>
+<p>You are not your audience.</p>
+<p>And that's probably a good thing.</p>
+<h2>The Unexpected Lesson</h2>
+<p>The biggest surprise wasn't that automation helped.</p>
+<p>It did.</p>
+<p>The biggest surprise was discovering how bad I am at predicting winners.</p>
+<p>Some of my favorite ideas went nowhere.</p>
+<p>Some of the weirdest ideas found an audience.</p>
+<p>The goblins taught me that.</p>
+<p>The analytics taught me that.</p>
+<p>The clicks taught me that.</p>
+<p>And honestly, that's probably the most valuable thing the entire project has given me.</p>
+<p>Not automation.</p>
+<p>Not scheduling.</p>
+<p>Not publishing.</p>
+<p>Humility.</p>
+<p>Because every time I think I've figured out what people want, the internet finds a new way to prove me wrong.</p>
+<p>And sometimes, thankfully, it does it with goblins.</p>
+<h2>P.S. If You're Still Reading This...</h2>
+<p>And you're wondering:</p>
+<p>&quot;What the hell is goblin chaos?&quot;</p>
+<p>Fair question.</p>
+<p>One of the biggest surprises from this whole experiment was discovering that some of my weirdest ideas resonated with people far more than the ones I thought would succeed.</p>
+<p>What started as a strange creative experiment somehow turned into coloring books, digital products, memes, and an audience that seems to enjoy chaotic woodland nonsense as much as I do.</p>
+<p>If you're curious about the goblins that helped teach me this lesson:</p>
+<p>👉 <a href="https://fleurdevie.gumroad.com/l/goblin-core-coloring-affirmations">Goblin Core Coloring Affirmations on Gumroad</a></p>
+<p>Turns out the internet wanted more goblins.</p>
+<p>I was as surprised as anyone.</p>]]></content:encoded>
+      <postpunk:canonicalUrl>https://ashb4.github.io/blog/i-started-automating-content-and-discovered-i-had-no-idea-what-people-wanted/</postpunk:canonicalUrl>
+      <postpunk:syndicationStatus>ready</postpunk:syndicationStatus>
+      <postpunk:image>frontend/assets/devto/Chaos2clarity.png</postpunk:image>
+      <category>marketing</category>
+      <category>automation</category>
+      <category>productivity</category>
+      <category>buildinpublic</category>
+      <postpunk:platform>devto</postpunk:platform>
+    </item>
+    <item>
+      <title>What Recruiters Can&apos;t See On My GitHub</title>
+      <link>https://ashb4.github.io/blog/what-recruiters-cant-see-on-my-github/</link>
+      <guid isPermaLink="false">p_20260615_devto_github_recruiters_01</guid>
+      <pubDate>Mon, 15 Jun 2026 15:00:00 GMT</pubDate>
+      <description><![CDATA[What Recruiters Can't See On My GitHub If you spend about 30 seconds looking at my GitHub profile, you might think I'm all over the place. React. Python. Healthcare. AI. Scrapers. Automation. Marketing tools. Job bots....]]></description>
+      <content:encoded><![CDATA[<h1>What Recruiters Can't See On My GitHub</h1>
+<p>If you spend about 30 seconds looking at my GitHub profile, you might think I'm all over the place.</p>
+<p>React.</p>
+<p>Python.</p>
+<p>Healthcare.</p>
+<p>AI.</p>
+<p>Scrapers.</p>
+<p>Automation.</p>
+<p>Marketing tools.</p>
+<p>Job bots.</p>
+<p>Honestly, that's something I've worried about.</p>
+<p>I have over 100 repositories. Recruiters can see most of them, but not all of them. Some are private because they're client work. Some are private because they're unfinished. Some are private because they contain ideas I've spent years developing and I'm not quite ready to throw the blueprints onto the internet.</p>
+<p>From the outside, it can look random.</p>
+<p>But recently I realized something.</p>
+<p>All of those projects are solving the same problem.</p>
+<p>I hate repetitive work.</p>
+<p>My GitHub is here: <a href="https://github.com/ashb4">https://github.com/ashb4</a></p>
+<h2>The Job Application That Broke Me</h2>
+<p>I've applied to thousands of jobs over the years.</p>
+<p>Thousands.</p>
+<p>And one thing has always driven me absolutely insane.</p>
+<p>You upload your resume.</p>
+<p>Then the company immediately asks you to type your entire resume into fifteen different boxes.</p>
+<p>Your work history.</p>
+<p>Your education.</p>
+<p>Your skills.</p>
+<p>Everything.</p>
+<p>The computer already has the information.</p>
+<p>The resume is right there.</p>
+<p>Yet somehow I'm sitting on page seven of an application retyping information that already exists.</p>
+<p>It feels inefficient.</p>
+<p>It feels stupid.</p>
+<p>And most of all, it feels like a waste of time.</p>
+<p>Eventually I got annoyed enough to start building tools to help.</p>
+<h2>Then I Noticed a Pattern</h2>
+<p>At first I thought I was building unrelated projects.</p>
+<p>A job application helper.</p>
+<p>A content scheduler.</p>
+<p>A healthcare platform.</p>
+<p>An AI framework.</p>
+<p>A browser automation system.</p>
+<p>But when I stepped back, I noticed the same motivation behind almost all of them.</p>
+<p>Every project started with some version of:</p>
+<p>&quot;There has to be a better way to do this.&quot;</p>
+<p>Take PostPunk.</p>
+<p>Most people see a social media scheduler.</p>
+<p>I see hours of repetitive posting that I never want to do again.</p>
+<p>I like creating content.</p>
+<p>I do not like manually posting the same content everywhere.</p>
+<p>So I built a system where I can create when I'm feeling creative, queue everything up, and let the system handle the repetitive parts later.</p>
+<p>Create once.</p>
+<p>Reuse many times.</p>
+<p>That's a pattern you'll see all over my GitHub.</p>
+<h2>The Projects Aren't Random</h2>
+<p>One recruiter might see:</p>
+<ul>
+<li>PostPunk</li>
+<li>Orchestrator</li>
+<li>BoxerLogic</li>
+<li>Healthcare applications</li>
+<li>Scrapers</li>
+<li>Automation tools</li>
+</ul>
+<p>and think:</p>
+<p>&quot;These don't seem related.&quot;</p>
+<p>I'd argue they're incredibly related.</p>
+<p>They're all attempts to reduce repetitive human effort.</p>
+<p>Different domains.</p>
+<p>Same obsession.</p>
+<p>Some developers love graphics.</p>
+<p>Some love databases.</p>
+<p>Some love distributed systems.</p>
+<p>I seem to be drawn toward removing friction.</p>
+<p>If something feels repetitive enough, eventually I start asking myself whether a computer should be doing it instead.</p>
+<h2>The AI Question</h2>
+<p>People sometimes assume that because I use AI, the projects are somehow doing all the work for me.</p>
+<p>The reality is less exciting.</p>
+<p>AI helps.</p>
+<p>But AI is not magic.</p>
+<p>I've found that the hardest part isn't generating code.</p>
+<p>It's understanding workflows.</p>
+<p>Understanding edge cases.</p>
+<p>Understanding what people are actually trying to accomplish.</p>
+<p>The code is often the easy part.</p>
+<p>The thinking is the hard part.</p>
+<p>That's true whether you're building a healthcare platform, a job application tool, or an automation system.</p>
+<h2>What I Hope Recruiters Actually See</h2>
+<p>I don't expect recruiters to inspect all 100+ repositories.</p>
+<p>Nobody has time for that.</p>
+<p>But if they do look at my GitHub, I hope they don't see a collection of random technologies.</p>
+<p>I hope they see a systems thinker.</p>
+<p>Someone who gets annoyed by repetitive work.</p>
+<p>Someone who enjoys finding patterns.</p>
+<p>Someone who likes building tools that save people time.</p>
+<p>Because when I look at my repositories, that's what I see.</p>
+<p>Not 100 separate projects.</p>
+<p>Just one idea repeated over and over:</p>
+<p>If a task is repetitive enough, there's probably a better way to do it.</p>
+<p>And sooner or later, I'm probably going to try building it.</p>]]></content:encoded>
+      <postpunk:canonicalUrl>https://ashb4.github.io/blog/what-recruiters-cant-see-on-my-github/</postpunk:canonicalUrl>
+      <postpunk:syndicationStatus>ready</postpunk:syndicationStatus>
+      <postpunk:image>frontend/assets/devto/IDeasPostsPins.png</postpunk:image>
+      <category>github</category>
+      <category>career</category>
+      <category>webdev</category>
+      <category>automation</category>
+      <postpunk:platform>devto</postpunk:platform>
+    </item>
+    <item>
+      <title>PostPunk Pipeline Live Test With Image</title>
+      <link>https://ashb4.github.io/blog/postpunk-pipeline-live-test-with-image/</link>
+      <guid isPermaLink="false">p_20260612_devto_pipeline_live_test_01</guid>
+      <pubDate>Fri, 12 Jun 2026 04:32:02 GMT</pubDate>
+      <description><![CDATA[A live test article proving the PostPunk portfolio, RSS, and DEV draft publishing pipeline can carry an image from one source record.]]></description>
+      <content:encoded><![CDATA[<h1>PostPunk Pipeline Live Test With Image</h1>
+<p>This is a short live pipeline test created from PostPunk.</p>
+<p>The goal is simple: write one article record, generate the canonical portfolio page, generate RSS, let DEV import it, and then publish the matching DEV draft automatically.</p>
+<p>If this appears on DEV, the new PostPunk syndication path is working end to end.</p>
+<h2>What this test checks</h2>
+<ul>
+<li>The article lives once in PostPunk.</li>
+<li>The canonical URL points back to the portfolio.</li>
+<li>The image travels with the article metadata.</li>
+<li>DEV publishing can be automated after RSS import creates a draft.</li>
+</ul>]]></content:encoded>
+      <postpunk:canonicalUrl>https://ashb4.github.io/blog/postpunk-pipeline-live-test-with-image/</postpunk:canonicalUrl>
+      <postpunk:syndicationStatus>approved</postpunk:syndicationStatus>
+      <postpunk:image>https://raw.githubusercontent.com/AshB4/N8tiveFlow/main/frontend/assets/devto/Chaos2clarity.png</postpunk:image>
+      <category>automation</category>
+      <category>webdev</category>
+      <category>devto</category>
+      <category>testing</category>
+      <postpunk:platform>devto</postpunk:platform>
+    </item>
+    <item>
+      <title>Running Playwright + Headless Chrome on Old Hardware Is Less “Automation” and More “Systems Archaeology”</title>
+      <link>https://ashb4.github.io/blog/running-playwright-headless-chrome-on-old-hardware-is-less-automation-and-more-systems-archaeology/</link>
+      <guid isPermaLink="false">p_20260608_devto_01</guid>
+      <pubDate>Mon, 08 Jun 2026 15:00:00 GMT</pubDate>
+      <description><![CDATA[Running Playwright + Headless Chrome on Old Hardware Is Less “Automation” and More “Systems Archaeology” There is a very specific type of developer optimism that makes you look at a dying 2015 HP laptop and think: “Yeah...]]></description>
+      <content:encoded><![CDATA[<h1>Running Playwright + Headless Chrome on Old Hardware Is Less “Automation” and More “Systems Archaeology”</h1>
+<p>There is a very specific type of developer optimism that makes you look at a dying 2015 HP laptop and think:</p>
+<blockquote>
+<p>“Yeah, this should absolutely run production browser automation.”</p>
+</blockquote>
+<p>This machine had:</p>
+<ul>
+<li>6 GB RAM</li>
+<li>a mechanical hard drive</li>
+<li>integrated Radeon graphics</li>
+<li>Linux</li>
+<li>Chrome</li>
+<li>trust issues</li>
+</ul>
+<p>I had already memorized Alt + PrintScreen + REISUB because eventually this machine was going to require spiritual intervention.</p>
+<p>Naturally, I turned it into a self-hosted automation server running Playwright workers for PostPunk.</p>
+<p>Because apparently I enjoy creating problems recreationally.</p>
+<h2>The Basic Fantasy</h2>
+<p>The fantasy sounds reasonable enough.</p>
+<p>Take an old laptop.
+Install Linux.
+Run some worker processes.
+Use Playwright for browser automation.
+Queue content posts automatically.
+Stop manually posting to platforms one miserable click at a time.</p>
+<p>Honestly?</p>
+<p>That last part mattered the most.</p>
+<p>I’m stubborn, cheap, and deeply allergic to manually posting content platform-by-platform forever.</p>
+<p>Which is basically the entire psychological profile required to build self-hosted automation systems.</p>
+<p>At some point this stopped being:</p>
+<blockquote>
+<p>“a fun Linux experiment”</p>
+</blockquote>
+<p>and became:</p>
+<blockquote>
+<p>“the engine for how I actually want to work.”</p>
+</blockquote>
+<p>That meant the machine suddenly mattered.</p>
+<p>And unfortunately, so did Chrome.</p>
+<h2>Everything Was Fine Until Chromium Entered The Story</h2>
+<p>The Linux side was mostly solid.</p>
+<p>Workers behaved.
+Scheduling behaved.
+Queue processing behaved.
+Notifications behaved.</p>
+<p>Then Chromium showed up and started acting like the laptop was trying to process emotional trauma in real time.</p>
+<p>At first the failures looked random:</p>
+<ul>
+<li>selectors timing out</li>
+<li>uploads silently failing</li>
+<li>clicks not landing</li>
+<li>pages freezing</li>
+<li>workers hanging forever</li>
+<li>random skipped inputs</li>
+<li>inconsistent rendering</li>
+</ul>
+<p>The worst part?</p>
+<p>The automation usually worked while I was watching it.</p>
+<p>Pinterest posted correctly.
+Facebook posted correctly.
+<a href="http://Dev.to">Dev.to</a> posted correctly.</p>
+<p>So naturally I thought:</p>
+<blockquote>
+<p>“Cool. Stable.”</p>
+</blockquote>
+<p>That was a lie.</p>
+<h2>The Moment I Realized This Wasn’t Just A Script Problem</h2>
+<p>One night around 3 AM, while manually logging back into one of the platforms, Chromium itself started pixelating.</p>
+<p>The screen partially froze.
+The UI glitched out.
+The machine made that horrible little Linux system ringing noise like everything inside the laptop had briefly entered a panic attack.</p>
+<p>I stopped moving the mouse.
+Waited a few seconds.
+The machine recovered.</p>
+<p>Firefox mostly behaved normally.</p>
+<p>Chrome behaved like the unstable roommate Linux was too polite to evict.</p>
+<p>That was the moment I realized:
+this was no longer just a Playwright problem.</p>
+<p>Something deeper was happening.</p>
+<h2>Old Hardware Changes Failure Modes</h2>
+<p>A lot of browser automation advice accidentally assumes healthy hardware.</p>
+<p>People say:</p>
+<blockquote>
+<p>“Playwright works great.”</p>
+</blockquote>
+<p>And I believe them.</p>
+<p>But there is usually an invisible footnote:</p>
+<blockquote>
+<p>“on hardware that is not actively fighting for its life.”</p>
+</blockquote>
+<p>Old hardware changes the nature of failures.</p>
+<p>On modern systems:</p>
+<ul>
+<li>bad waits</li>
+<li>selectors</li>
+<li>auth issues</li>
+<li>flaky timing</li>
+</ul>
+<p>On old systems:</p>
+<ul>
+<li>GPU weirdness</li>
+<li>rendering instability</li>
+<li>browser freezes</li>
+<li>memory pressure</li>
+<li>disk latency</li>
+<li>thermal throttling</li>
+<li>random Chrome existential crises</li>
+</ul>
+<p>At some point the machine stopped feeling “slow” and started feeling medically concerning.</p>
+<p>The fans would suddenly kick on like the laptop had just seen a tax audit.</p>
+<p>Opening Chrome on this thing felt less like launching software and more like asking an elderly wizard for one final favor.</p>
+<h2>Headless Chrome Is Not Lightweight. It Is Just Invisible</h2>
+<p>People hear “headless browser” and imagine some tiny efficient automation process.</p>
+<p>No.</p>
+<p>Headless Chromium still wants:</p>
+<ul>
+<li>RAM</li>
+<li>CPU</li>
+<li>rendering resources</li>
+<li>shared memory</li>
+<li>dependencies</li>
+<li>graphics support</li>
+<li>enough system stability to not implode under load</li>
+</ul>
+<p>And when resources get tight, the browser does not always fail cleanly.</p>
+<p>Sometimes it just becomes weird.</p>
+<p>Which is worse.</p>
+<p>The browser would get 95% through a workflow and then suddenly remember it was running on archaeology.</p>
+<p>That’s the dangerous middle ground:
+not broken enough to diagnose instantly,
+not stable enough to trust.</p>
+<h2>Headed And Headless Chromium Are Basically Different Species</h2>
+<p>This ended up being the biggest lesson.</p>
+<p>The workflows behaved differently depending on whether I could physically see the browser.</p>
+<p>That sounds fake until you experience it yourself.</p>
+<p>In headed mode:</p>
+<ul>
+<li>rendering slowed things down</li>
+<li>animations had time to finish</li>
+<li>uploads stabilized</li>
+<li>UI transitions completed</li>
+<li>the environment accidentally synchronized itself</li>
+</ul>
+<p>Headless mode removed all that padding.</p>
+<p>Suddenly the automation was running at full machine speed against a browser environment held together with aging hardware and optimism.</p>
+<p>That’s when the race conditions showed up.</p>
+<p>This:</p>
+<pre><code class="language-js">await page.click('[data-testid=&quot;publish-button&quot;]');
+</code></pre>
+<p>turns out to mean absolutely nothing if:</p>
+<ul>
+<li>React is still hydrating</li>
+<li>uploads are incomplete</li>
+<li>event listeners are not attached yet</li>
+<li>the UI exists visually but not functionally</li>
+</ul>
+<p>Watching successful automation manually proves almost nothing.</p>
+<p>Production workers do not care about your vibes.</p>
+<h2>Linux Browser Automation Slowly Becomes Folklore</h2>
+<p>At some point my debugging strategy stopped being engineering and became ritualistic behavior.</p>
+<p>I started:</p>
+<ul>
+<li>reinstalling packages I barely understood</li>
+<li>randomly deleting Chrome-related components</li>
+<li>tweaking launch flags endlessly</li>
+<li>waiting before clicks</li>
+<li>comparing screenshots</li>
+<li>listening for fan noise</li>
+<li>praying to God a little bit</li>
+</ul>
+<p>At one point I removed enough Chrome/X11-related stuff that the machine started pixelating outside the browser too.</p>
+<p>That was probably the strongest:</p>
+<blockquote>
+<p>“hardware may actually be dying”
+moment.</p>
+</blockquote>
+<p>Ironically, reinstalling the things I broke actually improved stability afterward.</p>
+<p>Which is the most Linux outcome possible.</p>
+<h2>GPU Weirdness Is Real</h2>
+<p>Firefox mostly behaved fine on this machine.</p>
+<p>Chrome specifically was chaos.</p>
+<p>Even normal Chrome windows were basically a 50/50 gamble:</p>
+<ul>
+<li>maybe fine</li>
+<li>maybe flickering</li>
+<li>maybe partially freezing</li>
+<li>maybe pixelating</li>
+<li>maybe emotionally collapsing halfway through rendering</li>
+</ul>
+<p>I still do not fully understand why.</p>
+<p>Maybe Chromium was hitting rendering paths the machine hated.
+Maybe Linux and Chrome were fighting deep in the graphics stack.
+Maybe the laptop itself was just old and tired.</p>
+<p>At some point debugging old Linux hardware stops being science and becomes folklore.</p>
+<h2>What Actually Helped</h2>
+<p>Not one thing.
+Several things.</p>
+<p>Moving more flows to headless mode helped because visible Chrome rendering was apparently making the machine more unstable.</p>
+<p>Proper waits helped a lot.</p>
+<p>I learned very quickly that:</p>
+<ul>
+<li>waits matter more than confidence</li>
+<li>“loaded” does not mean “ready”</li>
+<li>visible UI does not mean interactable UI</li>
+</ul>
+<p>Some flags that genuinely helped:</p>
+<pre><code class="language-js">const browser = await chromium.launch({
+  headless: true,
+  args: [
+    '--disable-gpu',
+    '--disable-dev-shm-usage',
+    '--no-sandbox',
+    '--disable-setuid-sandbox',
+    '--disable-background-timer-throttling',
+    '--disable-renderer-backgrounding'
+  ]
+});
+</code></pre>
+<p>And yes:</p>
+<pre><code class="language-bash">npx playwright install-deps
+</code></pre>
+<p>ended up mattering far more than I wanted it to.</p>
+<h2>My Observability Strategy Became “Listen For The Fan”</h2>
+<p>Before headless mode, I barely paid attention to my Telegram notifications because I could physically see the automation running.</p>
+<p>Once everything moved headless, the notifications became the only reliable proof the workers were alive.</p>
+<p>At one point my monitoring stack was basically:</p>
+<ul>
+<li>Telegram alerts</li>
+<li>screenshots</li>
+<li>log files</li>
+<li>listening for fan noise</li>
+</ul>
+<p>If I heard the fan suddenly spin up, I knew the workers were probably doing something.</p>
+<p>Which is not exactly enterprise observability engineering.</p>
+<p>Most of this debugging happened around 3 AM while sitting directly in front of the machine like some kind of browser automation goblin trying to convince Chromium not to explode overnight.</p>
+<h2>Reliability Is A Much Higher Standard Than “It Worked Once”</h2>
+<p>This was the real lesson.</p>
+<p>A successful run does not prove reliability.</p>
+<p>It proves:</p>
+<blockquote>
+<p>one run succeeded under one set of conditions.</p>
+</blockquote>
+<p>That’s all.</p>
+<p>Reliable automation means:</p>
+<ul>
+<li>unattended</li>
+<li>repeatable</li>
+<li>observable</li>
+<li>stable under load</li>
+<li>stable overnight</li>
+<li>stable when nobody is staring directly at Chromium like a nervous zookeeper</li>
+</ul>
+<p>That is a completely different standard.</p>
+<p>Eventually the workers became stable enough that I stopped compulsively checking them every few minutes.</p>
+<p>Honestly?</p>
+<p>That was probably the real milestone.</p>
+<p>Not:</p>
+<blockquote>
+<p>“the scripts worked.”</p>
+</blockquote>
+<p>But:</p>
+<blockquote>
+<p>“I no longer felt emotionally required to supervise Chrome personally.”</p>
+</blockquote>]]></content:encoded>
+      <postpunk:canonicalUrl>https://ashb4.github.io/blog/running-playwright-headless-chrome-on-old-hardware-is-less-automation-and-more-systems-archaeology/</postpunk:canonicalUrl>
+      <postpunk:syndicationStatus>ready</postpunk:syndicationStatus>
+      <postpunk:image>https://raw.githubusercontent.com/AshB4/N8tiveFlow/main/frontend/assets/devto/micromgrdev.png</postpunk:image>
+      <category>linux</category>
+      <category>playwright</category>
+      <category>automation</category>
+      <postpunk:platform>devto</postpunk:platform>
+    </item>
+    <item>
+      <title>The Bug Only Existed When Nobody Was Watching</title>
+      <link>https://ashb4.github.io/blog/the-bug-only-existed-when-nobody-was-watching/</link>
+      <guid isPermaLink="false">p_20260601_devto_01</guid>
+      <pubDate>Mon, 01 Jun 2026 15:00:00 GMT</pubDate>
+      <description><![CDATA[The Bug Only Existed When Nobody Was Watching There is a special kind of insult that only browser automation can deliver. You build a Playwright workflow. You test it manually. You watch the browser open, click, type, s...]]></description>
+      <content:encoded><![CDATA[<h1>The Bug Only Existed When Nobody Was Watching</h1>
+<p>There is a special kind of insult that only browser automation can deliver.</p>
+<p>You build a Playwright workflow.
+You test it manually.
+You watch the browser open, click, type, submit, navigate, succeed.</p>
+<p>Everything looks solid.</p>
+<p>Then you run the exact same flow in production, headless, unattended, on the actual worker machine, and it falls apart like it has never seen a DOM before.</p>
+<p>That was the bug.</p>
+<p>It only existed when nobody was watching.</p>
+<p>And yes, that is an incredibly annoying genre of engineering problem.</p>
+<h2>The Setup</h2>
+<p>This lived inside a self-hosted content automation stack running on an old HP laptop I repurposed into a Linux worker box for PostPunk.</p>
+<p>The stack was basically:</p>
+<ul>
+<li>Linux</li>
+<li>Playwright posting workers</li>
+<li>browser automation for publishing flows</li>
+<li>scheduled background jobs</li>
+<li>queue-driven content automation</li>
+</ul>
+<p>The machine itself was already operating mostly on vibes.</p>
+<p>It had:</p>
+<ul>
+<li>6 GB RAM</li>
+<li>a mechanical hard drive</li>
+<li>integrated Radeon graphics</li>
+<li>the general aura of a haunted library computer</li>
+</ul>
+<p>The kind of laptop where opening Chrome was basically rolling percentile dice against the gods of thermal management.</p>
+<p>I had already memorized Alt + PrintScreen + REISUB because eventually this machine was going to need emotional support.</p>
+<p>Naturally, I decided this was suitable production infrastructure.</p>
+<p>Because apparently I enjoy problems with texture.</p>
+<h2>The First Real Sign Something Was Wrong</h2>
+<p>At first I thought the automation itself was flaky.</p>
+<p>Maybe a selector issue.
+Maybe timing.
+Maybe Playwright weirdness.</p>
+<p>Then one night around 3 AM, while manually logging back into one of the platforms, Chromium itself started pixelating.</p>
+<p>The screen partially froze.
+The UI glitched out.
+Everything briefly distorted.
+Linux made that horrible little ringing system noise like the machine was actively negotiating with death.</p>
+<p>I stopped touching the mouse for a few seconds and eventually the system recovered.</p>
+<p>Firefox mostly behaved normally.</p>
+<p>Chrome behaved like the laptop was trying to reject it biologically.</p>
+<p>That was the moment I realized this was no longer just an automation problem.</p>
+<h2>The Lie: “It Works Fine”</h2>
+<p>While visually testing the automation, everything looked perfect.</p>
+<p>Headed Chromium launched.
+The page loaded.
+Selectors resolved.
+Buttons clicked.
+Posts published.</p>
+<p>Pinterest worked.
+Facebook worked.
+<a href="http://Dev.to">Dev.to</a> worked.</p>
+<p>If you watched the browser run manually, you would absolutely think:</p>
+<blockquote>
+<p>“Cool. This is production-ready.”</p>
+</blockquote>
+<p>That was the trap.</p>
+<p>Because the moment I switched the same workflows into unattended headless production mode, things became cursed.</p>
+<p>Suddenly:</p>
+<ul>
+<li>selectors timed out</li>
+<li>pages rendered differently</li>
+<li>interactions fired but did not land</li>
+<li>uploads silently failed</li>
+<li>waits became inconsistent</li>
+<li>browser state got flaky</li>
+<li>random inputs were skipped entirely</li>
+<li>jobs hung forever for no obvious reason</li>
+</ul>
+<p>The automation would sometimes just stop mid-flow like Chromium had emotionally checked out.</p>
+<h2>Headed and Headless Chromium Are Not the Same Thing</h2>
+<p>People describe headless Chrome like it is just:</p>
+<blockquote>
+<p>“Chrome without the window.”</p>
+</blockquote>
+<p>That is a comforting lie for people who have not suffered enough yet.</p>
+<p>Headed and headless Chromium differ in ways that matter:</p>
+<ul>
+<li>rendering paths</li>
+<li>GPU behavior</li>
+<li>compositor timing</li>
+<li>focus handling</li>
+<li>viewport defaults</li>
+<li>performance under load</li>
+<li>environmental dependencies</li>
+</ul>
+<p>On a modern machine, those differences are annoying.</p>
+<p>On old Linux hardware, they become plot-relevant.</p>
+<p>In headed mode, the visible browser was accidentally helping me.</p>
+<p>Rendering slowed things down just enough that:</p>
+<ul>
+<li>animations finished</li>
+<li>panels stabilized</li>
+<li>listeners attached properly</li>
+<li>React stopped rearranging the DOM</li>
+<li>uploads completed before clicks fired</li>
+</ul>
+<p>Then headless mode removed all that accidental timing padding.</p>
+<p>Suddenly the automation was operating at full machine speed against an unstable environment.</p>
+<p>That is where reality started.</p>
+<h2>The Machine Had Chrome-Specific Hatred</h2>
+<p>The weirdest part is that Firefox mostly behaved fine.</p>
+<p>Chrome specifically was the problem child.</p>
+<p>Even opening normal Chrome windows on this machine felt risky.</p>
+<p>There was basically a 50/50 chance:</p>
+<ul>
+<li>things would work normally</li>
+<li>the UI would partially freeze</li>
+<li>rendering would glitch</li>
+<li>the system would briefly pixelate</li>
+<li>the browser would become unstable under load</li>
+</ul>
+<p>I still do not fully understand why.</p>
+<p>Maybe Chromium was hitting GPU paths the laptop hated.
+Maybe Linux and Chrome were fighting somewhere deep in the graphics stack.
+Maybe the machine itself was simply old and tired.</p>
+<p>I genuinely do not know.</p>
+<p>At some point debugging old Linux hardware stops being science and becomes folklore.</p>
+<h2>Timing Bugs Are Worse in Automation</h2>
+<p>One of the hardest lessons with browser automation is this:</p>
+<p>Watching something work manually proves almost nothing.</p>
+<p>Manual observation accidentally hides instability.</p>
+<p>Humans naturally slow workflows down.
+Visible rendering introduces delays.
+The environment stabilizes itself while you are watching.</p>
+<p>Production workers do not care about your vibes.</p>
+<p>Headless Playwright runs at machine speed.</p>
+<p>So this:</p>
+<pre><code class="language-js">await page.click('[data-testid=&quot;publish-button&quot;]');
+</code></pre>
+<p>suddenly becomes dangerous because the UI might:</p>
+<ul>
+<li>exist visually but not functionally</li>
+<li>still be animating</li>
+<li>still be hydrating</li>
+<li>still be attaching listeners</li>
+<li>still be processing uploads</li>
+</ul>
+<p>The bug was not random.</p>
+<p>The bug was exposing assumptions I did not realize I had made.</p>
+<h2>Linux Browser Automation Is Its Own Genre of Suffering</h2>
+<p>Linux browser automation always includes at least one phase of:</p>
+<blockquote>
+<p>“Which dependency is ruining my life this time?”</p>
+</blockquote>
+<p>Eventually I ended up deep in the usual Playwright rabbit hole:</p>
+<ul>
+<li>screenshots</li>
+<li>tracing</li>
+<li>Chromium launch flags</li>
+<li>sandbox weirdness</li>
+<li>GPU disabling</li>
+<li>headless comparisons</li>
+<li>HTML snapshots</li>
+<li>Telegram alerts</li>
+<li>aggressive logging</li>
+</ul>
+<p>Some flags that genuinely helped:</p>
+<pre><code class="language-js">const browser = await chromium.launch({
+  headless: true,
+  args: [
+    '--disable-gpu',
+    '--disable-dev-shm-usage',
+    '--no-sandbox',
+    '--disable-setuid-sandbox',
+    '--disable-background-timer-throttling',
+    '--disable-renderer-backgrounding'
+  ]
+});
+</code></pre>
+<p>And yes:</p>
+<pre><code class="language-bash">npx playwright install-deps
+</code></pre>
+<p>ended up mattering way more than I wanted it to.</p>
+<h2>My Observability Strategy Became “Listen For The Fan”</h2>
+<p>Before headless mode, I barely cared about my Telegram notifications because I could physically watch the automation run on the screen.</p>
+<p>Once everything moved headless, the notifications suddenly became the only proof the system was still alive.</p>
+<p>At some points, my entire monitoring setup was basically:</p>
+<ul>
+<li>Telegram alerts</li>
+<li>log files</li>
+<li>listening for the laptop fan spinning up</li>
+</ul>
+<p>If I heard the fan kick on, I knew the workers were probably doing something.</p>
+<p>Which is not exactly enterprise observability engineering.</p>
+<p>Most of this debugging happened around 3 AM while sitting directly in front of the machine like some kind of browser automation goblin waiting to see whether Chromium would survive the night.</p>
+<h2>The Most Linux Thing I Did</h2>
+<p>At one point I started deleting Chrome-related Linux components trying to “clean up” the environment.</p>
+<p>I removed things I absolutely should not have removed.</p>
+<p>X11 desktop pieces.
+Chrome shell integrations.
+Random Chromium-related packages I barely understood.</p>
+<p>Eventually I broke the setup badly enough that I had to reinstall parts of it.</p>
+<p>And somehow?</p>
+<p>That actually improved stability afterward.</p>
+<p>Which is the most Linux sentence I have written in a while.</p>
+<h2>What Actually Helped</h2>
+<p>The final “fix” was not one fix.</p>
+<p>It was a pile of smaller operational improvements:</p>
+<ul>
+<li>moving workers fully headless</li>
+<li>improving logging</li>
+<li>relying on Telegram notifications</li>
+<li>adding screenshots on failure</li>
+<li>testing under actual production conditions</li>
+<li>waiting on UI state instead of luck</li>
+<li>reducing rendering overhead</li>
+<li>reinstalling the Chrome components I accidentally destroyed</li>
+</ul>
+<p>The biggest shift was psychological.</p>
+<p>I stopped treating:</p>
+<blockquote>
+<p>“it worked once”</p>
+</blockquote>
+<p>as evidence of reliability.</p>
+<p>Because reliability is not:</p>
+<ul>
+<li>“worked on my machine”</li>
+<li>“worked while visible”</li>
+<li>“worked during testing”</li>
+<li>“worked three times in a row”</li>
+</ul>
+<p>Reliability means:</p>
+<ul>
+<li>unattended</li>
+<li>repeatable</li>
+<li>observable</li>
+<li>stable under load</li>
+<li>stable overnight</li>
+<li>stable when nobody is babysitting Chromium personally</li>
+</ul>
+<p>That is an entirely different standard.</p>
+<h2>Final Thoughts</h2>
+<p>I still like this setup.</p>
+<p>Repurposing old hardware into useful infrastructure is genuinely fun.</p>
+<p>There is something satisfying about turning a neglected old laptop into a working automation server instead of throwing it away.</p>
+<p>But browser automation forces honesty into your system very quickly.</p>
+<p>The stack looked stable right up until Chromium had to behave unattended on a 10-year-old Linux laptop with trust issues and a mechanical hard drive.</p>
+<p>Eventually the workers became stable enough that I stopped staring directly at them while jobs ran.</p>
+<p>Honestly, that was probably the real milestone.</p>
+<p>Not:</p>
+<blockquote>
+<p>“The script finally worked.”</p>
+</blockquote>
+<p>But:</p>
+<blockquote>
+<p>“I no longer felt emotionally required to supervise Chromium personally.”</p>
+</blockquote>]]></content:encoded>
+      <postpunk:canonicalUrl>https://ashb4.github.io/blog/the-bug-only-existed-when-nobody-was-watching/</postpunk:canonicalUrl>
+      <postpunk:syndicationStatus>ready</postpunk:syndicationStatus>
+      <postpunk:image>https://raw.githubusercontent.com/AshB4/N8tiveFlow/main/frontend/assets/devto/linuxJesus.png</postpunk:image>
+      <category>linux</category>
+      <category>playwright</category>
+      <category>automation</category>
+      <postpunk:platform>devto</postpunk:platform>
+    </item>
+    <item>
+      <title>I Turned an Old HP Laptop Into a Linux Automation Server and Learned Why Browser Automation Is a Liar</title>
+      <link>https://ashb4.github.io/blog/i-turned-an-old-hp-laptop-into-a-linux-automation-server-and-learned-why-browser-automation-is-a-liar/</link>
+      <guid isPermaLink="false">p_20260525_devto_01</guid>
+      <pubDate>Mon, 25 May 2026 15:00:00 GMT</pubDate>
+      <description><![CDATA[I Turned an Old HP Laptop Into a Linux Automation Server and Learned Why Browser Automation Is a Liar There is a very specific kind of optimism that makes you look at a dying 2015 HP laptop and think: “Yeah. This should...]]></description>
+      <content:encoded><![CDATA[<h1>I Turned an Old HP Laptop Into a Linux Automation Server and Learned Why Browser Automation Is a Liar</h1>
+<p>There is a very specific kind of optimism that makes you look at a dying 2015 HP laptop and think:</p>
+<blockquote>
+<p>“Yeah. This should run production browser automation.”</p>
+</blockquote>
+<p>This thing had:</p>
+<ul>
+<li>6 GB RAM</li>
+<li>a mechanical hard drive</li>
+<li>integrated AMD graphics</li>
+<li>the general aura of a haunted library computer</li>
+</ul>
+<p>I had already memorized Alt + PrintScreen + REISUB because the machine had seen things.</p>
+<p>Naturally, I decided to turn it into a self-hosted automation server running Playwright workers for PostPunk.</p>
+<p>And honestly?</p>
+<p>At first, it mostly worked.</p>
+<p>The Linux side was fine. Queue workers were fine. Background jobs were fine. Firefox behaved surprisingly well.</p>
+<p>Then Chromium entered the chat and everything became spiritually unstable.</p>
+<h2>The Problem Wasn’t Immediate</h2>
+<p>The annoying part is that the automation <em>sometimes</em> worked.</p>
+<p>Pinterest would post.
+Facebook would post.
+<a href="http://Dev.to">Dev.to</a> would post.</p>
+<p>Then suddenly:</p>
+<ul>
+<li>selectors would fail</li>
+<li>pages would flicker</li>
+<li>interactions would stop working</li>
+<li>rendering would glitch out</li>
+<li>Chrome would randomly pixelate the display</li>
+</ul>
+<p>And the best part?</p>
+<p>Rebooting the machine fixed it for about ten minutes.</p>
+<p>Which is one of the worst debugging outcomes possible because it tricks you into thinking you solved something.</p>
+<h2>Headed vs Headless Was the Real Trap</h2>
+<p>At first I tested everything with a visible browser because I like seeing automation happen.</p>
+<p>Honestly, most developers do.</p>
+<p>Watching the browser click through workflows makes the system feel real. You can visually confirm:</p>
+<ul>
+<li>login state</li>
+<li>navigation</li>
+<li>selectors</li>
+<li>button clicks</li>
+<li>page rendering</li>
+</ul>
+<p>But on this machine, visible Chromium was apparently part of the problem.</p>
+<p>Headed mode flickered constantly. Sometimes opening multiple windows would cause random visual corruption. Firefox looked normal. Chromium behaved like it had unresolved personal issues with Linux.</p>
+<p>Ironically, once I moved more flows to headless mode, reliability improved.</p>
+<p>Not because the automation logic changed.</p>
+<p>Because the machine stopped trying to visibly render Chrome on ancient hardware held together by optimism and thermal paste.</p>
+<h2>Headless and Headed Browsers Are Not Really the Same</h2>
+<p>People talk about headless Chrome like it is just:</p>
+<blockquote>
+<p>“Chrome without the window.”</p>
+</blockquote>
+<p>That is a comforting lie.</p>
+<p>Headless and headed runs differ in:</p>
+<ul>
+<li>rendering behavior</li>
+<li>GPU paths</li>
+<li>timing</li>
+<li>compositor behavior</li>
+<li>resource usage</li>
+<li>sandboxing</li>
+<li>viewport defaults</li>
+</ul>
+<p>On modern hardware, those differences are annoying.</p>
+<p>On old hardware, those differences become a horror genre.</p>
+<p>This laptop was running:</p>
+<ul>
+<li>a spinning HDD</li>
+<li>integrated Radeon R6 graphics</li>
+<li>limited RAM</li>
+<li>multiple worker processes</li>
+<li>Playwright automation</li>
+</ul>
+<p>That is exactly the kind of setup where browser rendering starts acting cursed under load.</p>
+<h2>Linux Makes Browser Automation More Honest</h2>
+<p>Linux is great because it exposes every hidden assumption your workflow was making.</p>
+<p>A browser launched manually from your terminal is not living the same life as:</p>
+<ul>
+<li>a headless browser</li>
+<li>a system service</li>
+<li>a scheduled worker</li>
+<li>an unattended automation process</li>
+</ul>
+<p>Once I started debugging seriously, I ended up deep in the usual Playwright rabbit hole:</p>
+<ul>
+<li>screenshots</li>
+<li>tracing</li>
+<li>Chromium launch flags</li>
+<li>disabling GPU paths</li>
+<li>sandbox weirdness</li>
+<li>comparing headless vs headed runs</li>
+<li>logging everything to Telegram because the local logs were not helpful enough</li>
+</ul>
+<p>Some of the flags that helped:</p>
+<pre><code class="language-js">const browser = await chromium.launch({
+  headless: true,
+  args: [
+    '--disable-gpu',
+    '--disable-dev-shm-usage',
+    '--no-sandbox',
+    '--disable-setuid-sandbox'
+  ]
+});
+</code></pre>
+<p>And yes:</p>
+<pre><code class="language-bash">npx playwright install-deps
+</code></pre>
+<p>ended up mattering more than I wanted it to.</p>
+<h2>The Machine Had Vibes</h2>
+<p>Every self-hosted setup eventually develops a personality.</p>
+<p>This one had raccoon energy.</p>
+<p>It worked just well enough to encourage confidence right before doing something deeply suspicious.</p>
+<p>Firefox? Fine.</p>
+<p>Chromium?
+Flickering like a cursed artifact from a forgotten Best Buy clearance aisle.</p>
+<p>At some point I stopped treating the server like infrastructure and started treating it like a slightly unstable coworker that needed supervision and good logging.</p>
+<h2>What Actually Improved Reliability</h2>
+<p>The biggest improvement was honestly:</p>
+<ul>
+<li>moving more automation to headless mode</li>
+<li>improving logging</li>
+<li>adding Telegram notifications</li>
+<li>testing under actual production conditions instead of “works while I’m watching it”</li>
+</ul>
+<p>That last one matters.</p>
+<p>Because “works on my machine” means almost nothing in browser automation when:</p>
+<ul>
+<li>the hardware changes</li>
+<li>the rendering path changes</li>
+<li>the browser mode changes</li>
+<li>the workload changes</li>
+</ul>
+<p>Browser automation is part application logic and part environmental superstition.</p>
+<p>Old hardware amplifies that reality fast.</p>
+<h2>Lessons Learned</h2>
+<p>A few things I would absolutely do again:</p>
+<ul>
+<li>keep a visible debug mode available</li>
+<li>capture screenshots aggressively</li>
+<li>log browser launch args</li>
+<li>test under the exact conditions production uses</li>
+<li>assume old hardware will surface weird rendering bugs earlier</li>
+</ul>
+<p>And a few things I learned the hard way:</p>
+<ul>
+<li>headed success does not prove headless reliability</li>
+<li>Chromium on aging Linux hardware gets weird fast</li>
+<li>rebooting is not a debugging strategy</li>
+<li>self-hosted automation needs observability way more than optimism</li>
+</ul>
+<p>I still like the setup.</p>
+<p>Repurposing old hardware into useful infrastructure is genuinely fun.</p>
+<p>But browser automation was the thing that forced honesty into the system.</p>
+<p>The stack looked stable right up until Chromium had to behave unattended on a 10-year-old Linux laptop with a mechanical hard drive and trust issues.</p>
+<p>That’s when the project stopped being a fun experiment and started becoming engineering.</p>
+<h1>The Bug Only Existed When Nobody Was Watching</h1>
+<p>There is a special kind of insult that only browser automation can deliver.</p>
+<p>You build a Playwright workflow.
+You test it manually.
+You watch the browser open, click, type, submit, navigate, succeed.</p>
+<p>Everything looks solid.</p>
+<p>Then you run the exact same flow in production, headless, unattended, on the actual worker machine, and it falls apart like it has never seen a DOM before.</p>
+<p>That was the bug.</p>
+<p>It only existed when nobody was watching.</p>
+<p>And yes, that is an incredibly annoying genre of engineering problem.</p>
+<h2>The Setup</h2>
+<p>This lived inside a self-hosted content automation stack running on an old HP laptop I repurposed into a Linux worker box for PostPunk.</p>
+<p>The stack was basically:</p>
+<ul>
+<li>Linux</li>
+<li>Playwright posting workers</li>
+<li>browser automation for publishing flows</li>
+<li>scheduled background jobs</li>
+<li>queue-driven content automation</li>
+</ul>
+<p>The machine itself was already operating mostly on vibes.</p>
+<p>It had:</p>
+<ul>
+<li>6 GB RAM</li>
+<li>a mechanical hard drive</li>
+<li>integrated Radeon graphics</li>
+<li>the general aura of a haunted library computer</li>
+</ul>
+<p>The kind of laptop where opening Chrome was basically rolling percentile dice against the gods of thermal management.</p>
+<p>I had already memorized Alt + PrintScreen + REISUB because eventually this machine was going to need emotional support.</p>
+<p>Naturally, I decided this was suitable production infrastructure.</p>
+<p>Because apparently I enjoy problems with texture.</p>
+<h2>The First Real Sign Something Was Wrong</h2>
+<p>At first I thought the automation itself was flaky.</p>
+<p>Maybe a selector issue.
+Maybe timing.
+Maybe Playwright weirdness.</p>
+<p>Then one night around 3 AM, while manually logging back into one of the platforms, Chromium itself started pixelating.</p>
+<p>The screen partially froze.
+The UI glitched out.
+Everything briefly distorted.
+Linux made that horrible little ringing system noise like the machine was actively negotiating with death.</p>
+<p>I stopped touching the mouse for a few seconds and eventually the system recovered.</p>
+<p>Firefox mostly behaved normally.</p>
+<p>Chrome behaved like the laptop was trying to reject it biologically.</p>
+<p>That was the moment I realized this was no longer just an automation problem.</p>
+<h2>The Lie: “It Works Fine”</h2>
+<p>While visually testing the automation, everything looked perfect.</p>
+<p>Headed Chromium launched.
+The page loaded.
+Selectors resolved.
+Buttons clicked.
+Posts published.</p>
+<p>Pinterest worked.
+Facebook worked.
+<a href="http://Dev.to">Dev.to</a> worked.</p>
+<p>If you watched the browser run manually, you would absolutely think:</p>
+<blockquote>
+<p>“Cool. This is production-ready.”</p>
+</blockquote>
+<p>That was the trap.</p>
+<p>Because the moment I switched the same workflows into unattended headless production mode, things became cursed.</p>
+<p>Suddenly:</p>
+<ul>
+<li>selectors timed out</li>
+<li>pages rendered differently</li>
+<li>interactions fired but did not land</li>
+<li>uploads silently failed</li>
+<li>waits became inconsistent</li>
+<li>browser state got flaky</li>
+<li>random inputs were skipped entirely</li>
+<li>jobs hung forever for no obvious reason</li>
+</ul>
+<p>The automation would sometimes just stop mid-flow like Chromium had emotionally checked out.</p>
+<h2>Headed and Headless Chromium Are Not the Same Thing</h2>
+<p>People describe headless Chrome like it is just:</p>
+<blockquote>
+<p>“Chrome without the window.”</p>
+</blockquote>
+<p>That is a comforting lie for people who have not suffered enough yet.</p>
+<p>Headed and headless Chromium differ in ways that matter:</p>
+<ul>
+<li>rendering paths</li>
+<li>GPU behavior</li>
+<li>compositor timing</li>
+<li>focus handling</li>
+<li>viewport defaults</li>
+<li>performance under load</li>
+<li>environmental dependencies</li>
+</ul>
+<p>On a modern machine, those differences are annoying.</p>
+<p>On old Linux hardware, they become plot-relevant.</p>
+<p>In headed mode, the visible browser was accidentally helping me.</p>
+<p>Rendering slowed things down just enough that:</p>
+<ul>
+<li>animations finished</li>
+<li>panels stabilized</li>
+<li>listeners attached properly</li>
+<li>React stopped rearranging the DOM</li>
+<li>uploads completed before clicks fired</li>
+</ul>
+<p>Then headless mode removed all that accidental timing padding.</p>
+<p>Suddenly the automation was operating at full machine speed against an unstable environment.</p>
+<p>That is where reality started.</p>
+<h2>The Machine Had Chrome-Specific Hatred</h2>
+<p>The weirdest part is that Firefox mostly behaved fine.</p>
+<p>Chrome specifically was the problem child.</p>
+<p>Even opening normal Chrome windows on this machine felt risky.</p>
+<p>There was basically a 50/50 chance:</p>
+<ul>
+<li>things would work normally</li>
+<li>the UI would partially freeze</li>
+<li>rendering would glitch</li>
+<li>the system would briefly pixelate</li>
+<li>the browser would become unstable under load</li>
+</ul>
+<p>I still do not fully understand why.</p>
+<p>Maybe Chromium was hitting GPU paths the laptop hated.
+Maybe Linux and Chrome were fighting somewhere deep in the graphics stack.
+Maybe the machine itself was simply old and tired.</p>
+<p>I genuinely do not know.</p>
+<p>At some point debugging old Linux hardware stops being science and becomes folklore.</p>
+<h2>Timing Bugs Are Worse in Automation</h2>
+<p>One of the hardest lessons with browser automation is this:</p>
+<p>Watching something work manually proves almost nothing.</p>
+<p>Manual observation accidentally hides instability.</p>
+<p>Humans naturally slow workflows down.
+Visible rendering introduces delays.
+The environment stabilizes itself while you are watching.</p>
+<p>Production workers do not care about your vibes.</p>
+<p>Headless Playwright runs at machine speed.</p>
+<p>So this:</p>
+<pre><code class="language-js">await page.click('[data-testid=&quot;publish-button&quot;]');
+</code></pre>
+<p>suddenly becomes dangerous because the UI might:</p>
+<ul>
+<li>exist visually but not functionally</li>
+<li>still be animating</li>
+<li>still be hydrating</li>
+<li>still be attaching listeners</li>
+<li>still be processing uploads</li>
+</ul>
+<p>The bug was not random.</p>
+<p>The bug was exposing assumptions I did not realize I had made.</p>
+<h2>Linux Browser Automation Is Its Own Genre of Suffering</h2>
+<p>Linux browser automation always includes at least one phase of:</p>
+<blockquote>
+<p>“Which dependency is ruining my life this time?”</p>
+</blockquote>
+<p>Eventually I ended up deep in the usual Playwright rabbit hole:</p>
+<ul>
+<li>screenshots</li>
+<li>tracing</li>
+<li>Chromium launch flags</li>
+<li>sandbox weirdness</li>
+<li>GPU disabling</li>
+<li>headless comparisons</li>
+<li>HTML snapshots</li>
+<li>Telegram alerts</li>
+<li>aggressive logging</li>
+</ul>
+<p>Some flags that genuinely helped:</p>
+<pre><code class="language-js">const browser = await chromium.launch({
+  headless: true,
+  args: [
+    '--disable-gpu',
+    '--disable-dev-shm-usage',
+    '--no-sandbox',
+    '--disable-setuid-sandbox',
+    '--disable-background-timer-throttling',
+    '--disable-renderer-backgrounding'
+  ]
+});
+</code></pre>
+<p>And yes:</p>
+<pre><code class="language-bash">npx playwright install-deps
+</code></pre>
+<p>ended up mattering way more than I wanted it to.</p>
+<h2>My Observability Strategy Became “Listen For The Fan”</h2>
+<p>Before headless mode, I barely cared about my Telegram notifications because I could physically watch the automation run on the screen.</p>
+<p>Once everything moved headless, the notifications suddenly became the only proof the system was still alive.</p>
+<p>At some points, my entire monitoring setup was basically:</p>
+<ul>
+<li>Telegram alerts</li>
+<li>log files</li>
+<li>listening for the laptop fan spinning up</li>
+</ul>
+<p>If I heard the fan kick on, I knew the workers were probably doing something.</p>
+<p>Which is not exactly enterprise observability engineering.</p>
+<p>Most of this debugging happened around 3 AM while sitting directly in front of the machine like some kind of browser automation goblin waiting to see whether Chromium would survive the night.</p>
+<h2>The Most Linux Thing I Did</h2>
+<p>At one point I started deleting Chrome-related Linux components trying to “clean up” the environment.</p>
+<p>I removed things I absolutely should not have removed.</p>
+<p>X11 desktop pieces.
+Chrome shell integrations.
+Random Chromium-related packages I barely understood.</p>
+<p>Eventually I broke the setup badly enough that I had to reinstall parts of it.</p>
+<p>And somehow?</p>
+<p>That actually improved stability afterward.</p>
+<p>Which is the most Linux sentence I have written in a while.</p>
+<h2>What Actually Helped</h2>
+<p>The final “fix” was not one fix.</p>
+<p>It was a pile of smaller operational improvements:</p>
+<ul>
+<li>moving workers fully headless</li>
+<li>improving logging</li>
+<li>relying on Telegram notifications</li>
+<li>adding screenshots on failure</li>
+<li>testing under actual production conditions</li>
+<li>waiting on UI state instead of luck</li>
+<li>reducing rendering overhead</li>
+<li>reinstalling the Chrome components I accidentally destroyed</li>
+</ul>
+<p>The biggest shift was psychological.</p>
+<p>I stopped treating:</p>
+<blockquote>
+<p>“it worked once”</p>
+</blockquote>
+<p>as evidence of reliability.</p>
+<p>Because reliability is not:</p>
+<ul>
+<li>“worked on my machine”</li>
+<li>“worked while visible”</li>
+<li>“worked during testing”</li>
+<li>“worked three times in a row”</li>
+</ul>
+<p>Reliability means:</p>
+<ul>
+<li>unattended</li>
+<li>repeatable</li>
+<li>observable</li>
+<li>stable under load</li>
+<li>stable overnight</li>
+<li>stable when nobody is babysitting Chromium personally</li>
+</ul>
+<p>That is an entirely different standard.</p>
+<h2>Final Thoughts</h2>
+<p>I still like this setup.</p>
+<p>Repurposing old hardware into useful infrastructure is genuinely fun.</p>
+<p>There is something satisfying about turning a neglected old laptop into a working automation server instead of throwing it away.</p>
+<p>But browser automation forces honesty into your system very quickly.</p>
+<p>The stack looked stable right up until Chromium had to behave unattended on a 10-year-old Linux laptop with trust issues and a mechanical hard drive.</p>
+<p>Eventually the workers became stable enough that I stopped staring directly at them while jobs ran.</p>
+<p>Honestly, that was probably the real milestone.</p>
+<p>Not:</p>
+<blockquote>
+<p>“The script finally worked.”</p>
+</blockquote>
+<p>But:</p>
+<blockquote>
+<p>“I no longer felt emotionally required to supervise Chromium personally.”</p>
+</blockquote>
+<h1>Running Playwright + Headless Chrome on Old Hardware Is Less “Automation” and More “Systems Archaeology”</h1>
+<p>There is a very specific type of developer optimism that makes you look at a dying 2015 HP laptop and think:</p>
+<blockquote>
+<p>“Yeah, this should absolutely run production browser automation.”</p>
+</blockquote>
+<p>This machine had:</p>
+<ul>
+<li>6 GB RAM</li>
+<li>a mechanical hard drive</li>
+<li>integrated Radeon graphics</li>
+<li>Linux</li>
+<li>Chrome</li>
+<li>trust issues</li>
+</ul>
+<p>I had already memorized Alt + PrintScreen + REISUB because eventually this machine was going to require spiritual intervention.</p>
+<p>Naturally, I turned it into a self-hosted automation server running Playwright workers for PostPunk.</p>
+<p>Because apparently I enjoy creating problems recreationally.</p>
+<h2>The Basic Fantasy</h2>
+<p>The fantasy sounds reasonable enough.</p>
+<p>Take an old laptop.
+Install Linux.
+Run some worker processes.
+Use Playwright for browser automation.
+Queue content posts automatically.
+Stop manually posting to platforms one miserable click at a time.</p>
+<p>Honestly?</p>
+<p>That last part mattered the most.</p>
+<p>I’m stubborn, cheap, and deeply allergic to manually posting content platform-by-platform forever.</p>
+<p>Which is basically the entire psychological profile required to build self-hosted automation systems.</p>
+<p>At some point this stopped being:</p>
+<blockquote>
+<p>“a fun Linux experiment”</p>
+</blockquote>
+<p>and became:</p>
+<blockquote>
+<p>“the engine for how I actually want to work.”</p>
+</blockquote>
+<p>That meant the machine suddenly mattered.</p>
+<p>And unfortunately, so did Chrome.</p>
+<h2>Everything Was Fine Until Chromium Entered The Story</h2>
+<p>The Linux side was mostly solid.</p>
+<p>Workers behaved.
+Scheduling behaved.
+Queue processing behaved.
+Notifications behaved.</p>
+<p>Then Chromium showed up and started acting like the laptop was trying to process emotional trauma in real time.</p>
+<p>At first the failures looked random:</p>
+<ul>
+<li>selectors timing out</li>
+<li>uploads silently failing</li>
+<li>clicks not landing</li>
+<li>pages freezing</li>
+<li>workers hanging forever</li>
+<li>random skipped inputs</li>
+<li>inconsistent rendering</li>
+</ul>
+<p>The worst part?</p>
+<p>The automation usually worked while I was watching it.</p>
+<p>Pinterest posted correctly.
+Facebook posted correctly.
+<a href="http://Dev.to">Dev.to</a> posted correctly.</p>
+<p>So naturally I thought:</p>
+<blockquote>
+<p>“Cool. Stable.”</p>
+</blockquote>
+<p>That was a lie.</p>
+<h2>The Moment I Realized This Wasn’t Just A Script Problem</h2>
+<p>One night around 3 AM, while manually logging back into one of the platforms, Chromium itself started pixelating.</p>
+<p>The screen partially froze.
+The UI glitched out.
+The machine made that horrible little Linux system ringing noise like everything inside the laptop had briefly entered a panic attack.</p>
+<p>I stopped moving the mouse.
+Waited a few seconds.
+The machine recovered.</p>
+<p>Firefox mostly behaved normally.</p>
+<p>Chrome behaved like the unstable roommate Linux was too polite to evict.</p>
+<p>That was the moment I realized:
+this was no longer just a Playwright problem.</p>
+<p>Something deeper was happening.</p>
+<h2>Old Hardware Changes Failure Modes</h2>
+<p>A lot of browser automation advice accidentally assumes healthy hardware.</p>
+<p>People say:</p>
+<blockquote>
+<p>“Playwright works great.”</p>
+</blockquote>
+<p>And I believe them.</p>
+<p>But there is usually an invisible footnote:</p>
+<blockquote>
+<p>“on hardware that is not actively fighting for its life.”</p>
+</blockquote>
+<p>Old hardware changes the nature of failures.</p>
+<p>On modern systems:</p>
+<ul>
+<li>bad waits</li>
+<li>selectors</li>
+<li>auth issues</li>
+<li>flaky timing</li>
+</ul>
+<p>On old systems:</p>
+<ul>
+<li>GPU weirdness</li>
+<li>rendering instability</li>
+<li>browser freezes</li>
+<li>memory pressure</li>
+<li>disk latency</li>
+<li>thermal throttling</li>
+<li>random Chrome existential crises</li>
+</ul>
+<p>At some point the machine stopped feeling “slow” and started feeling medically concerning.</p>
+<p>The fans would suddenly kick on like the laptop had just seen a tax audit.</p>
+<p>Opening Chrome on this thing felt less like launching software and more like asking an elderly wizard for one final favor.</p>
+<h2>Headless Chrome Is Not Lightweight. It Is Just Invisible</h2>
+<p>People hear “headless browser” and imagine some tiny efficient automation process.</p>
+<p>No.</p>
+<p>Headless Chromium still wants:</p>
+<ul>
+<li>RAM</li>
+<li>CPU</li>
+<li>rendering resources</li>
+<li>shared memory</li>
+<li>dependencies</li>
+<li>graphics support</li>
+<li>enough system stability to not implode under load</li>
+</ul>
+<p>And when resources get tight, the browser does not always fail cleanly.</p>
+<p>Sometimes it just becomes weird.</p>
+<p>Which is worse.</p>
+<p>The browser would get 95% through a workflow and then suddenly remember it was running on archaeology.</p>
+<p>That’s the dangerous middle ground:
+not broken enough to diagnose instantly,
+not stable enough to trust.</p>
+<h2>Headed And Headless Chromium Are Basically Different Species</h2>
+<p>This ended up being the biggest lesson.</p>
+<p>The workflows behaved differently depending on whether I could physically see the browser.</p>
+<p>That sounds fake until you experience it yourself.</p>
+<p>In headed mode:</p>
+<ul>
+<li>rendering slowed things down</li>
+<li>animations had time to finish</li>
+<li>uploads stabilized</li>
+<li>UI transitions completed</li>
+<li>the environment accidentally synchronized itself</li>
+</ul>
+<p>Headless mode removed all that padding.</p>
+<p>Suddenly the automation was running at full machine speed against a browser environment held together with aging hardware and optimism.</p>
+<p>That’s when the race conditions showed up.</p>
+<p>This:</p>
+<pre><code class="language-js">await page.click('[data-testid=&quot;publish-button&quot;]');
+</code></pre>
+<p>turns out to mean absolutely nothing if:</p>
+<ul>
+<li>React is still hydrating</li>
+<li>uploads are incomplete</li>
+<li>event listeners are not attached yet</li>
+<li>the UI exists visually but not functionally</li>
+</ul>
+<p>Watching successful automation manually proves almost nothing.</p>
+<p>Production workers do not care about your vibes.</p>
+<h2>Linux Browser Automation Slowly Becomes Folklore</h2>
+<p>At some point my debugging strategy stopped being engineering and became ritualistic behavior.</p>
+<p>I started:</p>
+<ul>
+<li>reinstalling packages I barely understood</li>
+<li>randomly deleting Chrome-related components</li>
+<li>tweaking launch flags endlessly</li>
+<li>waiting before clicks</li>
+<li>comparing screenshots</li>
+<li>listening for fan noise</li>
+<li>praying to God a little bit</li>
+</ul>
+<p>At one point I removed enough Chrome/X11-related stuff that the machine started pixelating outside the browser too.</p>
+<p>That was probably the strongest:</p>
+<blockquote>
+<p>“hardware may actually be dying”
+moment.</p>
+</blockquote>
+<p>Ironically, reinstalling the things I broke actually improved stability afterward.</p>
+<p>Which is the most Linux outcome possible.</p>
+<h2>GPU Weirdness Is Real</h2>
+<p>Firefox mostly behaved fine on this machine.</p>
+<p>Chrome specifically was chaos.</p>
+<p>Even normal Chrome windows were basically a 50/50 gamble:</p>
+<ul>
+<li>maybe fine</li>
+<li>maybe flickering</li>
+<li>maybe partially freezing</li>
+<li>maybe pixelating</li>
+<li>maybe emotionally collapsing halfway through rendering</li>
+</ul>
+<p>I still do not fully understand why.</p>
+<p>Maybe Chromium was hitting rendering paths the machine hated.
+Maybe Linux and Chrome were fighting deep in the graphics stack.
+Maybe the laptop itself was just old and tired.</p>
+<p>At some point debugging old Linux hardware stops being science and becomes folklore.</p>
+<h2>What Actually Helped</h2>
+<p>Not one thing.
+Several things.</p>
+<p>Moving more flows to headless mode helped because visible Chrome rendering was apparently making the machine more unstable.</p>
+<p>Proper waits helped a lot.</p>
+<p>I learned very quickly that:</p>
+<ul>
+<li>waits matter more than confidence</li>
+<li>“loaded” does not mean “ready”</li>
+<li>visible UI does not mean interactable UI</li>
+</ul>
+<p>Some flags that genuinely helped:</p>
+<pre><code class="language-js">const browser = await chromium.launch({
+  headless: true,
+  args: [
+    '--disable-gpu',
+    '--disable-dev-shm-usage',
+    '--no-sandbox',
+    '--disable-setuid-sandbox',
+    '--disable-background-timer-throttling',
+    '--disable-renderer-backgrounding'
+  ]
+});
+</code></pre>
+<p>And yes:</p>
+<pre><code class="language-bash">npx playwright install-deps
+</code></pre>
+<p>ended up mattering far more than I wanted it to.</p>
+<h2>My Observability Strategy Became “Listen For The Fan”</h2>
+<p>Before headless mode, I barely paid attention to my Telegram notifications because I could physically see the automation running.</p>
+<p>Once everything moved headless, the notifications became the only reliable proof the workers were alive.</p>
+<p>At one point my monitoring stack was basically:</p>
+<ul>
+<li>Telegram alerts</li>
+<li>screenshots</li>
+<li>log files</li>
+<li>listening for fan noise</li>
+</ul>
+<p>If I heard the fan suddenly spin up, I knew the workers were probably doing something.</p>
+<p>Which is not exactly enterprise observability engineering.</p>
+<p>Most of this debugging happened around 3 AM while sitting directly in front of the machine like some kind of browser automation goblin trying to convince Chromium not to explode overnight.</p>
+<h2>Reliability Is A Much Higher Standard Than “It Worked Once”</h2>
+<p>This was the real lesson.</p>
+<p>A successful run does not prove reliability.</p>
+<p>It proves:</p>
+<blockquote>
+<p>one run succeeded under one set of conditions.</p>
+</blockquote>
+<p>That’s all.</p>
+<p>Reliable automation means:</p>
+<ul>
+<li>unattended</li>
+<li>repeatable</li>
+<li>observable</li>
+<li>stable under load</li>
+<li>stable overnight</li>
+<li>stable when nobody is staring directly at Chromium like a nervous zookeeper</li>
+</ul>
+<p>That is a completely different standard.</p>
+<p>Eventually the workers became stable enough that I stopped compulsively checking them every few minutes.</p>
+<p>Honestly?</p>
+<p>That was probably the real milestone.</p>
+<p>Not:</p>
+<blockquote>
+<p>“the scripts worked.”</p>
+</blockquote>
+<p>But:</p>
+<blockquote>
+<p>“I no longer felt emotionally required to supervise Chrome personally.”</p>
+</blockquote>
+<h1>Chrome Was The Unstable Roommate In My Linux Automation Stack</h1>
+<p>I honestly thought the script was broken at first.</p>
+<p>That’s the embarrassing part.</p>
+<p>I thought maybe:</p>
+<ul>
+<li>my selectors were wrong</li>
+<li>Playwright was clicking too early</li>
+<li>Pinterest changed something again</li>
+<li>Facebook loaded weird</li>
+<li><a href="http://Dev.to">Dev.to</a> timing shifted</li>
+</ul>
+<p>Normal automation stuff.</p>
+<p>Then Chrome itself started pixelating.</p>
+<p>And that’s when I got the very specific gut-drop feeling of:</p>
+<blockquote>
+<p>“Oh no. This is a REAL problem.”</p>
+</blockquote>
+<h2>The Machine</h2>
+<p>This entire setup lived on an old HP laptop I turned into a Linux worker box for PostPunk.</p>
+<p>Which sounds fun and experimental until the machine becomes responsible for your actual workflow.</p>
+<p>The specs were basically:</p>
+<ul>
+<li>6 GB RAM</li>
+<li>mechanical hard drive</li>
+<li>integrated Radeon graphics</li>
+<li>Chrome</li>
+<li>suffering</li>
+</ul>
+<p>The kind of machine where opening Chromium felt less like launching software and more like asking an elderly wizard for one final favor.</p>
+<p>And honestly?</p>
+<p>I loved the setup anyway.</p>
+<p>Because I like building things.</p>
+<p>That’s what I do.</p>
+<h2>Why I Even Built This</h2>
+<p>I hate manually posting content one platform at a time.</p>
+<p>Absolutely hate it.</p>
+<p>If I write something, I want it to:</p>
+<ul>
+<li>queue</li>
+<li>schedule</li>
+<li>publish</li>
+<li>move on with life</li>
+</ul>
+<p>I do not want to spend every morning manually reposting things across half the internet like a social media intern trapped in a Groundhog Day loop.</p>
+<p>So I built PostPunk.</p>
+<p>Not because I wanted “startup founder energy.”</p>
+<p>Because I literally needed infrastructure.</p>
+<p>I can’t afford a marketing team.</p>
+<p>So if I want my work to consistently exist online, I have to build the system myself.</p>
+<p>That’s the reality.</p>
+<p>The writing.
+The scheduling.
+The posting.
+The visibility.</p>
+<p>All of it depended on this weird old Linux laptop not emotionally collapsing during browser automation.</p>
+<h2>Everything Worked While I Was Watching It</h2>
+<p>That was the trap.</p>
+<p>When I manually tested the workers:</p>
+<ul>
+<li>Pinterest posted</li>
+<li>Facebook posted</li>
+<li><a href="http://Dev.to">Dev.to</a> posted</li>
+<li>selectors worked</li>
+<li>uploads worked</li>
+<li>clicks landed</li>
+</ul>
+<p>Everything looked stable.</p>
+<p>Then I would let the workers run unattended and suddenly:</p>
+<ul>
+<li>uploads stalled</li>
+<li>inputs got skipped</li>
+<li>pages froze</li>
+<li>rendering glitched</li>
+<li>jobs hung forever</li>
+<li>Chrome started acting possessed</li>
+</ul>
+<p>The worst bugs were the inconsistent ones.</p>
+<p>Those are the bugs that make you question your sanity because they fail <em>just rarely enough</em> to feel random.</p>
+<h2>The Fan Noise Became A Warning Sign</h2>
+<p>Eventually I started recognizing failure patterns from the machine itself.</p>
+<p>Not logs.
+Not stack traces.</p>
+<p>The actual hardware.</p>
+<p>If Chrome started flickering during login, whatever workflow I was running was probably doomed.</p>
+<p>Sometimes the screen would:</p>
+<ul>
+<li>partially freeze</li>
+<li>pixelate</li>
+<li>glitch out briefly</li>
+<li>make that horrible little Linux system ringing noise</li>
+</ul>
+<p>Then recover if I stopped touching anything for a few seconds.</p>
+<p>At some point my operational monitoring strategy became:</p>
+<blockquote>
+<p>“if the fan suddenly screams at 2 AM, something is probably wrong.”</p>
+</blockquote>
+<p>Which is not exactly enterprise-grade observability engineering.</p>
+<h2>Chrome Specifically Hated This Machine</h2>
+<p>Firefox mostly behaved fine.</p>
+<p>Chrome was chaos.</p>
+<p>Even opening normal Chrome windows was basically gambling:</p>
+<ul>
+<li>maybe fine</li>
+<li>maybe frozen</li>
+<li>maybe flickering</li>
+<li>maybe halfway into a rendering crisis</li>
+</ul>
+<p>I still do not fully understand why.</p>
+<p>Maybe GPU weirdness.
+Maybe Linux graphics stack nonsense.
+Maybe Chromium was hitting rendering paths the laptop hated.</p>
+<p>I genuinely don’t know.</p>
+<p>At some point Linux troubleshooting stops being engineering and becomes folklore.</p>
+<h2>Headless And Headed Browsers Are Different In Ways That Matter</h2>
+<p>This was the biggest lesson.</p>
+<p>The workflows behaved differently depending on whether I could physically SEE the browser.</p>
+<p>That sounds fake until you experience it.</p>
+<p>Headed mode accidentally slowed everything down enough to stabilize parts of the UI.</p>
+<p>Headless mode removed that safety padding.</p>
+<p>Suddenly Playwright was operating at full speed against:</p>
+<ul>
+<li>flaky rendering</li>
+<li>unstable browser state</li>
+<li>old hardware</li>
+<li>race conditions</li>
+<li>half-finished uploads</li>
+<li>incomplete UI hydration</li>
+</ul>
+<p>This innocent-looking line:</p>
+<pre><code class="language-js">await page.click('[data-testid=&quot;publish-button&quot;]');
+</code></pre>
+<p>turned out to mean:</p>
+<blockquote>
+<p>“I hope the UI actually exists yet.”</p>
+</blockquote>
+<p>Which are two very different things.</p>
+<h2>The Most Linux Thing I Did</h2>
+<p>At one point I started randomly deleting Chrome-related Linux components trying to “clean up” the environment.</p>
+<p>I removed things I absolutely did not understand.</p>
+<p>X11 stuff.
+Chrome shell integrations.
+Random Chromium packages.</p>
+<p>Eventually the entire machine started pixelating outside the browser too.</p>
+<p>That was probably the strongest:</p>
+<blockquote>
+<p>“hardware may actually be dying”
+moment.</p>
+</blockquote>
+<p>Ironically, reinstalling the things I broke actually improved stability afterward.</p>
+<p>Which feels spiritually correct for Linux somehow.</p>
+<h2>What Actually Helped</h2>
+<p>The fixes were less glamorous than I wanted.</p>
+<p>Mostly:</p>
+<ul>
+<li>proper waits</li>
+<li>more logging</li>
+<li>screenshots</li>
+<li>Telegram alerts</li>
+<li>headless mode</li>
+<li>disabling GPU paths</li>
+<li>reinstalling dependencies</li>
+<li>accepting that “works once” means nothing</li>
+</ul>
+<p>These flags helped a lot:</p>
+<pre><code class="language-js">const browser = await chromium.launch({
+  headless: true,
+  args: [
+    '--disable-gpu',
+    '--disable-dev-shm-usage',
+    '--no-sandbox',
+    '--disable-setuid-sandbox'
+  ]
+});
+</code></pre>
+<p>And yes:</p>
+<pre><code class="language-bash">npx playwright install-deps
+</code></pre>
+<p>actually mattered.</p>
+<p>Unfortunately.</p>
+<h2>This Was Never Really About Chrome</h2>
+<p>The reason I kept fixing it instead of quitting was simple:</p>
+<p>I wanted it to work.</p>
+<p>Because this machine became the engine behind everything else.</p>
+<p>The Pinterest traffic.
+The writing.
+The visibility.
+The projects.</p>
+<p>At one point I dropped from around 5k Pinterest followers to around 4.5k during all the automation hiccups.</p>
+<p>That stuff matters when you are trying to build things online consistently by yourself.</p>
+<p>I’m a builder.
+An inventor.
+A writer.</p>
+<p>And if I want people to actually SEE the things I make, then I also have to become:</p>
+<ul>
+<li>infrastructure engineer</li>
+<li>automation goblin</li>
+<li>sysadmin</li>
+<li>marketing department</li>
+<li>overnight Chrome therapist</li>
+</ul>
+<p>That’s just the reality now.</p>
+<h2>Final Thoughts</h2>
+<p>I think the funniest part is that the system eventually became stable enough that I stopped obsessively checking it every few minutes.</p>
+<p>Honestly, that was probably the real milestone.</p>
+<p>Not:</p>
+<blockquote>
+<p>“the automation worked.”</p>
+</blockquote>
+<p>But:</p>
+<blockquote>
+<p>“I no longer felt emotionally responsible for supervising Chromium personally.”</p>
+</blockquote>
+<p>And that’s probably the closest thing browser automation ever gives you to peace.</p>]]></content:encoded>
+      <postpunk:canonicalUrl>https://ashb4.github.io/blog/i-turned-an-old-hp-laptop-into-a-linux-automation-server-and-learned-why-browser-automation-is-a-liar/</postpunk:canonicalUrl>
+      <postpunk:syndicationStatus>ready</postpunk:syndicationStatus>
+      <postpunk:image>https://raw.githubusercontent.com/AshB4/N8tiveFlow/main/frontend/assets/devto/DevRage.png</postpunk:image>
+      <category>linux</category>
+      <category>playwright</category>
+      <category>automation</category>
+      <postpunk:platform>devto</postpunk:platform>
+    </item>
+    <item>
+      <title>How I Turn One Idea Into 10 Posts Without AI Slop</title>
+      <link>https://ashb4.github.io/blog/how-i-turn-one-idea-into-10-posts-without-ai-slop/</link>
+      <guid isPermaLink="false">p_20260424_devto_01</guid>
+      <pubDate>Mon, 18 May 2026 15:00:00 GMT</pubDate>
+      <description><![CDATA[Repurposing is not copying. It is multiplying. One idea becomes: A short post A thread A newsletter A video script The key is having a system, not just hoping for more ideas.]]></description>
+      <content:encoded><![CDATA[<p>Repurposing is not copying. It is multiplying.</p>
+<p>One idea becomes:</p>
+<ul>
+<li>A short post</li>
+<li>A thread</li>
+<li>A newsletter</li>
+<li>A video script</li>
+</ul>
+<p>The key is having a system, not just hoping for more ideas.</p>]]></content:encoded>
+      <postpunk:canonicalUrl>https://ashb4.github.io/blog/how-i-turn-one-idea-into-10-posts-without-ai-slop/</postpunk:canonicalUrl>
+      <postpunk:syndicationStatus>ready</postpunk:syndicationStatus>
+      <category>contentstrategy</category>
+      <category>repurpose</category>
+      <category>creator</category>
+      <postpunk:platform>devto</postpunk:platform>
+    </item>
+    <item>
+      <title>What Building a Social Scheduler Taught Me About Reliability</title>
+      <link>https://ashb4.github.io/blog/what-building-a-social-scheduler-taught-me-about-reliability/</link>
+      <guid isPermaLink="false">p_20260330_01</guid>
+      <pubDate>Tue, 31 Mar 2026 21:15:43 GMT</pubDate>
+      <description><![CDATA[Most automation tools feel impressive right up until you have to trust them. It is easy to demo a scheduler. It is much harder to build one that survives real life: expired tokens flaky platform APIs posts that need rev...]]></description>
+      <content:encoded><![CDATA[<p>Most automation tools feel impressive right up until you have to trust them.</p>
+<p>It is easy to demo a scheduler.</p>
+<p>It is much harder to build one that survives real life:</p>
+<ul>
+<li>expired tokens</li>
+<li>flaky platform APIs</li>
+<li>posts that need review</li>
+<li>queues that drift out of sync</li>
+<li>failures that happen while you are asleep</li>
+</ul>
+<p>That gap changed how I think about automation.</p>
+<p>I have been building a project called PostPunk, and I thought the hard part would be generating content and wiring platform APIs together. That turned out to be the easy part.</p>
+<p>The real work was operational trust.</p>
+<p>A useful scheduler needs a few things that demos usually skip:</p>
+<h2>1. Approval states matter</h2>
+<p>Not every post should go straight from draft to published.</p>
+<p>Some posts are written by you and are ready immediately. Some are AI-assisted and need a second look. If your system does not distinguish that clearly, you end up either babysitting everything or accidentally posting junk.</p>
+<p>So I ended up treating post states as part of the core workflow, not just metadata:</p>
+<ul>
+<li>draft</li>
+<li>approved</li>
+<li>posted</li>
+<li>failed</li>
+</ul>
+<p>That sounds simple, but it changes everything.</p>
+<h2>2. Failure is not an edge case</h2>
+<p>In scheduling systems, failure is normal.</p>
+<p>A platform token expires.
+An API rate-limits you.
+A platform changes a field name.
+An account is misconfigured.
+A browser fallback stops matching the UI.</p>
+<p>If the whole system falls apart the moment one target fails, you do not have automation. You have a fragile demo.</p>
+<p>So the system needs:</p>
+<ul>
+<li>retries</li>
+<li>visible failure states</li>
+<li>alerts</li>
+<li>manual assist when automation is not trustworthy</li>
+</ul>
+<h2>3. Automatic is not the same as unattended</h2>
+<p>A lot of posting tools sell the dream of full autopilot. In practice, a better model is often:</p>
+<ul>
+<li>automate what is stable</li>
+<li>assist where platforms are hostile</li>
+<li>keep the queue and schedule as the source of truth</li>
+</ul>
+<p>That still saves a huge amount of time, and more importantly, it is honest.</p>
+<h2>4. Scheduling is really an operations problem</h2>
+<p>The UI part is not enough.</p>
+<p>You also need:</p>
+<ul>
+<li>a worker that checks for due posts</li>
+<li>logs</li>
+<li>retry logic</li>
+<li>success and failure alerts</li>
+<li>a clear what is due today view</li>
+</ul>
+<p>Without those, the schedule is just decorative.</p>
+<h2>What I learned</h2>
+<p>The hardest part of automation is not getting software to do something once.</p>
+<p>It is getting it to behave predictably enough that you stop worrying about it.</p>
+<p>That is the part I care about now.</p>
+<p>If you are building internal tools, creator tools, or any kind of scheduler, reliability is the actual feature. Everything else is packaging.</p>
+<p>PostPunk is still a project I am actively working on, but building it has made me much less interested in shiny automation promises and much more interested in boring operational trust.</p>]]></content:encoded>
+      <postpunk:canonicalUrl>https://ashb4.github.io/blog/what-building-a-social-scheduler-taught-me-about-reliability/</postpunk:canonicalUrl>
+      <postpunk:syndicationStatus>ready</postpunk:syndicationStatus>
+      <category>automation</category>
+      <category>reliability</category>
+      <category>scheduler</category>
+      <postpunk:platform>devto</postpunk:platform>
+      <postpunk:externalUrl platform="devto">https://dev.to/ashb4/what-building-a-social-scheduler-taught-me-about-reliability-4m8o</postpunk:externalUrl>
+      <postpunk:platformId platform="devto">3437945</postpunk:platformId>
+    </item>
+  </channel>
+</rss>

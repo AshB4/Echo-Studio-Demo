@@ -1,0 +1,108 @@
+{
+  "productLink": "https://www.amazon.com/dp/B0H33Q7T69/",
+  "platforms": ["pinterest"],
+  "board": "Art & quotes",
+  "campaign": "bad-enough-book-pinterest",
+  "items": [
+    {
+      "keyword": "emotional healing book",
+      "angle": "self trust",
+      "title": "What I Called Anxiety Was Information",
+      "description": "A reflective illustrated book about emotional clarity, self-trust, boundaries, and learning to stop explaining what already hurt.",
+      "image": "frontend/assets/badEnough/BadEnoughKindleEdition.jpg",
+      "board": "Art & quotes",
+      "boards": ["Art & quotes", "psychology /sociology", "Beautiful me."],
+      "tags": ["emotional healing", "self trust", "boundaries", "reflective nonfiction", "emotional clarity"]
+    },
+    {
+      "keyword": "emotional abuse recovery",
+      "angle": "discernment",
+      "title": "The Absence Is The Signal",
+      "description": "A quiet reflection on recognizing patterns, trusting yourself, and understanding what peace actually feels like.",
+      "image": "frontend/assets/badEnough/BadEnoughKindleEdition.jpg",
+      "board": "psychology /sociology",
+      "boards": ["psychology /sociology", "Art & quotes", "Random thoughts"],
+      "tags": ["discernment", "emotional abuse", "healing", "self trust", "personal growth"]
+    },
+    {
+      "keyword": "self trust quotes",
+      "angle": "overload",
+      "title": "I Wasn't Confused. I Was Carrying Too Much.",
+      "description": "For readers rebuilding trust in themselves after emotional exhaustion, self-doubt, and confusion.",
+      "image": "frontend/assets/badEnough/BadEnoughKindleEdition.jpg",
+      "board": "Beautiful me.",
+      "boards": ["Beautiful me.", "Art & quotes", "Random thoughts"],
+      "tags": ["self trust", "healing journey", "mental wellness", "emotional exhaustion", "personal growth"]
+    },
+    {
+      "keyword": "healthy boundaries",
+      "angle": "boundaries",
+      "title": "Calm That Depends On Vigilance Isn't Peace",
+      "description": "A reflective book about boundaries, emotional safety, and choosing quiet over chaos.",
+      "image": "frontend/assets/badEnough/BadEnoughKindleEdition.jpg",
+      "board": "psychology /sociology",
+      "boards": ["psychology /sociology", "Beautiful me.", "Art & quotes"],
+      "tags": ["boundaries", "healthy relationships", "peace", "emotional healing", "self respect"]
+    },
+    {
+      "keyword": "peaceful living",
+      "angle": "clarity",
+      "title": "Quiet Became The Evidence",
+      "description": "Not therapy speak. Just clarity, patterns, boundaries, and choosing peace.",
+      "image": "frontend/assets/badEnough/BadEnoughKindleEdition.jpg",
+      "board": "Art & quotes",
+      "boards": ["Art & quotes", "Random thoughts", "Beautiful me."],
+      "tags": ["peace", "clarity", "quiet life", "mindful living", "healing"]
+    },
+    {
+      "keyword": "nervous system healing",
+      "angle": "safety",
+      "title": "You're Finally Off Duty",
+      "description": "A quiet book about protection, safety, and the moment your nervous system finally stops bracing.",
+      "image": "frontend/assets/badEnough/BackCoverBadEnough.png",
+      "board": "Beautiful me.",
+      "boards": ["Beautiful me.", "Art & quotes", "Angel's"],
+      "tags": ["nervous system", "rest", "healing", "safety", "peace"]
+    },
+    {
+      "keyword": "peace quotes",
+      "angle": "rest",
+      "title": "Peace Is The Standard, Not The Exception",
+      "description": "For readers rebuilding a life that feels calm instead of fragile.",
+      "image": "frontend/assets/badEnough/BackCoverBadEnough.png",
+      "board": "Art & quotes",
+      "boards": ["Art & quotes", "Beautiful me.", "Random thoughts"],
+      "tags": ["peace", "healing", "self worth", "calm", "personal growth"]
+    },
+    {
+      "keyword": "trust your intuition",
+      "angle": "instincts",
+      "title": "My Body Wasn't Wrong. It Was Early.",
+      "description": "A reflective book about instincts, patterns, and learning to trust yourself again.",
+      "image": "frontend/assets/badEnough/BackCoverBadEnough.png",
+      "board": "psychology /sociology",
+      "boards": ["psychology /sociology", "Beautiful me.", "Art & quotes"],
+      "tags": ["intuition", "self trust", "healing", "awareness", "personal growth"]
+    },
+    {
+      "keyword": "letting go quotes",
+      "angle": "closure",
+      "title": "I Didn't Lose Love. I Chose Peace.",
+      "description": "Letting go of chaos can feel like grief and freedom at the same time.",
+      "image": "frontend/assets/badEnough/BackCoverBadEnough.png",
+      "board": "Beautiful me.",
+      "boards": ["Beautiful me.", "Art & quotes", "Random thoughts"],
+      "tags": ["letting go", "peace", "healing journey", "emotional recovery", "self respect"]
+    },
+    {
+      "keyword": "emotional healing quotes",
+      "angle": "self respect",
+      "title": "You Do Not Need To Debate Yourself Into Exhaustion To Deserve Peace",
+      "description": "For anyone tired of arguing themselves out of what they already know.",
+      "image": "frontend/assets/badEnough/BackCoverBadEnough.png",
+      "board": "psychology /sociology",
+      "boards": ["psychology /sociology", "Beautiful me.", "Art & quotes"],
+      "tags": ["peace", "self respect", "boundaries", "healing", "emotional clarity"]
+    }
+  ]
+}

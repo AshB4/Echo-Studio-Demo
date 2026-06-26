@@ -1,0 +1,63 @@
+{
+  "campaign": "raised-a-problem-series",
+  "productLink": "https://my-store-10fedc5.creator-spring.com/listing/chaos-is-my-love-language?product=1776&variation=105218",
+  "platforms": ["pinterest"],
+  "board": "Funny Stuff",
+  "items": [
+    {
+      "keyword": "funny parenting meme",
+      "angle": "parents created a menace",
+      "title": "Raised A Problem And Honestly Worth It",
+      "description": "Funny goblin-core kids apparel for chaotic little gremlins raised entirely on confidence.",
+      "image": "frontend/assets/goblinaffs/GoblinTees/ShirtMemes/ChaosLoveLangKidsRaisedAProb.png",
+      "productLink": "https://my-store-10fedc5.creator-spring.com/listing/chaos-is-my-love-language?product=1776&variation=105218",
+      "board": "Funny Stuff",
+      "boards": ["Funny Stuff", "Epic cuteness"],
+      "tags": ["parenting meme", "funny kids", "chaos child", "goblin kid", "family humor"]
+    },
+    {
+      "keyword": "chaotic child humor",
+      "angle": "lovable disaster energy",
+      "title": "Some Kids Arrive Preloaded With Chaos",
+      "description": "Funny goblin-core kids shirt for tiny disasters operating entirely on chaos logic.",
+      "image": "frontend/assets/goblinaffs/GoblinTees/ShirtMemes/ChaosLoveLangKidsRaisedAProb.png",
+      "productLink": "https://my-store-10fedc5.creator-spring.com/listing/chaos-is-my-love-language?product=1776&variation=105218",
+      "board": "Epic cuteness",
+      "boards": ["Epic cuteness", "Funny Stuff"],
+      "tags": ["chaotic child", "funny toddler", "tiny menace", "kids chaos", "funny family"]
+    },
+    {
+      "keyword": "funny goblin kid shirt",
+      "angle": "tiny cryptid identity",
+      "title": "Professional Tiny Goblin",
+      "description": "Funny chaos goblin kids apparel for adorable little chaos cryptids.",
+      "image": "frontend/assets/goblinaffs/GoblinTees/ShirtMemes/ChaosLoveLangKidsRaisedAProb.png",
+      "productLink": "https://my-store-10fedc5.creator-spring.com/listing/chaos-is-my-love-language?product=1776&variation=105218",
+      "board": "Funny Stuff",
+      "boards": ["Funny Stuff", "Halloween"],
+      "tags": ["goblin kid", "funny shirt", "tiny cryptid", "chaos humor", "cute chaos"]
+    },
+    {
+      "keyword": "mom humor shirt",
+      "angle": "exhausted parent relatability",
+      "title": "I Made A Tiny Goblin And Now I Live With Consequences",
+      "description": "Funny parenting humor for exhausted adults raising tiny emotional support gremlins.",
+      "image": "frontend/assets/goblinaffs/GoblinTees/ShirtMemes/ChaosLoveLangKidsRaisedAProb.png",
+      "productLink": "https://my-store-10fedc5.creator-spring.com/listing/chaos-is-my-love-language?product=1776&variation=105218",
+      "board": "Funny Stuff",
+      "boards": ["Funny Stuff", "Baby Shower!"],
+      "tags": ["mom humor", "parent burnout", "funny family", "kids chaos", "chaotic child"]
+    },
+    {
+      "keyword": "cute funny kids clothes",
+      "angle": "adorable chaos identity",
+      "title": "Cute Tiny Menace Energy",
+      "description": "Funny goblin-core kids shirt for adorable little chaos creatures with zero impulse control.",
+      "image": "frontend/assets/goblinaffs/GoblinTees/ShirtMemes/ChaosLoveLangKidsRaisedAProb.png",
+      "productLink": "https://my-store-10fedc5.creator-spring.com/listing/chaos-is-my-love-language?product=1776&variation=105218",
+      "board": "Epic cuteness",
+      "boards": ["Epic cuteness", "Funny Stuff"],
+      "tags": ["cute chaos", "funny kids", "goblin humor", "tiny menace", "kids shirt"]
+    }
+  ]
+}

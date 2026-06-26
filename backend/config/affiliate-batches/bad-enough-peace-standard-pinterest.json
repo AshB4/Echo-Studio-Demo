@@ -1,0 +1,108 @@
+{
+  "productLink": "https://www.amazon.com/dp/B0H33Q7T69/",
+  "platforms": ["pinterest"],
+  "board": "Art & quotes",
+  "campaign": "bad-enough-peace-standard-pinterest",
+  "items": [
+    {
+      "keyword": "peaceful life",
+      "angle": "peace",
+      "title": "Peace Is The Standard, Not The Exception",
+      "description": "For anyone who spent too long believing calm had to be earned through endurance, vigilance, or over-explaining. A reflective illustrated book by Eshra Tikva.",
+      "image": "frontend/assets/badEnough/AbsenceSignalOverBed.png",
+      "board": "Art & quotes",
+      "boards": ["Art & quotes", "psychology /sociology", "Random thoughts"],
+      "tags": ["peace", "healing", "boundaries", "self trust", "emotional clarity"]
+    },
+    {
+      "keyword": "emotional healing",
+      "angle": "transformation",
+      "title": "Peace Felt Strange At First",
+      "description": "A quiet reflective book about learning that calm does not need to be earned and safety does not need to be negotiated.",
+      "image": "frontend/assets/badEnough/AbsenceSignalOverBed.png",
+      "board": "Art & quotes",
+      "boards": ["Art & quotes", "The Queen in me.", "Random thoughts"],
+      "tags": ["healing", "recovery", "peace", "growth", "reflection"]
+    },
+    {
+      "keyword": "boundary quotes",
+      "angle": "boundaries",
+      "title": "Calm Should Not Require Vigilance",
+      "description": "A reflective illustrated book about recognizing unhealthy patterns and choosing peace over constant alertness.",
+      "image": "frontend/assets/badEnough/ProblemToSolve.png",
+      "board": "psychology /sociology",
+      "boards": ["psychology /sociology", "Art & quotes"],
+      "tags": ["boundaries", "peace", "discernment", "healing", "clarity"]
+    },
+    {
+      "keyword": "self trust",
+      "angle": "validation",
+      "title": "You Don't Need To Earn Peace",
+      "description": "For readers rebuilding trust in themselves after years of confusion, second-guessing, and over-explaining.",
+      "image": "frontend/assets/badEnough/ProblemToSolve.png",
+      "board": "Art & quotes",
+      "boards": ["Art & quotes", "The Queen in me."],
+      "tags": ["self trust", "validation", "healing", "peace", "growth"]
+    },
+    {
+      "keyword": "nervous system healing",
+      "angle": "nervous system",
+      "title": "What If Calm Was Normal",
+      "description": "A reflective companion book about nervous system awareness, emotional clarity, and learning what safety feels like.",
+      "image": "frontend/assets/badEnough/AbsenceIsSignalWDogs.png",
+      "board": "psychology /sociology",
+      "boards": ["psychology /sociology", "Art & quotes"],
+      "tags": ["nervous system", "healing", "peace", "safety", "clarity"]
+    },
+    {
+      "keyword": "rest quotes",
+      "angle": "recovery",
+      "title": "You Can Rest Now",
+      "description": "A quiet illustrated book about protection, safety, and finally putting down what was never yours to carry.",
+      "image": "frontend/assets/badEnough/AbsenceIsSignalWDogs.png",
+      "board": "Art & quotes",
+      "boards": ["Art & quotes", "Random thoughts"],
+      "tags": ["rest", "peace", "recovery", "healing", "comfort"]
+    },
+    {
+      "keyword": "healing journey",
+      "angle": "future self",
+      "title": "The Version Of You That Sleeps",
+      "description": "For readers imagining a future where peace feels familiar instead of suspicious.",
+      "image": "frontend/assets/badEnough/AbsenceIsSignalWDogs.png",
+      "board": "The Queen in me.",
+      "boards": ["The Queen in me.", "Art & quotes"],
+      "tags": ["future self", "healing", "growth", "peace", "self trust"]
+    },
+    {
+      "keyword": "journaling prompts",
+      "angle": "reflection",
+      "title": "What Peace Taught Me",
+      "description": "A literary self-help book about emotional clarity, discernment, and trusting yourself again.",
+      "image": "frontend/assets/badEnough/AbsenceISSignalWFlowers.png",
+      "board": "Random thoughts",
+      "boards": ["Random thoughts", "Art & quotes"],
+      "tags": ["reflection", "journaling", "clarity", "healing", "peace"]
+    },
+    {
+      "keyword": "self esteem",
+      "angle": "identity",
+      "title": "Peace Is Not Weakness",
+      "description": "A reflective illustrated book about choosing calm over chaos and understanding that quiet is enough.",
+      "image": "frontend/assets/badEnough/AbsenceISSignalWFlowers.png",
+      "board": "The Queen in me.",
+      "boards": ["The Queen in me.", "Art & quotes"],
+      "tags": ["identity", "confidence", "peace", "growth", "healing"]
+    },
+    {
+      "keyword": "emotional abuse recovery",
+      "angle": "closure",
+      "title": "The Crisis Ended First",
+      "description": "A quiet book about recognizing what changed when the chaos finally stopped.",
+      "image": "frontend/assets/badEnough/AbsenceISSignalWFlowers.png",
+      "board": "psychology /sociology",
+      "boards": ["psychology /sociology", "Art & quotes"],
+      "tags": ["closure", "recovery", "healing", "boundaries", "clarity"]
+    }
+  ]
+}

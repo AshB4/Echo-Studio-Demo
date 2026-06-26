@@ -1,0 +1,208 @@
+{
+  "productLink": "https://www.amazon.com/dp/B0H33Q7T69/",
+  "platforms": ["pinterest"],
+  "board": "Art & quotes",
+  "campaign": "bad-enough-healing-mix-02-pinterest",
+  "items": [
+    {
+      "keyword": "emotional exhaustion",
+      "angle": "burnout",
+      "title": "Exhaustion Was Never Proof",
+      "description": "A reflective illustrated book about recognizing the difference between effort and suffering.",
+      "image": "frontend/assets/badEnough/ProblemToSolve.png",
+      "board": "psychology /sociology",
+      "boards": ["psychology /sociology", "Art & quotes", "Random thoughts"],
+      "tags": ["emotional exhaustion", "burnout", "healing", "peace", "self trust"]
+    },
+    {
+      "keyword": "healthy relationships",
+      "angle": "relationships",
+      "title": "Love Should Feel Safer Than This",
+      "description": "A quiet companion book about peace, trust, and emotional clarity.",
+      "image": "frontend/assets/badEnough/SaftyProblemFlowers.png",
+      "board": "psychology /sociology",
+      "boards": ["psychology /sociology", "Beautiful me.", "Art & quotes"],
+      "tags": ["healthy relationships", "safety", "trust", "emotional clarity", "healing"]
+    },
+    {
+      "keyword": "healing quotes",
+      "angle": "validation",
+      "title": "Calm Is Not Something You Earn",
+      "description": "For readers who spent too long believing peace had to be justified.",
+      "image": "frontend/assets/badEnough/PeaceIsTheStandard.png",
+      "board": "Art & quotes",
+      "boards": ["Art & quotes", "Random thoughts", "The Queen in me."],
+      "tags": ["healing quotes", "validation", "peace", "self worth", "emotional healing"]
+    },
+    {
+      "keyword": "peaceful living",
+      "angle": "lifestyle",
+      "title": "Peace Was The Missing Ingredient",
+      "description": "A reflective illustrated book about choosing calm over chaos.",
+      "image": "frontend/assets/badEnough/PeaceStandardBed.png",
+      "board": "Beautiful me.",
+      "boards": ["Beautiful me.", "Art & quotes", "Random thoughts"],
+      "tags": ["peaceful living", "calm", "healing", "quiet life", "boundaries"]
+    },
+    {
+      "keyword": "self worth",
+      "angle": "identity",
+      "title": "You Are Allowed To Want Peace",
+      "description": "A literary reflection on self-trust, boundaries, and emotional healing.",
+      "image": "frontend/assets/badEnough/PeaceStandardWFlowers.png",
+      "board": "The Queen in me.",
+      "boards": ["The Queen in me.", "Art & quotes", "Beautiful me."],
+      "tags": ["self worth", "identity", "self trust", "boundaries", "peace"]
+    },
+    {
+      "keyword": "boundaries",
+      "angle": "discernment",
+      "title": "Not Every Battle Is Yours",
+      "description": "A quiet book about recognizing what deserves your energy.",
+      "image": "frontend/assets/badEnough/SaftyProblemDogs.png",
+      "board": "Random thoughts",
+      "boards": ["Random thoughts", "psychology /sociology", "Art & quotes"],
+      "tags": ["boundaries", "discernment", "energy", "peace", "self respect"]
+    },
+    {
+      "keyword": "mental wellness",
+      "angle": "awareness",
+      "title": "Constant Vigilance Isn't Peace",
+      "description": "A reflective illustrated book about nervous system awareness.",
+      "image": "frontend/assets/badEnough/SaftyProblemBed.png",
+      "board": "psychology /sociology",
+      "boards": ["psychology /sociology", "Art & quotes", "Beautiful me."],
+      "tags": ["mental wellness", "nervous system", "vigilance", "peace", "awareness"]
+    },
+    {
+      "keyword": "growth",
+      "angle": "future self",
+      "title": "Imagine Feeling Safe Every Day",
+      "description": "A quiet companion book about healing and emotional clarity.",
+      "image": "frontend/assets/badEnough/PeaceStandarddogs.png",
+      "board": "The Queen in me.",
+      "boards": ["The Queen in me.", "Beautiful me.", "Art & quotes"],
+      "tags": ["growth", "future self", "safety", "healing", "emotional clarity"]
+    },
+    {
+      "keyword": "reflection",
+      "angle": "perspective",
+      "title": "What If Calm Was The Baseline",
+      "description": "A literary self-help book about peace, trust, and discernment.",
+      "image": "frontend/assets/badEnough/AbsenceSignalOverBed.png",
+      "board": "Art & quotes",
+      "boards": ["Art & quotes", "Random thoughts", "psychology /sociology"],
+      "tags": ["reflection", "calm", "peace", "trust", "discernment"]
+    },
+    {
+      "keyword": "emotional healing",
+      "angle": "closure",
+      "title": "The Chaos Doesn't Get To Define You",
+      "description": "A reflective illustrated book about choosing peace and trusting yourself.",
+      "image": "frontend/assets/badEnough/AbsenceISSignalWFlowers.png",
+      "board": "Beautiful me.",
+      "boards": ["Beautiful me.", "Art & quotes", "The Queen in me."],
+      "tags": ["emotional healing", "closure", "peace", "self trust", "growth"]
+    },
+    {
+      "keyword": "self trust",
+      "angle": "clarity",
+      "title": "The Answer Wasn't More Evidence",
+      "description": "A reflective illustrated book about trusting yourself and recognizing patterns.",
+      "image": "frontend/assets/badEnough/ProblemToSolve.png",
+      "board": "psychology /sociology",
+      "boards": ["psychology /sociology", "Art & quotes", "Random thoughts"],
+      "tags": ["self trust", "clarity", "patterns", "discernment", "healing"]
+    },
+    {
+      "keyword": "emotional abuse recovery",
+      "angle": "recovery",
+      "title": "You Didn't Need More Proof",
+      "description": "A quiet companion book about boundaries, healing, and self-trust.",
+      "image": "frontend/assets/badEnough/AbsenceSignalOverBed.png",
+      "board": "Art & quotes",
+      "boards": ["Art & quotes", "psychology /sociology", "Beautiful me."],
+      "tags": ["emotional abuse recovery", "proof", "boundaries", "healing", "self trust"]
+    },
+    {
+      "keyword": "healing journey",
+      "angle": "transformation",
+      "title": "What Changed When You Started Listening",
+      "description": "A reflective book about emotional clarity and personal growth.",
+      "image": "frontend/assets/badEnough/PeaceStandardWFlowers.png",
+      "board": "Beautiful me.",
+      "boards": ["Beautiful me.", "The Queen in me.", "Art & quotes"],
+      "tags": ["healing journey", "transformation", "emotional clarity", "growth", "self trust"]
+    },
+    {
+      "keyword": "relationship patterns",
+      "angle": "discernment",
+      "title": "The Pattern Was The Information",
+      "description": "For readers learning to trust what they experienced.",
+      "image": "frontend/assets/badEnough/AbsenceISSignalWFlowers.png",
+      "board": "psychology /sociology",
+      "boards": ["psychology /sociology", "Random thoughts", "Art & quotes"],
+      "tags": ["relationship patterns", "discernment", "self trust", "healing", "clarity"]
+    },
+    {
+      "keyword": "nervous system healing",
+      "angle": "body awareness",
+      "title": "Your Body Kept The Receipts",
+      "description": "A literary reflection on nervous system awareness and healing.",
+      "image": "frontend/assets/badEnough/AbsenceIsSignalWDogs.png",
+      "board": "Random thoughts",
+      "boards": ["Random thoughts", "psychology /sociology", "Art & quotes"],
+      "tags": ["nervous system healing", "body awareness", "healing", "self trust", "emotional awareness"]
+    },
+    {
+      "keyword": "self esteem",
+      "angle": "confidence",
+      "title": "Trust Yourself A Little More",
+      "description": "A reflective illustrated book about rebuilding confidence in your own judgment.",
+      "image": "frontend/assets/badEnough/PeaceStandarddogs.png",
+      "board": "The Queen in me.",
+      "boards": ["The Queen in me.", "Beautiful me.", "Art & quotes"],
+      "tags": ["self esteem", "confidence", "self trust", "judgment", "healing"]
+    },
+    {
+      "keyword": "peaceful life",
+      "angle": "peace",
+      "title": "The Signal Was Trying To Help",
+      "description": "A quiet book about clarity, healing, and emotional awareness.",
+      "image": "frontend/assets/badEnough/AbsenceIsSignalWDogs.png",
+      "board": "Art & quotes",
+      "boards": ["Art & quotes", "psychology /sociology", "Beautiful me."],
+      "tags": ["peaceful life", "signal", "clarity", "healing", "emotional awareness"]
+    },
+    {
+      "keyword": "boundaries",
+      "angle": "boundaries",
+      "title": "You Don't Owe Every Question An Answer",
+      "description": "A reflective book about self-trust, discernment, and choosing peace.",
+      "image": "frontend/assets/badEnough/SaftyProblemFlowers.png",
+      "board": "Random thoughts",
+      "boards": ["Random thoughts", "Art & quotes", "psychology /sociology"],
+      "tags": ["boundaries", "self trust", "discernment", "peace", "healing"]
+    },
+    {
+      "keyword": "journaling",
+      "angle": "reflection",
+      "title": "What Were You Trying To Convince Yourself Of",
+      "description": "A thoughtful companion book about emotional clarity and healing.",
+      "image": "frontend/assets/badEnough/PeaceStandardBed.png",
+      "board": "Random thoughts",
+      "boards": ["Random thoughts", "Art & quotes", "Beautiful me."],
+      "tags": ["journaling", "reflection", "emotional clarity", "healing", "self trust"]
+    },
+    {
+      "keyword": "healing quotes",
+      "angle": "validation",
+      "title": "Maybe You Were Right The First Time",
+      "description": "A reflective illustrated book about trusting yourself again.",
+      "image": "frontend/assets/badEnough/PeaceIsTheStandard.png",
+      "board": "Art & quotes",
+      "boards": ["Art & quotes", "The Queen in me.", "psychology /sociology"],
+      "tags": ["healing quotes", "validation", "self trust", "clarity", "peace"]
+    }
+  ]
+}

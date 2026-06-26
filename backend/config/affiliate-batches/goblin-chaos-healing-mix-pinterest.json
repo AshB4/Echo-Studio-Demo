@@ -1,0 +1,58 @@
+{
+  "campaign": "goblin-chaos-healing-mix",
+  "productLink": "https://fleurdevie.gumroad.com/l/goblin-core-coloring-affirmations",
+  "platforms": ["pinterest"],
+  "board": "coloring pages",
+  "items": [
+    {
+      "keyword": "goblin core coloring pages",
+      "angle": "emotional comfort through humor",
+      "title": "For the goblins healing through sarcasm and coloring pages",
+      "description": "Printable goblin-core affirmation coloring pages for chaotic humans trying their best. Weirdly comforting and instantly downloadable.",
+      "image": "frontend/assets/goblinaffs/DidntFixMyLife.png",
+      "board": "coloring pages",
+      "boards": ["coloring pages", "Funny Stuff"],
+      "tags": ["goblin core", "coloring pages", "printable art", "self care humor", "chaotic good"]
+    },
+    {
+      "keyword": "funny printable coloring pages",
+      "angle": "burnout humor relief",
+      "title": "Cute but emotionally unhinged coloring printables",
+      "description": "Goblin-core printable affirmations for burned out weirdos who cope with markers, chaos, and dark humor.",
+      "image": "frontend/assets/goblinaffs/DontNeedToBeGood.png",
+      "board": "Funny Stuff",
+      "boards": ["Funny Stuff", "coloring pages"],
+      "tags": ["burnout humor", "funny coloring", "mental health memes", "cute chaos", "printable coloring"]
+    },
+    {
+      "keyword": "self care printables",
+      "angle": "identity reinforcement for chaotic introverts",
+      "title": "Goblin self-care is buying weird little printables and surviving",
+      "description": "Digital goblin affirmation coloring kit for chaotic introverts, ADHD gremlins, and emotionally exhausted cryptids.",
+      "image": "frontend/assets/goblinaffs/SurviveToday.png",
+      "board": "Random thoughts",
+      "boards": ["Random thoughts", "coloring pages"],
+      "tags": ["adhd humor", "introvert memes", "self care printable", "goblin life", "digital download"]
+    },
+    {
+      "keyword": "weirdcore printable art",
+      "angle": "curiosity and absurdity",
+      "title": "This coloring book looks like a raccoon made a therapy journal",
+      "description": "Chaotic goblin-core coloring affirmations with feral energy, emotional support chaos, and printable weirdness.",
+      "image": "frontend/assets/goblinaffs/GonnaJournalNo.png",
+      "board": "Freaking Weird or mild...",
+      "boards": ["Freaking Weird or mild...", "coloring pages"],
+      "tags": ["raccoon energy", "weirdcore", "funny printables", "goblin memes", "chaos aesthetic"]
+    },
+    {
+      "keyword": "sarcastic affirmations printable",
+      "angle": "humor-driven emotional survival",
+      "title": "Printable affirmations for people held together by caffeine and spite",
+      "description": "Goblin-core coloring affirmations made for chaotic humans who need emotional support markers immediately.",
+      "image": "frontend/assets/goblinaffs/MyAuraWasDenied.png",
+      "board": "Funny Stuff",
+      "boards": ["Funny Stuff", "coloring pages"],
+      "tags": ["sarcastic affirmations", "funny self care", "printable download", "chaotic humor", "mental health humor"]
+    }
+  ]
+}

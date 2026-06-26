@@ -1,0 +1,58 @@
+{
+  "campaign": "chaos-is-my-love-language-soft-chaos",
+  "productLink": "https://my-store-10fedc5.creator-spring.com/listing/chaos-is-my-love-language?product=227&variation=2664",
+  "platforms": ["pinterest"],
+  "board": "Funny Stuff",
+  "items": [
+    {
+      "keyword": "funny burnout shirt",
+      "angle": "anti-hustle emotional relief",
+      "title": "You do not actually need to be productive every second",
+      "description": "Cute goblin meme energy for exhausted humans trying to survive capitalism without becoming a motivational podcast.",
+      "image": "frontend/assets/goblinaffs/GoblinTees/ShirtMemes/DontNeedToBeGoodShirt.png",
+      "board": "Funny Stuff",
+      "boards": ["Funny Stuff", "More Nerdy Goodness..."],
+      "tags": ["burnout humor", "goblin meme", "funny shirt", "anti hustle", "chaos goblin"]
+    },
+    {
+      "keyword": "cute comfort hoodie",
+      "angle": "emotional validation and comfort",
+      "title": "Emotionally exhausted goblin apparel for people doing their best",
+      "description": "A wearable reminder that surviving today still counts. Cozy chaos goblin energy included.",
+      "image": "frontend/assets/goblinaffs/GoblinTees/ShirtMemes/DontNeedToBeGoodShirt.png",
+      "board": "Epic cuteness",
+      "boards": ["Epic cuteness", "Funny Stuff"],
+      "tags": ["comfort hoodie", "soft goblin aesthetic", "cute weird fashion", "mental health humor", "introvert fashion"]
+    },
+    {
+      "keyword": "sarcastic goblin shirt",
+      "angle": "identity humor and sarcasm",
+      "title": "This goblin shirt feels like emotional support sarcasm",
+      "description": "Cute chaotic goblin meme apparel for people held together by caffeine, hoodies, and selective optimism.",
+      "image": "frontend/assets/goblinaffs/GoblinTees/ShirtMemes/DontNeedToBeGoodShirt.png",
+      "board": "More Nerdy Goodness...",
+      "boards": ["More Nerdy Goodness...", "Funny Stuff"],
+      "tags": ["sarcastic shirt", "goblin core", "funny hoodie", "weird girl aesthetic", "chaotic introvert"]
+    },
+    {
+      "keyword": "goblincore fashion",
+      "angle": "humor as emotional coping",
+      "title": "Goblin-core fashion for people healing through humor",
+      "description": "Funny goblin apparel with cozy chaotic energy for exhausted weirdos and emotionally unstable cryptids.",
+      "image": "frontend/assets/goblinaffs/GoblinTees/ShirtMemes/DontNeedToBeGoodShirt.png",
+      "board": "Freaking Weird or mild...",
+      "boards": ["Freaking Weird or mild...", "Funny Stuff"],
+      "tags": ["weirdcore fashion", "healing humor", "funny graphic tee", "goblincore", "cozy chaos"]
+    },
+    {
+      "keyword": "oversized funny hoodie",
+      "angle": "cozy identity reinforcement",
+      "title": "Some people meditate. Some people become goblins in oversized hoodies.",
+      "description": "Cute goblin meme apparel for people surviving creatively instead of efficiently.",
+      "image": "frontend/assets/goblinaffs/GoblinTees/ShirtMemes/DontNeedToBeGoodShirt.png",
+      "board": "The Queen in me.",
+      "boards": ["The Queen in me.", "Funny Stuff"],
+      "tags": ["oversized hoodie", "chaos aesthetic", "funny meme hoodie", "cozy introvert", "alternative fashion"]
+    }
+  ]
+}

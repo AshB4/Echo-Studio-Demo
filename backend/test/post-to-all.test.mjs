@@ -38,6 +38,23 @@ test("normalizeTargets preserves null account ids as null", () => {
   assert.deepEqual(result, [{ platform: "devto", accountId: null }]);
 });
 
+test("normalizeTargets removes duplicate platform account targets", () => {
+  const result = normalizeTargets([
+    "Facebook",
+    { platform: "facebook", accountId: null },
+    { platform: "Pinterest", accountId: null },
+    { platform: "pinterest" },
+    { platform: "facebook", accountId: "page-1" },
+    { platform: "facebook", accountId: "page-1" },
+  ]);
+
+  assert.deepEqual(result, [
+    { platform: "facebook", accountId: null },
+    { platform: "pinterest", accountId: null },
+    { platform: "facebook", accountId: "page-1" },
+  ]);
+});
+
 test("withAffiliateTag only tags plain Amazon links", () => {
   const result = withAffiliateTag(
     "Read this https://www.amazon.com/example-product and keep this https://example.com/test",

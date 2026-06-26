@@ -1,0 +1,198 @@
+{
+  "productLink": "https://www.amazon.com/dp/B0H33Q7T69/",
+  "platforms": ["pinterest"],
+  "board": "Art & quotes",
+  "campaign": "bad-enough-absence-signal-pinterest",
+  "items": [
+    {
+      "keyword": "emotional healing book",
+      "angle": "absence as signal",
+      "title": "The Absence Is The Signal",
+      "description": "A reflective illustrated book about nervous system awareness, emotional clarity, and learning what peace actually feels like. Sometimes what is missing tells the story.",
+      "image": "frontend/assets/badEnough/AbsenceSignalOverBed.png",
+      "board": "psychology /sociology",
+      "boards": ["psychology /sociology", "Art & quotes", "Beautiful me."],
+      "tags": ["emotional healing", "nervous system", "self trust", "peace", "discernment"]
+    },
+    {
+      "keyword": "self trust book",
+      "angle": "explanation fatigue",
+      "title": "Not Everything Needs An Explanation",
+      "description": "A quiet book about recognizing patterns, trusting yourself, and understanding that confusion is often information.",
+      "image": "frontend/assets/badEnough/AbsenceSignalOverBed.png",
+      "board": "Art & quotes",
+      "boards": ["Art & quotes", "psychology /sociology", "Random thoughts"],
+      "tags": ["self trust", "patterns", "clarity", "boundaries", "healing"]
+    },
+    {
+      "keyword": "peace after chaos",
+      "angle": "peace",
+      "title": "What Peace Feels Like",
+      "description": "For readers learning the difference between safety and vigilance. A reflective illustrated book by Eshra Tikva.",
+      "image": "frontend/assets/badEnough/AbsenceSignalOverBed.png",
+      "board": "Beautiful me.",
+      "boards": ["Beautiful me.", "Art & quotes", "psychology /sociology"],
+      "tags": ["peace", "safety", "vigilance", "nervous system", "healing"]
+    },
+    {
+      "keyword": "discernment book",
+      "angle": "quiet signal",
+      "title": "Trust The Quiet",
+      "description": "A literary self-help book about discernment, self-trust, boundaries, and emotional clarity.",
+      "image": "frontend/assets/badEnough/AbsenceSignalOverBed.png",
+      "board": "Random thoughts",
+      "boards": ["Random thoughts", "Art & quotes", "Beautiful me."],
+      "tags": ["discernment", "self trust", "boundaries", "emotional clarity", "healing"]
+    },
+    {
+      "keyword": "healing rest book",
+      "angle": "rest",
+      "title": "When Nothing Is Wrong Anymore",
+      "description": "A reflective companion book about healing, safety, and finally allowing yourself to rest.",
+      "image": "frontend/assets/badEnough/AbsenceSignalOverBed.png",
+      "board": "Angel's",
+      "boards": ["Angel's", "Beautiful me.", "Art & quotes"],
+      "tags": ["rest", "safety", "healing", "peace", "emotional recovery"]
+    },
+    {
+      "keyword": "nervous system rest",
+      "angle": "safety",
+      "title": "You Can Rest Now",
+      "description": "A quiet illustrated book about protection, safety, and the moment your nervous system finally stops bracing.",
+      "image": "frontend/assets/badEnough/AbsenceIsSignalWDogs.png",
+      "board": "Beautiful me.",
+      "boards": ["Beautiful me.", "Angel's", "Art & quotes"],
+      "tags": ["nervous system", "rest", "safety", "healing", "peace"]
+    },
+    {
+      "keyword": "emotional exhaustion recovery",
+      "angle": "rest as healing",
+      "title": "Healing Can Look Like Rest",
+      "description": "For readers rebuilding trust in themselves after confusion, self-doubt, and emotional exhaustion.",
+      "image": "frontend/assets/badEnough/AbsenceIsSignalWDogs.png",
+      "board": "psychology /sociology",
+      "boards": ["psychology /sociology", "Beautiful me.", "Art & quotes"],
+      "tags": ["emotional exhaustion", "self trust", "healing", "rest", "personal growth"]
+    },
+    {
+      "keyword": "peaceful living book",
+      "angle": "calm over chaos",
+      "title": "Peace Is Not Boring",
+      "description": "A reflective book about choosing calm over chaos and learning what genuine safety feels like.",
+      "image": "frontend/assets/badEnough/AbsenceIsSignalWDogs.png",
+      "board": "Art & quotes",
+      "boards": ["Art & quotes", "Beautiful me.", "Random thoughts"],
+      "tags": ["peace", "calm", "safety", "healing journey", "quiet life"]
+    },
+    {
+      "keyword": "boundaries book",
+      "angle": "the fight is over",
+      "title": "The Fight Is Over",
+      "description": "A literary reflection on boundaries, discernment, and no longer needing to explain your pain.",
+      "image": "frontend/assets/badEnough/AbsenceIsSignalWDogs.png",
+      "board": "Random thoughts",
+      "boards": ["Random thoughts", "psychology /sociology", "Art & quotes"],
+      "tags": ["boundaries", "discernment", "emotional pain", "self respect", "healing"]
+    },
+    {
+      "keyword": "safe enough to sleep",
+      "angle": "sleep safety",
+      "title": "Safe Enough To Sleep",
+      "description": "A quiet illustrated book about emotional clarity, self-trust, and finding peace again.",
+      "image": "frontend/assets/badEnough/AbsenceIsSignalWDogs.png",
+      "board": "Angel's",
+      "boards": ["Angel's", "Beautiful me.", "Art & quotes"],
+      "tags": ["sleep", "safety", "peace", "self trust", "emotional clarity"]
+    },
+    {
+      "keyword": "intuition healing",
+      "angle": "quiet warning",
+      "title": "The Signal Was Quiet",
+      "description": "Not every warning arrives as a crisis. Sometimes clarity arrives as relief.",
+      "image": "frontend/assets/badEnough/AbsenceISSignalWFlowers.png",
+      "board": "Art & quotes",
+      "boards": ["Art & quotes", "Random thoughts", "psychology /sociology"],
+      "tags": ["intuition", "clarity", "relief", "discernment", "healing"]
+    },
+    {
+      "keyword": "trust your instincts",
+      "angle": "already knew",
+      "title": "What You Already Knew",
+      "description": "A reflective illustrated book about trusting your instincts and recognizing patterns.",
+      "image": "frontend/assets/badEnough/AbsenceISSignalWFlowers.png",
+      "board": "psychology /sociology",
+      "boards": ["psychology /sociology", "Beautiful me.", "Art & quotes"],
+      "tags": ["instincts", "patterns", "self trust", "discernment", "healing"]
+    },
+    {
+      "keyword": "emotional clarity book",
+      "angle": "slow clarity",
+      "title": "Clarity Arrives Slowly",
+      "description": "For readers learning to trust themselves after spending too long questioning their reality.",
+      "image": "frontend/assets/badEnough/AbsenceISSignalWFlowers.png",
+      "board": "Beautiful me.",
+      "boards": ["Beautiful me.", "psychology /sociology", "Random thoughts"],
+      "tags": ["clarity", "self trust", "questioning reality", "healing", "emotional awareness"]
+    },
+    {
+      "keyword": "self trust boundaries",
+      "angle": "instinct memory",
+      "title": "Your Instincts Remember",
+      "description": "A literary companion book about self-trust, boundaries, and emotional awareness.",
+      "image": "frontend/assets/badEnough/AbsenceISSignalWFlowers.png",
+      "board": "Random thoughts",
+      "boards": ["Random thoughts", "Art & quotes", "Beautiful me."],
+      "tags": ["self trust", "boundaries", "instincts", "emotional awareness", "healing"]
+    },
+    {
+      "keyword": "healing and discernment",
+      "angle": "listening",
+      "title": "Learning To Listen To Yourself",
+      "description": "A quiet reflective book about discernment, healing, and choosing peace.",
+      "image": "frontend/assets/badEnough/AbsenceISSignalWFlowers.png",
+      "board": "Art & quotes",
+      "boards": ["Art & quotes", "psychology /sociology", "Beautiful me."],
+      "tags": ["discernment", "healing", "peace", "self trust", "personal growth"]
+    },
+    {
+      "keyword": "rest and nervous system",
+      "angle": "rest information",
+      "title": "Rest Is Information",
+      "description": "A reflective illustrated book about nervous system awareness and learning what safety feels like.",
+      "image": "frontend/assets/badEnough/AbsenceSignalOverBed.png",
+      "board": "Beautiful me.",
+      "boards": ["Beautiful me.", "Angel's", "psychology /sociology"],
+      "tags": ["rest", "nervous system", "safety", "emotional awareness", "healing"]
+    },
+    {
+      "keyword": "peace not earned",
+      "angle": "exhaustion",
+      "title": "Exhaustion Wasn't The Goal",
+      "description": "For anyone who spent too long believing peace had to be earned.",
+      "image": "frontend/assets/badEnough/AbsenceSignalOverBed.png",
+      "board": "Random thoughts",
+      "boards": ["Random thoughts", "Art & quotes", "Beautiful me."],
+      "tags": ["exhaustion", "peace", "self worth", "healing", "boundaries"]
+    },
+    {
+      "keyword": "self trust proof",
+      "angle": "proof",
+      "title": "You Don't Need More Proof",
+      "description": "A quiet book about self-trust, discernment, and recognizing patterns.",
+      "image": "frontend/assets/badEnough/ProblemToSolve.png",
+      "board": "psychology /sociology",
+      "boards": ["psychology /sociology", "Art & quotes", "Random thoughts"],
+      "tags": ["self trust", "discernment", "patterns", "emotional clarity", "healing"]
+    },
+    {
+      "keyword": "trust yourself book",
+      "angle": "what if right",
+      "title": "What If You Were Right",
+      "description": "A reflective illustrated book about trusting yourself and choosing peace.",
+      "image": "frontend/assets/badEnough/AbsenceSignalOverBed.png",
+      "board": "Art & quotes",
+      "boards": ["Art & quotes", "Beautiful me.", "psychology /sociology"],
+      "tags": ["trust yourself", "peace", "self trust", "healing", "emotional clarity"]
+    }
+  ]
+}

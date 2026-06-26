@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>The Bug Only Existed When Nobody Was Watching</title>
+  <meta name="description" content="The Bug Only Existed When Nobody Was Watching There is a special kind of insult that only browser automation can deliver. You build a Playwright workflow. You test it manually. You watch the browser open, click, type, s...">
+  <link rel="canonical" href="https://ashb4.github.io/blog/the-bug-only-existed-when-nobody-was-watching/">
+  <link rel="alternate" type="application/rss+xml" title="Ash B4 Blog RSS" href="/blog/feed.xml">
+  <style>
+    body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.65;margin:0;background:#101418;color:#f5f3ef}
+    main{max-width:780px;margin:0 auto;padding:48px 20px 72px}
+    a{color:#7dd3fc} h1{line-height:1.1;font-size:clamp(2rem,5vw,3.8rem)} .meta,.excerpt{color:#c7c2b8}
+    article img{max-width:100%;height:auto}.card{border-top:1px solid #343a40;padding:24px 0}.tags{display:flex;gap:8px;flex-wrap:wrap}.tag{font-size:.85rem;color:#111;background:#f2c94c;padding:2px 8px;border-radius:999px}
+  </style>
+</head>
+<body>
+  <main><article>
+  <p><a href="../">Blog</a></p>
+  <h1>The Bug Only Existed When Nobody Was Watching</h1>
+  <p class="meta">6/1/2026</p>
+  <p class="excerpt">The Bug Only Existed When Nobody Was Watching There is a special kind of insult that only browser automation can deliver. You build a Playwright workflow. You test it manually. You watch the browser open, click, type, s...</p>
+  <div class="tags"><span class="tag">linux</span><span class="tag">playwright</span><span class="tag">automation</span></div>
+  <p><img src="https://raw.githubusercontent.com/AshB4/N8tiveFlow/main/frontend/assets/devto/linuxJesus.png" alt=""></p>
+  <h1>The Bug Only Existed When Nobody Was Watching</h1>
+<p>There is a special kind of insult that only browser automation can deliver.</p>
+<p>You build a Playwright workflow.
+You test it manually.
+You watch the browser open, click, type, submit, navigate, succeed.</p>
+<p>Everything looks solid.</p>
+<p>Then you run the exact same flow in production, headless, unattended, on the actual worker machine, and it falls apart like it has never seen a DOM before.</p>
+<p>That was the bug.</p>
+<p>It only existed when nobody was watching.</p>
+<p>And yes, that is an incredibly annoying genre of engineering problem.</p>
+<h2>The Setup</h2>
+<p>This lived inside a self-hosted content automation stack running on an old HP laptop I repurposed into a Linux worker box for PostPunk.</p>
+<p>The stack was basically:</p>
+<ul>
+<li>Linux</li>
+<li>Playwright posting workers</li>
+<li>browser automation for publishing flows</li>
+<li>scheduled background jobs</li>
+<li>queue-driven content automation</li>
+</ul>
+<p>The machine itself was already operating mostly on vibes.</p>
+<p>It had:</p>
+<ul>
+<li>6 GB RAM</li>
+<li>a mechanical hard drive</li>
+<li>integrated Radeon graphics</li>
+<li>the general aura of a haunted library computer</li>
+</ul>
+<p>The kind of laptop where opening Chrome was basically rolling percentile dice against the gods of thermal management.</p>
+<p>I had already memorized Alt + PrintScreen + REISUB because eventually this machine was going to need emotional support.</p>
+<p>Naturally, I decided this was suitable production infrastructure.</p>
+<p>Because apparently I enjoy problems with texture.</p>
+<h2>The First Real Sign Something Was Wrong</h2>
+<p>At first I thought the automation itself was flaky.</p>
+<p>Maybe a selector issue.
+Maybe timing.
+Maybe Playwright weirdness.</p>
+<p>Then one night around 3 AM, while manually logging back into one of the platforms, Chromium itself started pixelating.</p>
+<p>The screen partially froze.
+The UI glitched out.
+Everything briefly distorted.
+Linux made that horrible little ringing system noise like the machine was actively negotiating with death.</p>
+<p>I stopped touching the mouse for a few seconds and eventually the system recovered.</p>
+<p>Firefox mostly behaved normally.</p>
+<p>Chrome behaved like the laptop was trying to reject it biologically.</p>
+<p>That was the moment I realized this was no longer just an automation problem.</p>
+<h2>The Lie: “It Works Fine”</h2>
+<p>While visually testing the automation, everything looked perfect.</p>
+<p>Headed Chromium launched.
+The page loaded.
+Selectors resolved.
+Buttons clicked.
+Posts published.</p>
+<p>Pinterest worked.
+Facebook worked.
+<a href="http://Dev.to">Dev.to</a> worked.</p>
+<p>If you watched the browser run manually, you would absolutely think:</p>
+<blockquote>
+<p>“Cool. This is production-ready.”</p>
+</blockquote>
+<p>That was the trap.</p>
+<p>Because the moment I switched the same workflows into unattended headless production mode, things became cursed.</p>
+<p>Suddenly:</p>
+<ul>
+<li>selectors timed out</li>
+<li>pages rendered differently</li>
+<li>interactions fired but did not land</li>
+<li>uploads silently failed</li>
+<li>waits became inconsistent</li>
+<li>browser state got flaky</li>
+<li>random inputs were skipped entirely</li>
+<li>jobs hung forever for no obvious reason</li>
+</ul>
+<p>The automation would sometimes just stop mid-flow like Chromium had emotionally checked out.</p>
+<h2>Headed and Headless Chromium Are Not the Same Thing</h2>
+<p>People describe headless Chrome like it is just:</p>
+<blockquote>
+<p>“Chrome without the window.”</p>
+</blockquote>
+<p>That is a comforting lie for people who have not suffered enough yet.</p>
+<p>Headed and headless Chromium differ in ways that matter:</p>
+<ul>
+<li>rendering paths</li>
+<li>GPU behavior</li>
+<li>compositor timing</li>
+<li>focus handling</li>
+<li>viewport defaults</li>
+<li>performance under load</li>
+<li>environmental dependencies</li>
+</ul>
+<p>On a modern machine, those differences are annoying.</p>
+<p>On old Linux hardware, they become plot-relevant.</p>
+<p>In headed mode, the visible browser was accidentally helping me.</p>
+<p>Rendering slowed things down just enough that:</p>
+<ul>
+<li>animations finished</li>
+<li>panels stabilized</li>
+<li>listeners attached properly</li>
+<li>React stopped rearranging the DOM</li>
+<li>uploads completed before clicks fired</li>
+</ul>
+<p>Then headless mode removed all that accidental timing padding.</p>
+<p>Suddenly the automation was operating at full machine speed against an unstable environment.</p>
+<p>That is where reality started.</p>
+<h2>The Machine Had Chrome-Specific Hatred</h2>
+<p>The weirdest part is that Firefox mostly behaved fine.</p>
+<p>Chrome specifically was the problem child.</p>
+<p>Even opening normal Chrome windows on this machine felt risky.</p>
+<p>There was basically a 50/50 chance:</p>
+<ul>
+<li>things would work normally</li>
+<li>the UI would partially freeze</li>
+<li>rendering would glitch</li>
+<li>the system would briefly pixelate</li>
+<li>the browser would become unstable under load</li>
+</ul>
+<p>I still do not fully understand why.</p>
+<p>Maybe Chromium was hitting GPU paths the laptop hated.
+Maybe Linux and Chrome were fighting somewhere deep in the graphics stack.
+Maybe the machine itself was simply old and tired.</p>
+<p>I genuinely do not know.</p>
+<p>At some point debugging old Linux hardware stops being science and becomes folklore.</p>
+<h2>Timing Bugs Are Worse in Automation</h2>
+<p>One of the hardest lessons with browser automation is this:</p>
+<p>Watching something work manually proves almost nothing.</p>
+<p>Manual observation accidentally hides instability.</p>
+<p>Humans naturally slow workflows down.
+Visible rendering introduces delays.
+The environment stabilizes itself while you are watching.</p>
+<p>Production workers do not care about your vibes.</p>
+<p>Headless Playwright runs at machine speed.</p>
+<p>So this:</p>
+<pre><code class="language-js">await page.click('[data-testid=&quot;publish-button&quot;]');
+</code></pre>
+<p>suddenly becomes dangerous because the UI might:</p>
+<ul>
+<li>exist visually but not functionally</li>
+<li>still be animating</li>
+<li>still be hydrating</li>
+<li>still be attaching listeners</li>
+<li>still be processing uploads</li>
+</ul>
+<p>The bug was not random.</p>
+<p>The bug was exposing assumptions I did not realize I had made.</p>
+<h2>Linux Browser Automation Is Its Own Genre of Suffering</h2>
+<p>Linux browser automation always includes at least one phase of:</p>
+<blockquote>
+<p>“Which dependency is ruining my life this time?”</p>
+</blockquote>
+<p>Eventually I ended up deep in the usual Playwright rabbit hole:</p>
+<ul>
+<li>screenshots</li>
+<li>tracing</li>
+<li>Chromium launch flags</li>
+<li>sandbox weirdness</li>
+<li>GPU disabling</li>
+<li>headless comparisons</li>
+<li>HTML snapshots</li>
+<li>Telegram alerts</li>
+<li>aggressive logging</li>
+</ul>
+<p>Some flags that genuinely helped:</p>
+<pre><code class="language-js">const browser = await chromium.launch({
+  headless: true,
+  args: [
+    '--disable-gpu',
+    '--disable-dev-shm-usage',
+    '--no-sandbox',
+    '--disable-setuid-sandbox',
+    '--disable-background-timer-throttling',
+    '--disable-renderer-backgrounding'
+  ]
+});
+</code></pre>
+<p>And yes:</p>
+<pre><code class="language-bash">npx playwright install-deps
+</code></pre>
+<p>ended up mattering way more than I wanted it to.</p>
+<h2>My Observability Strategy Became “Listen For The Fan”</h2>
+<p>Before headless mode, I barely cared about my Telegram notifications because I could physically watch the automation run on the screen.</p>
+<p>Once everything moved headless, the notifications suddenly became the only proof the system was still alive.</p>
+<p>At some points, my entire monitoring setup was basically:</p>
+<ul>
+<li>Telegram alerts</li>
+<li>log files</li>
+<li>listening for the laptop fan spinning up</li>
+</ul>
+<p>If I heard the fan kick on, I knew the workers were probably doing something.</p>
+<p>Which is not exactly enterprise observability engineering.</p>
+<p>Most of this debugging happened around 3 AM while sitting directly in front of the machine like some kind of browser automation goblin waiting to see whether Chromium would survive the night.</p>
+<h2>The Most Linux Thing I Did</h2>
+<p>At one point I started deleting Chrome-related Linux components trying to “clean up” the environment.</p>
+<p>I removed things I absolutely should not have removed.</p>
+<p>X11 desktop pieces.
+Chrome shell integrations.
+Random Chromium-related packages I barely understood.</p>
+<p>Eventually I broke the setup badly enough that I had to reinstall parts of it.</p>
+<p>And somehow?</p>
+<p>That actually improved stability afterward.</p>
+<p>Which is the most Linux sentence I have written in a while.</p>
+<h2>What Actually Helped</h2>
+<p>The final “fix” was not one fix.</p>
+<p>It was a pile of smaller operational improvements:</p>
+<ul>
+<li>moving workers fully headless</li>
+<li>improving logging</li>
+<li>relying on Telegram notifications</li>
+<li>adding screenshots on failure</li>
+<li>testing under actual production conditions</li>
+<li>waiting on UI state instead of luck</li>
+<li>reducing rendering overhead</li>
+<li>reinstalling the Chrome components I accidentally destroyed</li>
+</ul>
+<p>The biggest shift was psychological.</p>
+<p>I stopped treating:</p>
+<blockquote>
+<p>“it worked once”</p>
+</blockquote>
+<p>as evidence of reliability.</p>
+<p>Because reliability is not:</p>
+<ul>
+<li>“worked on my machine”</li>
+<li>“worked while visible”</li>
+<li>“worked during testing”</li>
+<li>“worked three times in a row”</li>
+</ul>
+<p>Reliability means:</p>
+<ul>
+<li>unattended</li>
+<li>repeatable</li>
+<li>observable</li>
+<li>stable under load</li>
+<li>stable overnight</li>
+<li>stable when nobody is babysitting Chromium personally</li>
+</ul>
+<p>That is an entirely different standard.</p>
+<h2>Final Thoughts</h2>
+<p>I still like this setup.</p>
+<p>Repurposing old hardware into useful infrastructure is genuinely fun.</p>
+<p>There is something satisfying about turning a neglected old laptop into a working automation server instead of throwing it away.</p>
+<p>But browser automation forces honesty into your system very quickly.</p>
+<p>The stack looked stable right up until Chromium had to behave unattended on a 10-year-old Linux laptop with trust issues and a mechanical hard drive.</p>
+<p>Eventually the workers became stable enough that I stopped staring directly at them while jobs ran.</p>
+<p>Honestly, that was probably the real milestone.</p>
+<p>Not:</p>
+<blockquote>
+<p>“The script finally worked.”</p>
+</blockquote>
+<p>But:</p>
+<blockquote>
+<p>“I no longer felt emotionally required to supervise Chromium personally.”</p>
+</blockquote>
+
+</article></main>
+</body>
+</html>

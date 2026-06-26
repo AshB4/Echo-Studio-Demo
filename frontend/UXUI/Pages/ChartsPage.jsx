@@ -180,6 +180,16 @@ export default function ChartsPage() {
 	}, [location.state?.stats, posts]);
 
 	const pinterestStats = analytics?.pinterest || DEFAULT_PINTEREST_STATS;
+	const pinterestTotals = pinterestStats?.totals || DEFAULT_PINTEREST_STATS.totals;
+	const pinterestInteractionRate = useMemo(() => {
+		const impressions = Number(pinterestTotals.impressions || 0);
+		if (!impressions) return 0;
+		const interactions =
+			Number(pinterestTotals.pinClicks || 0) +
+			Number(pinterestTotals.outboundClicks || 0) +
+			Number(pinterestTotals.saves || 0);
+		return Number(((interactions / impressions) * 100).toFixed(2));
+	}, [pinterestTotals]);
 
 	const platformList = useMemo(() => {
 		const entries = Object.entries(stats.platformCounts || {});
@@ -277,12 +287,12 @@ export default function ChartsPage() {
 							</div>
 						<div className="border border-teal-600 rounded p-3">
 							<p className="text-xs uppercase tracking-[0.3em] text-teal-400">
-								Pinterest Score
+								Interaction Rate
 							</p>
 							<p className="text-2xl text-teal-200 font-semibold">
-								{pinterestStats.totals?.score ?? 0}
+								{pinterestInteractionRate}%
 							</p>
-							<p className="text-xs text-teal-500">from Pinterest snapshots</p>
+							<p className="text-xs text-teal-500">pin clicks + outbound clicks + saves / impressions</p>
 						</div>
 						</div>
 					</div>
@@ -293,28 +303,28 @@ export default function ChartsPage() {
 						</h2>
 						<div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
 							<div className="border border-teal-600 rounded p-3">
-								<p className="text-xs uppercase tracking-[0.3em] text-teal-400">Clicks</p>
-								<p className="text-2xl text-pink-300 font-semibold">{analytics?.totals?.clicks ?? 0}</p>
+								<p className="text-xs uppercase tracking-[0.3em] text-teal-400">Impressions</p>
+								<p className="text-2xl text-pink-300 font-semibold">{pinterestTotals.impressions ?? 0}</p>
 							</div>
 							<div className="border border-teal-600 rounded p-3">
-								<p className="text-xs uppercase tracking-[0.3em] text-teal-400">Signups</p>
-								<p className="text-2xl text-pink-300 font-semibold">{analytics?.totals?.signups ?? 0}</p>
+								<p className="text-xs uppercase tracking-[0.3em] text-teal-400">Pin Clicks</p>
+								<p className="text-2xl text-pink-300 font-semibold">{pinterestTotals.pinClicks ?? 0}</p>
 							</div>
 							<div className="border border-teal-600 rounded p-3">
-								<p className="text-xs uppercase tracking-[0.3em] text-teal-400">Likes</p>
-								<p className="text-2xl text-pink-300 font-semibold">{stats.manualTotals?.likes7d ?? analytics?.totals?.likes ?? 0}</p>
+								<p className="text-xs uppercase tracking-[0.3em] text-teal-400">Outbound Clicks</p>
+								<p className="text-2xl text-pink-300 font-semibold">{pinterestTotals.outboundClicks ?? 0}</p>
 							</div>
 							<div className="border border-teal-600 rounded p-3">
 								<p className="text-xs uppercase tracking-[0.3em] text-teal-400">Saves</p>
-								<p className="text-2xl text-pink-300 font-semibold">{stats.manualTotals?.saves7d ?? analytics?.totals?.saves ?? 0}</p>
+								<p className="text-2xl text-pink-300 font-semibold">{pinterestTotals.saves ?? 0}</p>
 							</div>
 							<div className="border border-teal-600 rounded p-3">
-								<p className="text-xs uppercase tracking-[0.3em] text-teal-400">Retweets</p>
-								<p className="text-2xl text-pink-300 font-semibold">{analytics?.totals?.retweets ?? 0}</p>
+								<p className="text-xs uppercase tracking-[0.3em] text-teal-400">Snapshot Count</p>
+								<p className="text-2xl text-pink-300 font-semibold">{pinterestStats.count ?? 0}</p>
 							</div>
 							<div className="border border-teal-600 rounded p-3">
-								<p className="text-xs uppercase tracking-[0.3em] text-teal-400">Success Rate</p>
-								<p className="text-2xl text-pink-300 font-semibold">{analytics?.posting?.successRate ?? 0}%</p>
+								<p className="text-xs uppercase tracking-[0.3em] text-teal-400">Interaction Rate</p>
+								<p className="text-2xl text-pink-300 font-semibold">{pinterestInteractionRate}%</p>
 							</div>
 							<div className="border border-pink-600 rounded p-3 md:col-span-3">
 								<p className="text-xs uppercase tracking-[0.3em] text-pink-400">Pinterest Snapshot Feed</p>

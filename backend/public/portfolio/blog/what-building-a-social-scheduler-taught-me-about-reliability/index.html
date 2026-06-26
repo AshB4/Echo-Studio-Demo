@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>What Building a Social Scheduler Taught Me About Reliability</title>
+  <meta name="description" content="Most automation tools feel impressive right up until you have to trust them. It is easy to demo a scheduler. It is much harder to build one that survives real life: expired tokens flaky platform APIs posts that need rev...">
+  <link rel="canonical" href="https://ashb4.github.io/blog/what-building-a-social-scheduler-taught-me-about-reliability/">
+  <link rel="alternate" type="application/rss+xml" title="Ash B4 Blog RSS" href="/blog/feed.xml">
+  <style>
+    body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.65;margin:0;background:#101418;color:#f5f3ef}
+    main{max-width:780px;margin:0 auto;padding:48px 20px 72px}
+    a{color:#7dd3fc} h1{line-height:1.1;font-size:clamp(2rem,5vw,3.8rem)} .meta,.excerpt{color:#c7c2b8}
+    article img{max-width:100%;height:auto}.card{border-top:1px solid #343a40;padding:24px 0}.tags{display:flex;gap:8px;flex-wrap:wrap}.tag{font-size:.85rem;color:#111;background:#f2c94c;padding:2px 8px;border-radius:999px}
+  </style>
+</head>
+<body>
+  <main><article>
+  <p><a href="../">Blog</a></p>
+  <h1>What Building a Social Scheduler Taught Me About Reliability</h1>
+  <p class="meta">3/31/2026</p>
+  <p class="excerpt">Most automation tools feel impressive right up until you have to trust them. It is easy to demo a scheduler. It is much harder to build one that survives real life: expired tokens flaky platform APIs posts that need rev...</p>
+  <div class="tags"><span class="tag">automation</span><span class="tag">reliability</span><span class="tag">scheduler</span></div>
+  
+  <p>Most automation tools feel impressive right up until you have to trust them.</p>
+<p>It is easy to demo a scheduler.</p>
+<p>It is much harder to build one that survives real life:</p>
+<ul>
+<li>expired tokens</li>
+<li>flaky platform APIs</li>
+<li>posts that need review</li>
+<li>queues that drift out of sync</li>
+<li>failures that happen while you are asleep</li>
+</ul>
+<p>That gap changed how I think about automation.</p>
+<p>I have been building a project called PostPunk, and I thought the hard part would be generating content and wiring platform APIs together. That turned out to be the easy part.</p>
+<p>The real work was operational trust.</p>
+<p>A useful scheduler needs a few things that demos usually skip:</p>
+<h2>1. Approval states matter</h2>
+<p>Not every post should go straight from draft to published.</p>
+<p>Some posts are written by you and are ready immediately. Some are AI-assisted and need a second look. If your system does not distinguish that clearly, you end up either babysitting everything or accidentally posting junk.</p>
+<p>So I ended up treating post states as part of the core workflow, not just metadata:</p>
+<ul>
+<li>draft</li>
+<li>approved</li>
+<li>posted</li>
+<li>failed</li>
+</ul>
+<p>That sounds simple, but it changes everything.</p>
+<h2>2. Failure is not an edge case</h2>
+<p>In scheduling systems, failure is normal.</p>
+<p>A platform token expires.
+An API rate-limits you.
+A platform changes a field name.
+An account is misconfigured.
+A browser fallback stops matching the UI.</p>
+<p>If the whole system falls apart the moment one target fails, you do not have automation. You have a fragile demo.</p>
+<p>So the system needs:</p>
+<ul>
+<li>retries</li>
+<li>visible failure states</li>
+<li>alerts</li>
+<li>manual assist when automation is not trustworthy</li>
+</ul>
+<h2>3. Automatic is not the same as unattended</h2>
+<p>A lot of posting tools sell the dream of full autopilot. In practice, a better model is often:</p>
+<ul>
+<li>automate what is stable</li>
+<li>assist where platforms are hostile</li>
+<li>keep the queue and schedule as the source of truth</li>
+</ul>
+<p>That still saves a huge amount of time, and more importantly, it is honest.</p>
+<h2>4. Scheduling is really an operations problem</h2>
+<p>The UI part is not enough.</p>
+<p>You also need:</p>
+<ul>
+<li>a worker that checks for due posts</li>
+<li>logs</li>
+<li>retry logic</li>
+<li>success and failure alerts</li>
+<li>a clear what is due today view</li>
+</ul>
+<p>Without those, the schedule is just decorative.</p>
+<h2>What I learned</h2>
+<p>The hardest part of automation is not getting software to do something once.</p>
+<p>It is getting it to behave predictably enough that you stop worrying about it.</p>
+<p>That is the part I care about now.</p>
+<p>If you are building internal tools, creator tools, or any kind of scheduler, reliability is the actual feature. Everything else is packaging.</p>
+<p>PostPunk is still a project I am actively working on, but building it has made me much less interested in shiny automation promises and much more interested in boring operational trust.</p>
+
+</article></main>
+</body>
+</html>

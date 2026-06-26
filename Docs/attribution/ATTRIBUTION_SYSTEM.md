@@ -4,15 +4,18 @@ Implements comprehensive marketing attribution to track the full customer journe
 
 ## 🎯 Overview
 
-This system addresses the critical limitation mentioned in the UTM tracking docs: *"You can track what was posted — but not clicks or sales unless you connect to: Gumroad analytics export, Google Analytics, or your own webhook/server log endpoint"*
+Implements multi-touch attribution for PostPunk.
 
-Now Post Punk can:
-- Track touchpoints (views, clicks, engagements) from social posts
-- Record conversions (purchases, sign-ups, etc.) from external sources
-- Stitch together complete customer journeys
-- Apply multiple attribution models for different insights
-- Measure content effectiveness beyond vanity metrics
-- Optimize marketing spend based on actual ROI
+The system records marketing touchpoints and conversion events, reconstructs customer journeys, and applies attribution models for reporting and optimization.
+
+## Goals
+
+- Record touchpoints across marketing channels.
+- Record business outcomes such as purchases and sign-ups.
+- Reconstruct customer journeys.
+- Support multiple attribution models.
+- Measure content effectiveness beyond engagement metrics.
+- Provide reporting for optimization decisions.
 
 ## 🏗️ Architecture
 
@@ -202,10 +205,10 @@ Works alongside existing analytics endpoints:
 - Designed to work with existing Post Punk architecture
 - Minimal performance impact on core posting functionality
 
-### Future Enhancements
+### Possible Future Enhancements
 - Google Analytics integration
 - Gumroad webhook automation
-- Machine learning for data-driven attribution
+- Experimental data-driven attribution approaches
 - A/B testing framework for content optimization
 - Customer lifetime value (LTV) tracking
 

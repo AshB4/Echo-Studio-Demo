@@ -1,0 +1,63 @@
+{
+  "campaign": "black-baby-onsie-series",
+  "productLink": "https://my-store-10fedc5.creator-spring.com/listing/chaos-is-my-love-language?product=287&variation=6097",
+  "platforms": ["pinterest"],
+  "board": "Epic cuteness",
+  "items": [
+    {
+      "keyword": "cute baby onesie",
+      "angle": "tiny chaos aesthetic",
+      "title": "Tiny Goblin Energy Activated",
+      "description": "Funny goblin-core baby onesie for adorable chaos gremlins and exhausted parents.",
+      "image": "frontend/assets/goblinaffs/GoblinTees/BlackBabyOnsie.jpg",
+      "productLink": "https://my-store-10fedc5.creator-spring.com/listing/chaos-is-my-love-language?product=287&variation=6097",
+      "board": "Epic cuteness",
+      "boards": ["Epic cuteness", "Baby Shower!"],
+      "tags": ["baby onesie", "cute chaos", "funny baby", "goblin baby", "tiny cryptid"]
+    },
+    {
+      "keyword": "funny newborn outfit",
+      "angle": "adorable goblin humor",
+      "title": "Freshly Spawned Chaos Creature",
+      "description": "Funny goblin baby outfit for newborns already radiating dangerous levels of chaos.",
+      "image": "frontend/assets/goblinaffs/GoblinTees/BlackBabyOnsie.jpg",
+      "productLink": "https://my-store-10fedc5.creator-spring.com/listing/chaos-is-my-love-language?product=287&variation=6097",
+      "board": "Baby Shower!",
+      "boards": ["Baby Shower!", "Funny Stuff"],
+      "tags": ["newborn humor", "funny baby clothes", "chaos baby", "cute goblin", "baby meme"]
+    },
+    {
+      "keyword": "funny parenting meme",
+      "angle": "tiny lovable menace",
+      "title": "Small Enough To Carry. Strong Enough To Destroy You.",
+      "description": "Funny goblin-core baby humor for emotionally exhausted parents surviving tiny lovable disasters.",
+      "image": "frontend/assets/goblinaffs/GoblinTees/BlackBabyOnsie.jpg",
+      "productLink": "https://my-store-10fedc5.creator-spring.com/listing/chaos-is-my-love-language?product=287&variation=6097",
+      "board": "Funny Stuff",
+      "boards": ["Funny Stuff", "Epic cuteness"],
+      "tags": ["parenting humor", "tiny menace", "funny family", "baby goblin", "mom life"]
+    },
+    {
+      "keyword": "baby shower outfit idea",
+      "angle": "giftable baby humor",
+      "title": "The Funniest Baby Shower Gift This Year",
+      "description": "Funny goblin baby onesie for parents raising tiny cryptids with unlimited confidence.",
+      "image": "frontend/assets/goblinaffs/GoblinTees/BlackBabyOnsie.jpg",
+      "productLink": "https://my-store-10fedc5.creator-spring.com/listing/chaos-is-my-love-language?product=287&variation=6097",
+      "board": "Baby Shower!",
+      "boards": ["Baby Shower!", "Epic cuteness"],
+      "tags": ["baby shower", "funny baby", "gift idea", "cute chaos", "baby outfit"]
+    },
+    {
+      "keyword": "funny chaos baby",
+      "angle": "chaotic cute identity",
+      "title": "Emotionally Supportive Tiny Goblin",
+      "description": "Cute funny goblin-core baby design for tiny emotional support chaos creatures.",
+      "image": "frontend/assets/goblinaffs/GoblinTees/BlackBabyOnsie.jpg",
+      "productLink": "https://my-store-10fedc5.creator-spring.com/listing/chaos-is-my-love-language?product=287&variation=6097",
+      "board": "Epic cuteness",
+      "boards": ["Epic cuteness", "Funny Stuff"],
+      "tags": ["chaos baby", "cute goblin", "funny baby", "adorable menace", "baby humor"]
+    }
+  ]
+}

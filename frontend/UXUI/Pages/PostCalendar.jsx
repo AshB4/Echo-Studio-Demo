@@ -395,6 +395,9 @@ export default function PostCalendar() {
         startDate,
         moved: data.moved || 0,
         daysUsed: data.daysUsed || 0,
+        message: data.message || "",
+        dailyPlan: Array.isArray(data.dailyPlan) ? data.dailyPlan : [],
+        maxSameProductPerDay: data.maxSameProductPerDay || 0,
       });
     } catch (error) {
       console.error("Failed to remix Pinterest queue", error);
@@ -677,9 +680,15 @@ export default function PostCalendar() {
               {remixingQueue
                 ? "Remixing..."
                 : remixResult?.ok
-                ? `Moved ${remixResult.moved} posts from ${remixResult.startDate}`
+                ? remixResult.message ||
+                  `Moved ${remixResult.moved} posts from ${remixResult.startDate}`
                 : remixResult?.message || "amazon-a / amazon-b / digital / wildcard"}
             </p>
+            {remixResult?.ok && remixResult.dailyPlan?.length ? (
+              <p className="mt-1 text-xs text-cyan-300">
+                {remixResult.dailyPlan.join(" / ")} • max {remixResult.maxSameProductPerDay} per product/day
+              </p>
+            ) : null}
           </button>
 
           <button

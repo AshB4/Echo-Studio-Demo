@@ -41,9 +41,22 @@ import {
 	listPostedLog,
 	savePinterestPinMappings,
 	replaceStoreSnapshot,
-	updateRotationSettings,
 	updatePost as updatePostInDb,
 } from "./utils/localDb.mjs";
+import { 
+	initAttributionStorage, 
+	recordTouchpoint, 
+	recordConversion, 
+	getTouchpoints, 
+	getConversions, 
+	getAttributionData,
+	clearAttributionData
+} from "./attribution/events.js";
+import { 
+	stitchUserJourneys, 
+	applyAttributionModel, 
+	calculateAttributionReporting
+} from "./attribution/stitching.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -98,6 +111,39 @@ async function appendPostedLogEntry(post) {
 			manualArchived: true,
 		}),
 	);
+}
+
+function postTargetsPinterest(post = {}) {
+	const platforms = Array.isArray(post?.platforms) ? post.platforms : [];
+	const targets = Array.isArray(post?.targets) ? post.targets : [];
+	return (
+		platforms.some((platform) => String(platform || "").toLowerCase() === "pinterest") ||
+		targets.some((target) => String(target?.platform || "").toLowerCase() === "pinterest")
+	);
+}
+
+function shouldAutoRebalancePinterest(post = {}) {
+	return (
+		postTargetsPinterest(post) &&
+		normalizePostStatus(post?.status || "draft") === "approved" &&
+		Boolean(post?.scheduledAt)
+	);
+}
+
+async function maybeRebalancePinterestQueue(post = null) {
+	if (!shouldAutoRebalancePinterest(post)) {
+		return null;
+	}
+	const snapshot = await readStoreSnapshot();
+	const { posts, summary } = rebalancePinterestMix(snapshot.posts, {
+		startDate: new Date().toISOString().slice(0, 10),
+	});
+	await replaceStoreSnapshot({
+		posts,
+		postedLog: snapshot.postedLog,
+		rejections: snapshot.rejections,
+	});
+	return summary;
 }
 
 function safeFileName(input) {
@@ -300,6 +346,347 @@ app.get("/api/analytics/pinterest/mappings", async (_req, res) => {
 	}
 });
 
+// Attribution Tracking Endpoints
+app.post("/api/attribution/touchpoint", async (req, res) => {
+	try {
+		const touchpoint = await recordTouchpoint(req.body);
+		res.status(201).json(touchpoint);
+	} catch (error) {
+		res.status(500).json({
+			error: "Failed to record touchpoint",
+			detail: error?.message || String(error),
+		});
+	}
+});
+
+app.post("/api/attribution/conversion", async (req, res) => {
+	try {
+		const conversion = await recordConversion(req.body);
+		res.status(201).json(conversion);
+	} catch (error) {
+		res.status(500).json({
+			error: "Failed to record conversion",
+			detail: error?.message || String(error),
+		});
+	}
+});
+
+app.get("/api/attribution/data", async (req, res) => {
+	try {
+		const data = await getAttributionData(req.query);
+		res.json(data);
+	} catch (error) {
+		res.status(500).json({
+			error: "Failed to get attribution data",
+			detail: error?.message || String(error),
+		});
+	}
+});
+
+app.delete("/api/attribution/reset", async (_req, res) => {
+	try {
+		await clearAttributionData();
+		res.json({ message: "Attribution data cleared successfully" });
+	} catch (error) {
+		res.status(500).json({
+			error: "Failed to clear attribution data",
+			detail: error?.message || String(error),
+		});
+	}
+});
+
+// Attribution Modeling Endpoints
+app.get("/api/attribution/journeys", async (req, res) => {
+	try {
+		const { attributionModel, timeWindowHours } = req.query;
+		const [touchpoints, conversions] = await Promise.all([
+			getTouchpoints(),
+			getConversions()
+		]);
+		
+		const journeys = stitchUserJourneys(touchpoints, conversions, {
+			attributionModel,
+			timeWindowHours: timeWindowHours ? parseInt(timeWindowHours, 10) : undefined
+		});
+		
+		const attributedJourneys = journeys.map(journey => 
+			applyAttributionModel(journey)
+		);
+		
+		res.json({
+			journeys: attributedJourneys,
+			count: attributedJourneys.length
+		});
+	} catch (error) {
+		res.status(500).json({
+			error: "Failed to generate attribution journeys",
+			detail: error?.message || String(error),
+		});
+	}
+});
+
+app.get("/api/attribution/report", async (req, res) => {
+	try {
+		const { attributionModel, timeWindowHours } = req.query;
+		const [touchpoints, conversions] = await Promise.all([
+			getTouchpoints(),
+			getConversions()
+		]);
+		
+		const journeys = stitchUserJourneys(touchpoints, conversions, {
+			attributionModel,
+			timeWindowHours: timeWindowHours ? parseInt(timeWindowHours, 10) : undefined
+		});
+		
+		const attributedJourneys = journeys.map(journey => 
+			applyAttributionModel(journey)
+		);
+		
+		const report = calculateAttributionReporting(attributedJourneys);
+		
+		res.json({
+			report,
+			model: attributionModel || 'linear',
+			timeWindowHours: timeWindowHours ? parseInt(timeWindowHours, 10) : 24 * 30
+		});
+	} catch (error) {
+		res.status(500).json({
+			error: "Failed to generate attribution report",
+			detail: error?.message || String(error),
+		});
+	}
+});
+
+// Attribution Dashboard Endpoints
+app.get("/api/attribution/dashboard", async (req, res) => {
+	try {
+		const { attributionModel, timeWindowDays } = req.query;
+		const [touchpoints, conversions] = await Promise.all([
+			getTouchpoints(),
+			getConversions()
+		]);
+		
+		const timeWindowHours = timeWindowDays ? parseInt(timeWindowDays, 10) * 24 : 24 * 30;
+		
+		const journeys = stitchUserJourneys(touchpoints, conversions, {
+			attributionModel,
+			timeWindowHours
+		});
+		
+		const attributedJourneys = journeys.map(journey => 
+			applyAttributionModel(journey)
+		);
+		
+		const report = calculateAttributionReporting(attributedJourneys);
+		
+		// Calculate additional dashboard metrics
+		const contentROI = calculateContentROI(attributedJourneys);
+		const channelEfficiency = calculateChannelEfficiency(attributedJourneys);
+		const attributionScores = calculateAttributionScores(attributedJourneys, attributionModel);
+		const contentInfluenceScore = calculateContentInfluenceScore(attributedJourneys, touchpoints);
+		
+		res.json({
+			report,
+			dashboard: {
+				contentROI,
+				channelEfficiency,
+				attributionScores,
+				contentInfluenceScore,
+				summary: {
+					totalConversions: report.summary.conversionJourneys,
+					totalAssistedConversions: report.summary.assistedConversions,
+					totalDirectConversions: report.summary.directConversions,
+					attributionModel: attributionModel || 'linear',
+					timeWindowDays: timeWindowDays ? parseInt(timeWindowDays, 10) : 30
+				}
+			}
+		});
+	} catch (error) {
+		res.status(500).json({
+			error: "Failed to generate attribution dashboard",
+			detail: error?.message || String(error),
+		});
+	}
+});
+
+/**
+ * Calculate Content ROI: (AttributedRevenue – ContentCost)/ContentCost
+ * @param {Array} journeys - Array of attributed journeys
+ * @returns {Object} Content ROI metrics
+ */
+function calculateContentROI(journeys) {
+	// In a real implementation, we would have actual content cost data
+	// For now, we'll use a placeholder content cost
+	const contentCostPerPiece = 50; // $50 per content piece (placeholder)
+	
+	const totalAttributedRevenue = journeys.reduce((sum, journey) => {
+		return sum + journey.attributionCredits.reduce((creditSum, touchpoint) => {
+			return creditSum + (touchpoint.attributionCredit * (journey.conversion?.value || 1));
+		}, 0);
+	}, 0);
+	
+	// Estimate number of content pieces (unique campaigns)
+	const uniqueCampaigns = new Set();
+	journeys.forEach(journey => {
+		journey.attributionCredits.forEach(touchpoint => {
+			if (touchpoint.campaign) {
+				uniqueCampaigns.add(touchpoint.campaign);
+			}
+		});
+	});
+	
+	const contentCost = uniqueCampaigns.size * contentCostPerPiece;
+	const contentROI = contentCost > 0 ? (totalAttributedRevenue - contentCost) / contentCost : 0;
+	
+	return {
+		contentROI: parseFloat(contentROI.toFixed(4)),
+		contentROIPercentage: parseFloat((contentROI * 100).toFixed(2)),
+		totalAttributedRevenue: parseFloat(totalAttributedRevenue.toFixed(2)),
+		estimatedContentCost: contentCost,
+		contentPiecesCount: uniqueCampaigns.size
+	};
+}
+
+/**
+ * Calculate Channel Efficiency: (AttributedConversions ÷ Spend)
+ * @param {Array} journeys - Array of attributed journeys
+ * @returns {Object} Channel efficiency metrics
+ */
+function calculateChannelEfficiency(journeys) {
+	// In a real implementation, we would have actual spend data per channel
+	// For now, we'll use placeholder values
+	const channelSpend = {
+		facebook: 100,
+		pinterest: 150,
+		instagram: 120,
+		email: 80,
+		organic_search: 0,  // Free but has opportunity cost
+		default: 100
+	};
+	
+	// Calculate attributed conversions per channel
+	const channelConversions = {};
+	journeys.forEach(journey => {
+		journey.attributionCredits.forEach(touchpoint => {
+			const channel = touchpoint.channel || 'unknown';
+			if (!channelConversions[channel]) {
+				channelConversions[channel] = 0;
+			}
+			channelConversions[channel] += touchpoint.attributionCredit;
+		});
+	});
+	
+	// Calculate efficiency for each channel
+	const channelEfficiency = {};
+	Object.keys(channelConversions).forEach(channel => {
+		const spend = channelSpend[channel] || channelSpend.default;
+		channelEfficiency[channel] = spend > 0 ? channelConversions[channel] / spend : 0;
+	});
+	
+	return {
+		channelEfficiency: Object.entries(channelEfficiency).map(([channel, efficiency]) => ({
+			channel,
+			efficiency: parseFloat(efficiency.toFixed(4)),
+			attributedConversions: parseFloat((channelConversions[channel] || 0).toFixed(2)),
+			estimatedSpend: channelSpend[channel] || channelSpend.default
+		})).sort((a, b) => b.efficiency - a.efficiency)
+	};
+}
+
+/**
+ * Calculate Attribution Scores based on model
+ * @param {Array} journeys - Array of attributed journeys
+ * @param {string} model - Attribution model being used
+ * @returns {Object} Attribution scores
+ */
+function calculateAttributionScores(journeys, model) {
+	// Calculate scores based on the selected model
+	const scores = {};
+	
+	journeys.forEach(journey => {
+		journey.attributionCredits.forEach(touchpoint => {
+			const channel = touchpoint.channel || 'unknown';
+			if (!scores[channel]) {
+				scores[channel] = {
+					firstTouch: 0,
+					middleTouch: 0,
+					lastTouch: 0,
+					totalScore: 0
+				};
+			}
+			
+			// Determine if this touchpoint is first, middle, or last in its journey
+			const touchpointIndex = journey.attributionCredits.findIndex(tp => tp.id === touchpoint.id);
+			const isFirst = touchpointIndex === 0;
+			const isLast = touchpointIndex === journey.attributionCredits.length - 1;
+			const isMiddle = !isFirst && !isLast;
+			
+			if (isFirst) {
+				scores[channel].firstTouch += touchpoint.attributionCredit;
+			} else if (isLast) {
+				scores[channel].lastTouch += touchpoint.attributionCredit;
+			} else if (isMiddle) {
+				scores[channel].middleTouch += touchpoint.attributionCredit;
+			}
+			
+			scores[channel].totalScore += touchpoint.attributionCredit;
+		});
+	});
+	
+	return {
+		attributionScores: Object.entries(scores).map(([channel, scores]) => {
+			return {
+				channel,
+				firstTouchScore: parseFloat(scores.firstTouch.toFixed(4)),
+				middleTouchScore: parseFloat(scores.middleTouch.toFixed(4)),
+				lastTouchScore: parseFloat(scores.lastTouch.toFixed(4)),
+				totalScore: parseFloat(scores.totalScore.toFixed(4)),
+				// Calculate position-based score (40% first, 40% last, 20% middle)
+				positionBasedScore: parseFloat((
+					0.4 * scores.firstTouch +
+					0.2 * scores.middleTouch +
+					0.4 * scores.lastTouch
+				).toFixed(4))
+			};
+		}).sort((a, b) => b.totalScore - a.totalScore)
+	};
+}
+
+/**
+ * Calculate Content Influence Score: (AssistedConversions + DirectConversions) ÷ ContentViews
+ * @param {Array} journeys - Array of attributed journeys
+ * @param {Array} touchpoints - Array of all touchpoints (for content views)
+ * @returns {Object} Content influence score
+ */
+function calculateContentInfluenceScore(journeys, touchpoints) {
+	// Count assisted + direct conversions
+	const conversionJourneys = journeys.filter(j => j.conversion !== null);
+	const directConversions = conversionJourneys.filter(journey => 
+		journey.touchpoints.length === 1
+	).length;
+	const assistedConversions = conversionJourneys.length - directConversions;
+	
+	// Estimate content views (touchpoints that are views or similar)
+	// In a real implementation, we'd have explicit view events
+	const contentViews = touchpoints.filter(tp => {
+		// Consider page views, content views, etc. as content views
+		const viewTypes = ['page_view', 'content_view', 'blog_view', 'article_view'];
+		return viewTypes.includes(tp.event_type) || 
+			(tp.type === 'touchpoint' && !tp.event_type); // Assume generic touchpoints are views
+	}).length;
+	
+	const contentInfluenceScore = contentViews > 0 ? 
+		(assistedConversions + directConversions) / contentViews : 0;
+	
+	return {
+		contentInfluenceScore: parseFloat(contentInfluenceScore.toFixed(4)),
+		assistedConversions,
+		directConversions,
+		totalInfluencedConversions: assistedConversions + directConversions,
+		contentViews: contentViews
+	};
+}
+
 app.put("/api/analytics/pinterest/mappings", async (req, res) => {
 	try {
 		const body = req.body;
@@ -483,6 +870,15 @@ app.post("/api/posts", async (req, res) => {
 		} = req.body ?? {};
 		if (!title || !body)
 			return res.status(400).json({ error: "title and body required" });
+			
+		// Validate UTM parameters when product links are present
+		if (metadata?.productLinks) {
+			const validationError = validateUTMParameters(metadata.productLinks);
+			if (validationError) {
+				return res.status(400).json({ error: validationError });
+			}
+		}
+
 		const posts = await listPosts();
 		const id = "p_" + Date.now();
 		const distributionTargets = distributionTagsToTargets(
@@ -529,11 +925,51 @@ app.post("/api/posts", async (req, res) => {
 			});
 		}
 		await createPost(post);
-		res.status(201).json(post);
+		const rebalanceSummary = await maybeRebalancePinterestQueue(post);
+		res.status(201).json({
+			...post,
+			rebalanceSummary,
+		});
 	} catch (e) {
 		res.status(500).json({ error: "Failed to create post", detail: String(e) });
 	}
 });
+
+/**
+ * Validate UTM parameters in product links
+ * @param {Object} productLinks - Object containing product links
+ * @returns {string|null} Error message if validation fails, null if valid
+ */
+function validateUTMParameters(productLinks) {
+	if (!productLinks || typeof productLinks !== 'object') {
+		return null;
+	}
+
+	// Check if any product links are present
+	const links = Object.values(productLinks).filter(link => link && typeof link === 'string');
+	if (links.length === 0) {
+		return null;
+	}
+
+	// For each link, check if it has UTM parameters
+	for (const link of links) {
+		try {
+			const url = new URL(link);
+			const hasUTM = ['utm_source', 'utm_medium', 'utm_campaign'].some(param => 
+				url.searchParams.has(param)
+			);
+			
+			if (!hasUTM) {
+				return `Product link missing UTM parameters: ${link}. Please add utm_source, utm_medium, and utm_campaign.`;
+			}
+		} catch (e) {
+			// If URL parsing fails, it's not a valid URL but we'll let other validation handle that
+			continue;
+		}
+	}
+	
+	return null;
+}
 
 app.put("/api/posts/:id", async (req, res) => {
 	try {
@@ -610,7 +1046,11 @@ app.put("/api/posts/:id", async (req, res) => {
 			});
 		}
 		await updatePostInDb(posts[i].id, posts[i]);
-		res.json(posts[i]);
+		const rebalanceSummary = await maybeRebalancePinterestQueue(posts[i]);
+		res.json({
+			...posts[i],
+			rebalanceSummary,
+		});
 	} catch (e) {
 		res.status(500).json({ error: "Failed to update post", detail: String(e) });
 	}
@@ -703,6 +1143,7 @@ app.post("/api/queue/rebalance-pinterest", async (req, res) => {
 		return res.json({
 			ok: true,
 			dryRun: Boolean(dryRun),
+			message: `Rebalanced ${summary.candidates} Pinterest posts from ${summary.startDate} using ${summary.dailyPlan.join(" / ")}`,
 			...summary,
 		});
 	} catch (e) {

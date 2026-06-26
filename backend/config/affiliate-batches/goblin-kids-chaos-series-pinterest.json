@@ -1,0 +1,63 @@
+{
+  "campaign": "goblin-kids-chaos-series",
+  "productLink": "https://my-store-10fedc5.creator-spring.com/listing/chaos-is-my-love-language?product=1776&variation=105218",
+  "platforms": ["pinterest"],
+  "board": "Funny Stuff",
+  "items": [
+    {
+      "keyword": "funny kids shirt",
+      "angle": "tiny feral menace",
+      "title": "Mom Said No So Anyway...",
+      "description": "Funny chaos goblin kids shirt for tiny lovable disasters with maximum confidence and absolutely no survival instincts.",
+      "image": "frontend/assets/goblinaffs/GoblinTees/ShirtMemes/KidsChaosTeeMomSaidNo.png",
+      "productLink": "https://my-store-10fedc5.creator-spring.com/listing/chaos-is-my-love-language?product=1776&variation=105218",
+      "board": "Funny Stuff",
+      "boards": ["Funny Stuff", "Epic cuteness"],
+      "tags": ["funny kids", "goblin child", "chaos kid", "mom said no", "feral child"]
+    },
+    {
+      "keyword": "funny toddler clothes",
+      "angle": "affectionate chaos",
+      "title": "Raising Tiny Goblins Builds Character",
+      "description": "Funny toddler goblin shirt for chaotic little gremlins powered entirely by snacks and dangerous confidence.",
+      "image": "frontend/assets/goblinaffs/GoblinTees/ShirtMemes/ChaosLoveLangKidsRaisedAProb.png",
+      "productLink": "https://my-store-10fedc5.creator-spring.com/listing/chaos-is-my-love-language?product=1776&variation=105218",
+      "board": "Epic cuteness",
+      "boards": ["Epic cuteness", "Funny Stuff"],
+      "tags": ["toddler humor", "chaos kid", "tiny goblin", "funny family", "kids chaos"]
+    },
+    {
+      "keyword": "kids goblin hoodie",
+      "angle": "cozy chaos identity",
+      "title": "Tiny Goblin But Make It Cozy",
+      "description": "Funny cozy goblin hoodie for kids with maximum chaos energy and emotional support hoodie vibes.",
+      "image": "frontend/assets/goblinaffs/GoblinTees/NavyKidCLLHoodie.jpg",
+      "productLink": "https://my-store-10fedc5.creator-spring.com/listing/chaos-is-my-love-language?product=1776&variation=105218",
+      "board": "Epic cuteness",
+      "boards": ["Epic cuteness", "Halloween"],
+      "tags": ["kids hoodie", "goblin hoodie", "chaos child", "funny hoodie", "cozy goblin"]
+    },
+    {
+      "keyword": "funny parenting meme",
+      "angle": "every parent understands this",
+      "title": "Parents Of Tiny Goblins Need Strong Coffee",
+      "description": "Funny chaos goblin apparel for kids who somehow create destruction faster than physics should allow.",
+      "image": "frontend/assets/goblinaffs/GoblinTees/ShirtMemes/KidsChaosLoveLangSilencewasWarning.png",
+      "productLink": "https://my-store-10fedc5.creator-spring.com/listing/chaos-is-my-love-language?product=1776&variation=105218",
+      "board": "Funny Stuff",
+      "boards": ["Funny Stuff", "Baby Shower!"],
+      "tags": ["parent humor", "kids chaos", "goblin energy", "mom humor", "chaotic child"]
+    },
+    {
+      "keyword": "cute chaos kid shirt",
+      "angle": "adorable menace energy",
+      "title": "Cute Enough To Get Away With Chaos",
+      "description": "Funny goblin-core kids apparel for tiny emotional support gremlins who leave destruction and glitter everywhere.",
+      "image": "frontend/assets/goblinaffs/GoblinTees/ShirtMemes/KidsChaosTeeMomSaidNo.png",
+      "productLink": "https://my-store-10fedc5.creator-spring.com/listing/chaos-is-my-love-language?product=1776&variation=105218",
+      "board": "Epic cuteness",
+      "boards": ["Epic cuteness", "Funny Stuff", "Halloween"],
+      "tags": ["cute goblin", "kids humor", "tiny menace", "chaos aesthetic", "funny shirt"]
+    }
+  ]
+}

@@ -36,7 +36,7 @@ export function inferStartAnywayIdentity(text = "", mediaPath = "") {
   const media = basenameLower(mediaPath);
   const fullMedia = String(mediaPath || "").toLowerCase();
   const source = `${text} ${media} ${fullMedia}`;
-  if (!/creator-spring|teespring|start-anyway|frog circle shirt|frog shirt|frog hoodie/.test(source)) {
+  if (!/start-anyway|frog circle shirt|frog shirt|frog hoodie/.test(source)) {
     return null;
   }
   if (/hoodie|cozy outfit|hoodie aesthetic|hdke-y7dfd6oe9-4yglo8ycwbu/.test(source)) {
@@ -132,6 +132,24 @@ function inferKnownIdentity(text, mediaPath = "") {
   }
   const startAnyway = inferStartAnywayIdentity(text, mediaPath);
   if (startAnyway) return startAnyway;
+  if (fullMedia.includes("frontend/assets/goblinaffs/goblintees/shirtmemes/")) {
+    if (/baby/.test(media)) {
+      return {
+        productProfileId: "goblin-certified-baby",
+        batchLabel: "goblin-tees",
+      };
+    }
+    if (/kid|kids/.test(media)) {
+      return {
+        productProfileId: "goblin-certified-kids",
+        batchLabel: "goblin-tees",
+      };
+    }
+    return {
+      productProfileId: "goblin-dark-tees",
+      batchLabel: "goblin-tees",
+    };
+  }
   if (fullMedia.includes("frontend/assets/goblinaffs/goblintees/")) {
     if (/onesie|baby/.test(media)) {
       return {

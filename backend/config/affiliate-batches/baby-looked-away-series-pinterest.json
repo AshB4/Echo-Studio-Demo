@@ -1,0 +1,63 @@
+{
+  "campaign": "baby-looked-away-series",
+  "productLink": "https://my-store-10fedc5.creator-spring.com/listing/chaos-is-my-love-language?product=287&variation=6097",
+  "platforms": ["pinterest"],
+  "board": "Epic cuteness",
+  "items": [
+    {
+      "keyword": "funny toddler meme",
+      "angle": "tiny cryptid energy",
+      "title": "Toddlers Are Just Fast Goblins",
+      "description": "Funny goblin baby humor for parents raising tiny cryptids with unlimited stamina and dangerous curiosity.",
+      "image": "frontend/assets/goblinaffs/GoblinTees/ShirtMemes/BabyChaosLookedAway.png",
+      "productLink": "https://my-store-10fedc5.creator-spring.com/listing/chaos-is-my-love-language?product=287&variation=6097",
+      "board": "Epic cuteness",
+      "boards": ["Epic cuteness", "Funny Stuff"],
+      "tags": ["toddler meme", "funny baby", "chaos toddler", "tiny goblin", "mom humor"]
+    },
+    {
+      "keyword": "funny parenting shirt",
+      "angle": "every exhausted parent understands",
+      "title": "I Turned Around And Regretted Everything",
+      "description": "Funny goblin-core parenting humor for exhausted adults surviving tiny chaos creatures.",
+      "image": "frontend/assets/goblinaffs/GoblinTees/ShirtMemes/BabyChaosLookedAway.png",
+      "productLink": "https://my-store-10fedc5.creator-spring.com/listing/chaos-is-my-love-language?product=287&variation=6097",
+      "board": "Funny Stuff",
+      "boards": ["Funny Stuff", "Baby Shower!"],
+      "tags": ["parent humor", "funny shirt", "baby chaos", "goblin child", "mom life"]
+    },
+    {
+      "keyword": "cute funny baby",
+      "angle": "adorable menace",
+      "title": "Cute Enough To Escape Consequences",
+      "description": "Funny goblin baby outfit for adorable little disasters weaponizing cuteness professionally.",
+      "image": "frontend/assets/goblinaffs/GoblinTees/ShirtMemes/BabyChaosLookedAway.png",
+      "productLink": "https://my-store-10fedc5.creator-spring.com/listing/chaos-is-my-love-language?product=287&variation=6097",
+      "board": "Epic cuteness",
+      "boards": ["Epic cuteness", "Baby Shower!"],
+      "tags": ["cute baby", "adorable chaos", "funny baby", "tiny menace", "baby goblin"]
+    },
+    {
+      "keyword": "baby chaos meme",
+      "angle": "affectionate disaster humor",
+      "title": "The Smaller They Are The More Dangerous They Become",
+      "description": "Funny goblin-core parenting meme for emotionally exhausted parents and tiny lovable disasters.",
+      "image": "frontend/assets/goblinaffs/GoblinTees/ShirtMemes/BabyChaosLookedAway.png",
+      "productLink": "https://my-store-10fedc5.creator-spring.com/listing/chaos-is-my-love-language?product=287&variation=6097",
+      "board": "Funny Stuff",
+      "boards": ["Funny Stuff", "Epic cuteness"],
+      "tags": ["baby meme", "funny parenting", "chaos child", "baby goblin", "family humor"]
+    },
+    {
+      "keyword": "funny baby shower idea",
+      "angle": "giftable relatable humor",
+      "title": "Every Parent Of A Tiny Goblin Needs This",
+      "description": "Funny goblin baby humor that perfectly captures exhausted parent survival energy.",
+      "image": "frontend/assets/goblinaffs/GoblinTees/ShirtMemes/BabyChaosLookedAway.png",
+      "productLink": "https://my-store-10fedc5.creator-spring.com/listing/chaos-is-my-love-language?product=287&variation=6097",
+      "board": "Baby Shower!",
+      "boards": ["Baby Shower!", "Funny Stuff"],
+      "tags": ["baby shower", "funny gift", "mom humor", "baby chaos", "cute goblin"]
+    }
+  ]
+}

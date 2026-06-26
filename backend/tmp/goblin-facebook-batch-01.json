@@ -1,0 +1,122 @@
+[
+  {
+    "title": "Chaos Goblin Certified",
+    "body": "POV: you left the house for ONE thing and somehow returned with snacks, emotional damage, and a new side quest. Chaos Goblin Certified. Obviously.",
+    "platforms": ["facebook"],
+    "scheduledAt": "2026-06-04T17:00:00.000Z",
+    "mediaPath": "/Users/ash/Desktop/N8tiveFlow/frontend/assets/goblinaffs/GoblinTees/grayCLL.jpg",
+    "mediaType": "image",
+    "tags": ["goblincore", "funny shirt", "chaos energy", "introvert humor"],
+    "metadata": {
+      "productProfileId": "goblin-certified-apparel",
+      "productProfileLabel": "Goblin Certified Apparel",
+      "productLinks": {
+        "primary": "https://my-store-10fedc5.creator-spring.com/listing/chaos-goblin-certified"
+      },
+      "distributionTags": ["post:facebook"],
+      "keyword": "chaos goblin shirt",
+      "angle": "side quest humor",
+      "batchLabel": "goblin-facebook-batch-01"
+    }
+  },
+  {
+    "title": "Chaos Is A Lifestyle",
+    "body": "This shirt feels like iced coffee at 2pm, unfinished side quests, and surviving entirely on vibes. Honestly? Certified behavior.",
+    "platforms": ["facebook"],
+    "scheduledAt": "2026-06-05T15:00:00.000Z",
+    "mediaPath": "/Users/ash/Desktop/N8tiveFlow/frontend/assets/goblinaffs/GoblinTees/redCLLTee.jpg",
+    "mediaType": "image",
+    "tags": ["chaos shirt", "goblin mode", "funny tee", "relatable humor"],
+    "metadata": {
+      "productProfileId": "goblin-certified-apparel",
+      "productProfileLabel": "Goblin Certified Apparel",
+      "productLinks": {
+        "primary": "https://my-store-10fedc5.creator-spring.com/listing/chaos-goblin-certified"
+      },
+      "distributionTags": ["post:facebook"],
+      "keyword": "funny chaos shirt",
+      "angle": "vibes based existence",
+      "batchLabel": "goblin-facebook-batch-01"
+    }
+  },
+  {
+    "title": "Snack Goblin Energy",
+    "body": "Some people peak at productivity. Others evolve into highly specialized snack goblins with WiFi access. Choose your class wisely.",
+    "platforms": ["facebook"],
+    "scheduledAt": "2026-06-05T17:00:00.000Z",
+    "mediaPath": "/Users/ash/Desktop/N8tiveFlow/frontend/assets/goblinaffs/GoblinTees/TankGrayCLL.jpg",
+    "mediaType": "image",
+    "tags": ["snack goblin", "funny tank", "summer chaos", "goblincore"],
+    "metadata": {
+      "productProfileId": "goblin-certified-apparel",
+      "productProfileLabel": "Goblin Certified Apparel",
+      "productLinks": {
+        "primary": "https://my-store-10fedc5.creator-spring.com/listing/chaos-goblin-certified?product=117"
+      },
+      "distributionTags": ["post:facebook"],
+      "keyword": "snack goblin tank top",
+      "angle": "snack goblin identity",
+      "batchLabel": "goblin-facebook-batch-01"
+    }
+  },
+  {
+    "title": "Summer Goblin Uniform",
+    "body": "This tank top was made for summer chaos, iced coffee runs, wandering Target unsupervised, and emotional support beverages.",
+    "platforms": ["facebook"],
+    "scheduledAt": "2026-06-06T15:00:00.000Z",
+    "mediaPath": "/Users/ash/Desktop/N8tiveFlow/frontend/assets/goblinaffs/GoblinTees/TankGrayCLL.jpg",
+    "mediaType": "image",
+    "tags": ["summer outfit", "funny tank top", "goblin energy", "chaos mode"],
+    "metadata": {
+      "productProfileId": "goblin-certified-apparel",
+      "productProfileLabel": "Goblin Certified Apparel",
+      "productLinks": {
+        "primary": "https://my-store-10fedc5.creator-spring.com/listing/chaos-goblin-certified?product=117"
+      },
+      "distributionTags": ["post:facebook"],
+      "keyword": "summer goblin tank",
+      "angle": "summer chaos",
+      "batchLabel": "goblin-facebook-batch-01"
+    }
+  },
+  {
+    "title": "Soft Hoodie Loud Chaos",
+    "body": "Soft hoodie. Loud chaos. For people who look emotionally stable until the third inconvenience hits.",
+    "platforms": ["facebook"],
+    "scheduledAt": "2026-06-06T17:00:00.000Z",
+    "mediaPath": "/Users/ash/Desktop/N8tiveFlow/frontend/assets/goblinaffs/GoblinTees/MagentaCLL.jpg",
+    "mediaType": "image",
+    "tags": ["pink hoodie", "chaos hoodie", "goblincore", "funny clothes"],
+    "metadata": {
+      "productProfileId": "goblin-certified-apparel",
+      "productProfileLabel": "Goblin Certified Apparel",
+      "productLinks": {
+        "primary": "https://my-store-10fedc5.creator-spring.com/listing/chaos-goblin-certified?product=212"
+      },
+      "distributionTags": ["post:facebook"],
+      "keyword": "pink chaos hoodie",
+      "angle": "cute chaos",
+      "batchLabel": "goblin-facebook-batch-01"
+    }
+  },
+  {
+    "title": "Maximum Goblin Mode",
+    "body": "Rain outside. Blanket inside. Zero plans. Maximum goblin. This sweatshirt understands the assignment.",
+    "platforms": ["facebook"],
+    "scheduledAt": "2026-06-07T15:00:00.000Z",
+    "mediaPath": "/Users/ash/Desktop/N8tiveFlow/frontend/assets/goblinaffs/GoblinTees/stealCLLSweatshirt.jpg",
+    "mediaType": "image",
+    "tags": ["cozy sweatshirt", "rainy day mood", "goblincore", "funny sweatshirt"],
+    "metadata": {
+      "productProfileId": "goblin-certified-apparel",
+      "productProfileLabel": "Goblin Certified Apparel",
+      "productLinks": {
+        "primary": "https://my-store-10fedc5.creator-spring.com/listing/chaos-goblin-certified?product=345"
+      },
+      "distributionTags": ["post:facebook"],
+      "keyword": "cozy goblin sweatshirt",
+      "angle": "rainy day comfort",
+      "batchLabel": "goblin-facebook-batch-01"
+    }
+  }
+]

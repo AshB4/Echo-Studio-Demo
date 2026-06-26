@@ -244,6 +244,25 @@ export function buildOutputSchema(productName, productType, audience, options = 
   "curiosity_score": 0,
   "save_score": 0,
   "share_score": 0,
+  "identity_archetype": "",
+  "ecosystem_cluster": "",
+  "future_self_signal": "",
+  "save_reason": "",
+  "utility_type": "",
+  "discovery_score": 0,
+  "retail_commonality_score": 0,
+  "rabbit_hole_score": 0,
+  "visual_clarity_score": 0,
+  "save_potential_score": 0,
+  "amazon_discovery_score": 0,
+  "seasonality_score": 0,
+  "landing_page_match_score": 0,
+  "landing_page_match_reason": "",
+  "product_fit_score": 0,
+  "product_fit_state": "",
+  "product_fit_reasons": [],
+  "product_fit_recommended": false,
+  "product_fit_blocked": false,
   "intent_primary": "",
   "intent_secondary": "",
   "awareness_stage": "",
@@ -433,6 +452,12 @@ export function buildRequirementsLayer() {
 - thumbnail_concept / first_line: provide the thumbnail and opening lead
 - platform_optimizations: adapt the hook/body/CTA per platform instead of repeating the same text
 - ctr_score / clarity_score / trust_score / curiosity_score / save_score / share_score: score the lane across CTR and retention
+- identity_archetype / ecosystem_cluster / future_self_signal: classify the identity and ecosystem the pin should reinforce
+- save_reason / utility_type: explain why this is worth saving and what kind of utility it provides
+- discovery_score / rabbit_hole_score / retail_commonality_score / visual_clarity_score: score discovery quality and penalty for generic retail familiarity
+- amazon_discovery_score / seasonality_score: score Amazon-native novelty and seasonal momentum
+- landing_page_match_score / landing_page_match_reason: ensure the pin promise matches the destination
+- product_fit_score / product_fit_state / product_fit_reasons: gate the pin as recommended, acceptable, downgraded, or blocked
 - awareness_stage: problem-aware, solution-aware, evaluation, purchase, or post-purchase
 - pain_proximity: numeric score from 0-10 for urgency or frustration
 - commerciality_score: numeric score from 0-10 for buying readiness
@@ -477,14 +502,24 @@ export function buildPinterestCreativeLayer(context = {}) {
 	const recentHooks = Array.isArray(context.recentHooks) ? context.recentHooks.slice(0, 5) : [];
 	const recentVisuals = Array.isArray(context.recentVisuals) ? context.recentVisuals.slice(0, 5) : [];
 	const lanes = Array.isArray(context.priorityLanes) ? context.priorityLanes.join(", ") : "";
+	const fit = context.productFit || {};
 	return `Pinterest creative safeguards:
 - Trigger lane: ${context.trigger || "not specified"}
 - Category lane: ${context.category || "not specified"}
 - Category throttle: ${context.categoryThrottleCount || 0} recent pin(s)
 - Priority lanes: ${lanes || "seasonal affiliate, home/garden affiliate, dev products, goblin printables, coloring books"}
+- Product fit: ${fit.product_fit_state || context.productFitState || "not assessed"} (score ${fit.product_fit_score ?? "n/a"})
+- Ecosystem cluster: ${fit.ecosystem_cluster || "not specified"}
+- Identity archetype: ${fit.identity_archetype || "not specified"}
+- Future self signal: ${fit.future_self_signal || "not specified"}
+- Save reason: ${fit.save_reason || "not specified"}
+- Utility type: ${fit.utility_type || "not specified"}
+- Discovery score: ${fit.discovery_score ?? "n/a"} | Rabbit-hole score: ${fit.rabbit_hole_score ?? "n/a"} | Retail commonality: ${fit.retail_commonality_score ?? "n/a"}
+- Visual clarity: ${fit.visual_clarity_score ?? "n/a"} | Landing page match: ${fit.landing_page_match_score ?? "n/a"}
 - Recent hooks to avoid: ${recentHooks.join(" | ") || "none"}
 - Recent visual styles to avoid: ${recentVisuals.join(" | ") || "none"}
-- Rule: keep the emotion, but change product, composition, and hook framing when similarity climbs.`;
+- Rule: keep the emotion, but change product, composition, and hook framing when similarity climbs.
+- Rule: if product fit is blocked or the landing page match is weak, downgrade the lane or rewrite the angle before generating more variants.`;
 }
 
 function buildCompactContext(productName, productType, audience, options = {}) {
@@ -561,6 +596,25 @@ export function buildStrategyStagePrompt(productName, productType, audience, opt
   "curiosity_score": 0,
   "save_score": 0,
   "share_score": 0,
+  "identity_archetype": "",
+  "ecosystem_cluster": "",
+  "future_self_signal": "",
+  "save_reason": "",
+  "utility_type": "",
+  "discovery_score": 0,
+  "retail_commonality_score": 0,
+  "rabbit_hole_score": 0,
+  "visual_clarity_score": 0,
+  "save_potential_score": 0,
+  "amazon_discovery_score": 0,
+  "seasonality_score": 0,
+  "landing_page_match_score": 0,
+  "landing_page_match_reason": "",
+  "product_fit_score": 0,
+  "product_fit_state": "",
+  "product_fit_reasons": [],
+  "product_fit_recommended": false,
+  "product_fit_blocked": false,
   "intent_primary": "",
   "intent_secondary": "",
   "awareness_stage": "",

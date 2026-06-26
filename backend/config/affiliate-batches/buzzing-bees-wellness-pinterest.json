@@ -1,0 +1,207 @@
+{
+  "campaign": "buzzing-bees-wellness-pinterest",
+  "productLink": "https://www.amazon.com/Buzzing-Adventures-Coloring-Explore-Beehives/dp/B0D9R6ZMPX",
+  "board": "coloring pages",
+  "items": [
+    {
+      "keyword": "adult coloring book",
+      "angle": "5 minute reset",
+      "title": "5 Minutes Of Calm For Busy Adults",
+      "description": "Need a quick mental reset? These relaxing bee coloring pages help you slow down, focus, and unwind in just a few minutes. Perfect for stress relief, mindfulness, and creative self-care.",
+      "image": "frontend/assets/buzzingbees/5minsOfCalmBigBee.png",
+      "board": "coloring pages",
+      "boards": ["coloring pages", "Beautiful me.", "Home spa"],
+      "tags": ["adult coloring", "stress relief", "mindfulness", "self care", "bee coloring"]
+    },
+    {
+      "keyword": "stress relief activity",
+      "angle": "anxiety relief",
+      "title": "Feeling Overwhelmed? Try This Instead",
+      "description": "Sometimes all you need is a quiet activity that doesn't require screens, noise, or effort. Grab a page, color for a few minutes, and give your brain a break.",
+      "image": "frontend/assets/buzzingbees/5minsOfCalmBigBee.png",
+      "board": "Beautiful me.",
+      "boards": ["Beautiful me.", "coloring pages", "psychology /sociology"],
+      "tags": ["anxiety relief", "adult coloring", "mental wellness", "calm hobby", "creative therapy"]
+    },
+    {
+      "keyword": "mindful hobbies",
+      "angle": "mindfulness",
+      "title": "A Tiny Daily Ritual That Feels Amazing",
+      "description": "Coloring can become a simple mindfulness practice. Slow down, focus on one page, and enjoy a few peaceful moments away from the chaos.",
+      "image": "frontend/assets/buzzingbees/5minsOfCalmBigBee.png",
+      "board": "Random thoughts",
+      "boards": ["Random thoughts", "coloring pages", "Beautiful me."],
+      "tags": ["mindfulness", "self care", "adult coloring book", "slow living", "wellness"]
+    },
+    {
+      "keyword": "relaxing coloring pages",
+      "angle": "sleep prep",
+      "title": "A Better Bedtime Habit Than Doomscrolling",
+      "description": "Looking for a calming nighttime routine? Coloring helps many adults relax, unplug, and prepare for restful sleep.",
+      "image": "frontend/assets/buzzingbees/5minsOfCalmBigBee.png",
+      "board": "Home spa",
+      "boards": ["Home spa", "coloring pages", "Beautiful me."],
+      "tags": ["bedtime routine", "relaxation", "adult coloring", "sleep habits", "self care"]
+    },
+    {
+      "keyword": "bee coloring pages",
+      "angle": "nature therapy",
+      "title": "Escape Into A Garden Full Of Bees",
+      "description": "Beautiful bee-themed coloring pages inspired by nature. A relaxing creative escape for gardeners, flower lovers, and coloring enthusiasts.",
+      "image": "frontend/assets/buzzingbees/5minsOfCalmBigBee.png",
+      "board": "Gardening stuff",
+      "boards": ["Gardening stuff", "coloring pages", "Art & quotes"],
+      "tags": ["bee coloring", "flowers", "garden lovers", "adult coloring", "nature art"]
+    },
+    {
+      "keyword": "adult coloring benefits",
+      "angle": "science backed",
+      "title": "Why Adults Are Coloring Again",
+      "description": "Coloring isn't just for kids anymore. Many adults use coloring books to reduce stress, improve focus, and enjoy a relaxing creative outlet.",
+      "image": "frontend/assets/buzzingbees/AdultsColoringAgainBigBee.png",
+      "board": "Art & quotes",
+      "boards": ["Art & quotes", "coloring pages", "Beautiful me."],
+      "tags": ["adult coloring", "creative hobby", "stress relief", "focus", "wellness"]
+    },
+    {
+      "keyword": "creative hobbies for adults",
+      "angle": "beginner hobby",
+      "title": "No Talent Required",
+      "description": "Want a creative hobby without learning complicated skills? Coloring is simple, affordable, relaxing, and beginner-friendly.",
+      "image": "frontend/assets/buzzingbees/AdultsColoringAgainBigBee.png",
+      "board": "Fun Ideas",
+      "boards": ["Fun Ideas", "coloring pages", "I'm so Crafty...."],
+      "tags": ["creative hobby", "beginner hobby", "adult coloring", "easy hobby", "fun activity"]
+    },
+    {
+      "keyword": "self care activities",
+      "angle": "mental wellness",
+      "title": "A Self Care Trend That Actually Helps",
+      "description": "Adult coloring books are making a comeback because they're simple, affordable, and genuinely relaxing.",
+      "image": "frontend/assets/buzzingbees/AdultsColoringAgainBigBee.png",
+      "board": "Beautiful me.",
+      "boards": ["Beautiful me.", "coloring pages", "Home spa"],
+      "tags": ["self care", "adult coloring", "stress relief", "wellness", "creative outlet"]
+    },
+    {
+      "keyword": "screen free hobbies",
+      "angle": "digital detox",
+      "title": "Need A Break From Screens?",
+      "description": "Trade endless scrolling for something calming and creative. These bee coloring pages make a perfect screen-free hobby.",
+      "image": "frontend/assets/buzzingbees/AdultsColoringAgainBigBee.png",
+      "board": "Random thoughts",
+      "boards": ["Random thoughts", "coloring pages", "Fun Ideas"],
+      "tags": ["digital detox", "adult coloring", "screen free", "creative hobby", "mindfulness"]
+    },
+    {
+      "keyword": "bee coloring book",
+      "angle": "nature lover",
+      "title": "Coloring For Nature Lovers",
+      "description": "Love flowers, gardens, and pollinators? Explore detailed bee-themed coloring pages designed for relaxing creative sessions.",
+      "image": "frontend/assets/buzzingbees/AdultsColoringAgainBigBee.png",
+      "board": "Gardening stuff",
+      "boards": ["Gardening stuff", "coloring pages", "Art & quotes"],
+      "tags": ["bee coloring", "flowers", "garden art", "nature lovers", "adult coloring"]
+    },
+    {
+      "keyword": "relaxing hobbies",
+      "angle": "feel good hobby",
+      "title": "A Hobby That Actually Feels Good",
+      "description": "Some hobbies create more stress than they solve. Coloring is simple, relaxing, and easy to enjoy whenever you need a break.",
+      "image": "frontend/assets/buzzingbees/FeelGoodHobbyPoppy.png",
+      "board": "coloring pages",
+      "boards": ["coloring pages", "Beautiful me.", "Home spa"],
+      "tags": ["relaxing hobby", "adult coloring", "creative wellness", "stress relief", "self care"]
+    },
+    {
+      "keyword": "creative self care",
+      "angle": "emotional",
+      "title": "Your Brain Deserves Nice Things Too",
+      "description": "A few quiet minutes with a coloring page can help create a sense of calm and accomplishment after a busy day.",
+      "image": "frontend/assets/buzzingbees/FeelGoodHobbyPoppy.png",
+      "board": "Beautiful me.",
+      "boards": ["Beautiful me.", "coloring pages", "psychology /sociology"],
+      "tags": ["self care", "creative hobby", "adult coloring", "mental wellness", "relaxation"]
+    },
+    {
+      "keyword": "cozy hobbies",
+      "angle": "cozy lifestyle",
+      "title": "Cozy Hobby Starter Pack",
+      "description": "Tea. Blanket. Coloring book. That's the whole plan. Sometimes simple hobbies are the best hobbies.",
+      "image": "frontend/assets/buzzingbees/FeelGoodHobbyPoppy.png",
+      "board": "Fun Ideas",
+      "boards": ["Fun Ideas", "coloring pages", "Home spa"],
+      "tags": ["cozy hobby", "adult coloring", "slow living", "relaxation", "creative fun"]
+    },
+    {
+      "keyword": "mindful hobbies",
+      "angle": "mental reset",
+      "title": "When Your Brain Needs A Soft Reset",
+      "description": "Coloring encourages focus, creativity, and a slower pace. A perfect activity when life feels noisy.",
+      "image": "frontend/assets/buzzingbees/FeelGoodHobbyPoppy.png",
+      "board": "Random thoughts",
+      "boards": ["Random thoughts", "coloring pages", "Beautiful me."],
+      "tags": ["mindfulness", "creative hobby", "adult coloring", "stress relief", "wellness"]
+    },
+    {
+      "keyword": "flower coloring pages",
+      "angle": "nature",
+      "title": "Bring A Wildflower Field To Life",
+      "description": "Relax with beautiful flower and bee coloring pages inspired by nature and peaceful garden scenes.",
+      "image": "frontend/assets/buzzingbees/FeelGoodHobbyPoppy.png",
+      "board": "Gardening stuff",
+      "boards": ["Gardening stuff", "coloring pages", "Art & quotes"],
+      "tags": ["flower coloring", "bee coloring", "garden art", "adult coloring", "nature lovers"]
+    },
+    {
+      "keyword": "cheap hobbies",
+      "angle": "budget hobby",
+      "title": "Cheap Hobby That Feels Expensive",
+      "description": "You don't need expensive supplies to enjoy a creative hobby. A coloring book and a few pencils can go a long way.",
+      "image": "frontend/assets/buzzingbees/CheapHobbySunflower.png",
+      "board": "Fun Ideas",
+      "boards": ["Fun Ideas", "coloring pages", "I'm so Crafty...."],
+      "tags": ["cheap hobby", "budget hobby", "adult coloring", "creative hobby", "self care"]
+    },
+    {
+      "keyword": "affordable hobbies",
+      "angle": "value",
+      "title": "The Best Hobby Per Dollar",
+      "description": "Low cost. Low stress. High enjoyment. Adult coloring remains one of the most affordable creative hobbies available.",
+      "image": "frontend/assets/buzzingbees/CheapHobbySunflower.png",
+      "board": "Random thoughts",
+      "boards": ["Random thoughts", "coloring pages", "Fun Ideas"],
+      "tags": ["affordable hobby", "adult coloring", "budget friendly", "creative outlet", "wellness"]
+    },
+    {
+      "keyword": "adult coloring book",
+      "angle": "luxury feeling",
+      "title": "Feels Like A Luxury Escape",
+      "description": "Take a break from the noise and enjoy a peaceful creative activity inspired by flowers, bees, and nature.",
+      "image": "frontend/assets/buzzingbees/CheapHobbySunflower.png",
+      "board": "Beautiful me.",
+      "boards": ["Beautiful me.", "coloring pages", "Home spa"],
+      "tags": ["luxury feeling", "self care", "adult coloring", "stress relief", "relaxation"]
+    },
+    {
+      "keyword": "sunflower coloring pages",
+      "angle": "nature lover",
+      "title": "Sunflowers, Bees, And Quiet Moments",
+      "description": "Detailed sunflower and bee illustrations designed for relaxing coloring sessions and nature-inspired creativity.",
+      "image": "frontend/assets/buzzingbees/CheapHobbySunflower.png",
+      "board": "Gardening stuff",
+      "boards": ["Gardening stuff", "coloring pages", "Art & quotes"],
+      "tags": ["sunflower coloring", "bee coloring", "nature art", "adult coloring", "gardening"]
+    },
+    {
+      "keyword": "easy hobbies",
+      "angle": "beginner",
+      "title": "Looking For An Easy Hobby?",
+      "description": "No experience needed. Just open a page, pick your colors, and enjoy a creative hobby that fits any schedule.",
+      "image": "frontend/assets/buzzingbees/AdultsColoringAgainBigBee.png",
+      "board": "coloring pages",
+      "boards": ["coloring pages", "Fun Ideas", "I'm so Crafty...."],
+      "tags": ["easy hobby", "beginner hobby", "adult coloring", "creative activity", "stress relief"]
+    }
+  ]
+}

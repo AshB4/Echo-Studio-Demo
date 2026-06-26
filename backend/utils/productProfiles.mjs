@@ -100,6 +100,27 @@ export const productProfiles = [
     ],
   },
   {
+    id: "not-sure-bad-enough-book",
+    label: "When You're Not Sure If It Was Bad Enough",
+    lifecycleStatus: "live",
+    category: "Books",
+    productType: "Kindle and paperback nonfiction book about patterns, boundaries, and ending over-explaining",
+    audience: "readers questioning painful relationship patterns, boundary confusion, emotional minimization, and whether their experience was bad enough to name",
+    brandVoice: "validating, clear, grounded, gentle but direct",
+    primaryGoal: "sell the book on Amazon while making readers feel less alone and less pressured to justify their pain",
+    promotionChannels: ["amazon", "facebook", "pinterest", "instagram"],
+    links: {
+      gumroad: "",
+      amazon: "https://www.amazon.com/dp/B0H33H6X8G",
+      primary: "https://www.amazon.com/dp/B0H33H6X8G",
+    },
+    notes: [
+      "Lead with recognition, relief, and permission to stop over-explaining.",
+      "Mention Kindle naturally, but keep copy format-neutral because paperback is available from the Amazon page.",
+      "Avoid sensational trauma language; keep the tone steady, compassionate, and practical.",
+    ],
+  },
+  {
     id: "goblin-coloring-affirmations",
     label: "Goblin Core Coloring Affirmations",
     lifecycleStatus: "live",

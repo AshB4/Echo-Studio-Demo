@@ -1,0 +1,58 @@
+{
+  "campaign": "survive-today-goblin-soft-chaos",
+  "productLink": "https://my-store-10fedc5.creator-spring.com/listing/chaos-goblin-certified",
+  "platforms": ["pinterest"],
+  "board": "Funny Stuff",
+  "items": [
+    {
+      "keyword": "survival humor shirt",
+      "angle": "daily survival validation",
+      "title": "Honestly surviving today was kind of impressive",
+      "description": "Cute goblin chaos meme apparel for exhausted humans surviving one emotional support snack at a time.",
+      "image": "frontend/assets/goblinaffs/GoblinTees/ShirtMemes/SurviveTodayInCotten.png",
+      "board": "Funny Stuff",
+      "boards": ["Funny Stuff", "Random thoughts"],
+      "tags": ["survival humor", "chaos goblin", "funny shirt", "burnout meme", "mental health humor"]
+    },
+    {
+      "keyword": "cute burnout hoodie",
+      "angle": "comfort and emotional softness",
+      "title": "This hoodie understands emotional damage better than most people",
+      "description": "Goblin-core comfort apparel for chaotic introverts trying very hard not to become cryptids.",
+      "image": "frontend/assets/goblinaffs/GoblinTees/ShirtMemes/SurviveTodayInCotten.png",
+      "board": "Epic cuteness",
+      "boards": ["Epic cuteness", "Funny Stuff"],
+      "tags": ["comfort hoodie", "cute chaos", "soft goblin aesthetic", "introvert humor", "cozy meme fashion"]
+    },
+    {
+      "keyword": "sarcastic goblin apparel",
+      "angle": "identity humor and relatability",
+      "title": "Emotionally stable people are probably confused by this shirt",
+      "description": "Funny goblin meme apparel for caffeine-powered weirdos and emotionally exhausted raccoons.",
+      "image": "frontend/assets/goblinaffs/GoblinTees/ShirtMemes/SurviveTodayInCotten.png",
+      "board": "More Nerdy Goodness...",
+      "boards": ["More Nerdy Goodness...", "Funny Stuff"],
+      "tags": ["sarcastic shirt", "goblin core", "funny apparel", "chaotic introvert", "weirdcore fashion"]
+    },
+    {
+      "keyword": "weirdcore hoodie aesthetic",
+      "angle": "curiosity and absurdist humor",
+      "title": "This looks like a raccoon designed emotional support clothing",
+      "description": "Cute chaotic goblin apparel with feral cozy energy and suspiciously accurate life advice.",
+      "image": "frontend/assets/goblinaffs/GoblinTees/ShirtMemes/SurviveTodayInCotten.png",
+      "board": "Freaking Weird or mild...",
+      "boards": ["Freaking Weird or mild...", "More Nerdy Goodness..."],
+      "tags": ["weirdcore", "chaos aesthetic", "funny goblin meme", "alternative fashion", "internet humor"]
+    },
+    {
+      "keyword": "funny oversized hoodie",
+      "angle": "cozy identity reinforcement",
+      "title": "Some days the goal is simply not becoming a forest cryptid",
+      "description": "Oversized goblin-core hoodie energy for people surviving creatively instead of efficiently.",
+      "image": "frontend/assets/goblinaffs/GoblinTees/ShirtMemes/SurviveTodayInCotten.png",
+      "board": "The Queen in me.",
+      "boards": ["The Queen in me.", "Epic cuteness"],
+      "tags": ["oversized hoodie", "goblin aesthetic", "cozy chaos", "funny meme hoodie", "burnout fashion"]
+    }
+  ]
+}

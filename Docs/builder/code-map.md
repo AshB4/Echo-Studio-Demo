@@ -1,172 +1,224 @@
 # Code Map
 
-This file explains what owns what in PostPunk/N8tiveFlow.
+This file is a current-state map of N8tiveFlow / PostPunk.
 
-Use it before adding features so we do not recreate logic, duplicate helpers, or split the source of truth.
+It is meant to help a new contributor answer one question quickly: what actually owns what right now?
 
-## Current Strategic Stack
+## 1. High-Level Architecture
 
-- Canonical publishing lives outside PostPunk in `AshB4 Studio`
-- Astro is the canonical SEO and authority layer
-- PostPunk is the workflow, metadata, scheduling, and syndication layer
-- The primary active distribution lanes are `Facebook`, `Dev.to`, `Pinterest`, and `Reddit`
-- Other adapter files may exist, but they should not be mistaken for the current strategic focus
+PostPunk is the workflow, queue, syndication, and automation layer.
 
-## Core Flow
+The canonical publishing site lives outside this repo in the AshB4 Studio / Astro site. PostPunk supports that site by:
 
-- Frontend entrypoint and route source of truth: `frontend/main.jsx`
-- Composer page UI: `frontend/UXUI/Pages/postComposer.jsx`
-- Composer state and submit logic: `frontend/UXUI/Components/PostComposer/usePostComposerState.jsx`
-- Batch import and queue staging: `frontend/UXUI/Pages/BatchPage.jsx`
-- Affiliate strategy/rules page: `frontend/UXUI/Pages/AffiliateEnginePage.jsx`
-- Affiliate batch builder: `frontend/UXUI/Pages/AffiliateBuilderPage.jsx`
-- Rotation and scheduling defaults setup: `frontend/UXUI/Pages/SetupPage.jsx`
-- Posted history archive UI: `frontend/UXUI/Pages/ArchivePage.jsx`
-- Backend API: `backend/server.mjs`
-- Scheduled worker: `backend/scripts/postingJob.mjs`
-- Pinterest queue remix/rebalance logic: `backend/scripts/queue/rebalance-pinterest-mix.mjs`
-- Platform dispatch: `backend/scripts/platforms/post-to-all.js`
+- storing and editing content records
+- queueing and scheduling posts
+- dispatching to external platforms
+- generating RSS feeds
+- exporting portfolio pages and article files
+- tracking posting history, retries, and failures
 
-## Single Sources Of Truth
+The important split is:
 
-- Queue data: SQLite `posts` table via `backend/utils/localDb.mjs`
-- Posted log/history: SQLite `posted_log` table via `backend/utils/localDb.mjs`
-- Rejections and failures: SQLite `rejections` table via `backend/utils/localDb.mjs`
-- Legacy JSON mirrors for compatibility:
-  - `backend/queue/postQueue.json`
-  - `backend/queue/postedLog.json`
-  - `backend/queue/rejections.json`
-- Status rules:
-  - `backend/utils/postStatus.mjs`
-  - `frontend/UXUI/utils/postStatus.js`
-- Distribution-tag parsing:
-  - `backend/utils/distributionTags.mjs`
-  - `frontend/UXUI/utils/distributionTags.js`
-- Product profiles:
-  - `backend/utils/productProfiles.mjs`
-  - `frontend/UXUI/utils/productProfiles.js`
-- Platform writing guidance:
-  - `backend/utils/platformProfiles.mjs`
-  - `frontend/UXUI/utils/platformProfiles.js`
+- Astro/AshB4 Studio owns canonical publishing and SEO authority
+- PostPunk owns operations, metadata, syndication, and automation
 
-## Frontend Page Ownership
+Do not treat PostPunk as a full CMS. It is a publishing operations system with a content API attached to it.
 
-- Calendar and home view: `frontend/UXUI/Pages/PostCalendar.jsx`
-- Composer: `frontend/UXUI/Pages/postComposer.jsx`
-- Posted archive and bulk scheduling: `frontend/UXUI/Pages/PostLib.jsx`
-- Batch import and batch queue actions: `frontend/UXUI/Pages/BatchPage.jsx`
-- Affiliate rules, planning kernel, and reusable GPT prompts: `frontend/UXUI/Pages/AffiliateEnginePage.jsx`
-- Affiliate row builder, bulk JSON import, and affiliate queue scheduling: `frontend/UXUI/Pages/AffiliateBuilderPage.jsx`
-- Today Ops and manual assist: `frontend/UXUI/Pages/TodayQueue.jsx`
-- Pinterest analytics dashboard: `frontend/UXUI/Pages/ChartsPage.jsx`
-- Posted archive: `frontend/UXUI/Pages/ArchivePage.jsx`
-- Rotation/setup: `frontend/UXUI/Pages/SetupPage.jsx`
-- pSEO pages: `frontend/UXUI/Pages/SeoPages.jsx`
-- 404 and fallback UI: `frontend/UXUI/Pages/notFound.jsx`
+## 2. Frontend Structure and Major Routes
 
-### Current page-specific operational notes
+The active frontend entrypoint is `frontend/main.jsx`.
 
-- `frontend/UXUI/Pages/PostCalendar.jsx`
-  - shows scheduled approved posts
-  - now also shows failed scheduled posts in red
-  - supports retrying failed posts forward by a day
-  - owns the `Remix Pinterest` button, which calls `/api/queue/rebalance-pinterest` and reloads posts
-  - shows affiliate day markers in the month grid with a small status-colored `🛒` badge beside the date number
-  - orders day-level posts so `facebook`/`instagram` social posts appear before affiliate Amazon/Pinterest pins
-- `frontend/UXUI/Pages/PostLib.jsx`
-  - posted archive and bulk scheduling surface
-  - `/lib` navigation was removed in favor of `/archive`
-- `frontend/UXUI/Pages/ChartsPage.jsx`
-  - shows Pinterest CSV/snapshot analytics and funnel summary data
-- `frontend/UXUI/Pages/SetupPage.jsx`
-  - owns rotation defaults
-  - now also surfaces token/platform health from `/api/platform-health`
-- `frontend/UXUI/Pages/postComposer.jsx`
-  - owns single-post AI assist
-  - has visible AI results tray and one-click `Approve + Schedule Next Open Day`
-- `frontend/UXUI/Pages/BatchPage.jsx`
-  - owns import-first batch workflow
-  - has AI response staging and batch scheduling/mix actions
-- `frontend/UXUI/Pages/AffiliateEnginePage.jsx`
-  - owns the Amazon affiliate planning framework
-  - holds decision rules, sale-mode notes, tracking guidance, and reusable GPT research prompts
-- `frontend/UXUI/Pages/AffiliateBuilderPage.jsx`
-  - owns the Amazon affiliate working builder
-  - supports row-based affiliate pin prep using `keyword`, `angle`, `productLink`, `title`, `description`, `image`, `board`, optional `boards`, and `tags`
-  - supports bulk GPT JSON import, local autosave, row selection, and queueing selected rows into the main queue
-  - mixes queued rows by product/link before scheduling so one product does not clump on consecutive slots
-  - pulls saved board suggestions from `/api/pinterest-boards` and uses them for primary and alternate board fields
+`frontend/app.jsx` is deprecated and returns nothing. Do not add new routing there.
 
-## Composer Dependencies
+Global styling starts in `frontend/index.css`.
 
-- Platform selector UI: `frontend/UXUI/Global/PostComposer/PlatformSelector.jsx`
-- Image upload UI: `frontend/UXUI/Global/PostComposer/ImageUploader.jsx`
-- Platform-specific text UI: `frontend/UXUI/Global/PostComposer/CustomPlatformText.jsx`
-- Product selector UI: `frontend/UXUI/Global/PostComposer/SeoProductSelector.jsx`
+### Main routes
 
-## Backend API Ownership
+- `/` - calendar and queue home
+- `/compose` - post composer
+- `/lab` - Post Lab
+- `/batch` - batch import and staging
+- `/affiliate` - affiliate strategy / rules
+- `/affiliate/builder` - affiliate row builder
+- `/today`, `/today-ops`, `/ops`, `/today/*` - Today Ops / manual queue handling
+- `/charts`, `/pinterest-analytics` - Pinterest analytics
+- `/archive` - posted archive
+- `/setup` - rotation and token health
+- `/pseo`, `/pseo/:slug` - pSEO pages
+- `*` - 404
 
-- Posts CRUD: `backend/server.mjs`
-- Archive API: `backend/server.mjs`
-- Rotation settings API: `backend/server.mjs`
-- Accounts API: `backend/server.mjs`
-- Pinterest boards API: `backend/server.mjs`
-- Platform health API: `backend/server.mjs`
-- Analytics summary API: `backend/server.mjs`
-- AI SEO generation API: `backend/server.mjs`
-- AI campaign generation API: `backend/server.mjs`
-- Media upload API: `backend/server.mjs`
-- Pinterest queue remix API: `backend/server.mjs`
+### Frontend page ownership
 
-### Important backend behavior notes
+- `frontend/UXUI/Pages/PostCalendar.jsx` - calendar, queue visibility, Pinterest remix action
+- `frontend/UXUI/Pages/postComposer.jsx` - composer page
+- `frontend/UXUI/Pages/BatchPage.jsx` - batch import flow
+- `frontend/UXUI/Pages/AffiliateEnginePage.jsx` - affiliate strategy and prompt guidance
+- `frontend/UXUI/Pages/AffiliateBuilderPage.jsx` - row-based affiliate builder
+- `frontend/UXUI/Pages/TodayQueue.jsx` - manual ops / recovery surface
+- `frontend/UXUI/Pages/ChartsPage.jsx` - analytics dashboard
+- `frontend/UXUI/Pages/ArchivePage.jsx` - archive/history
+- `frontend/UXUI/Pages/SetupPage.jsx` - settings and platform health
+- `frontend/UXUI/Pages/SeoPages.jsx` - pSEO content pages
+- `frontend/UXUI/Pages/notFound.jsx` - error page
 
-- `backend/server.mjs`
-  - moving a post to `status: "posted"` appends it to archive history
-  - `/api/platform-health` powers the `/setup` token-health panel
-  - `/api/pinterest-boards` exposes saved Pinterest board names and default board for the affiliate builder
-  - `/api/queue/rebalance-pinterest` runs the Pinterest queue rebalance against SQLite-backed posts and refreshes JSON mirrors through `localDb.mjs`
-- `backend/scripts/postingJob.mjs`
-  - fully failed posts stay in the queue as `failed` after max attempts instead of disappearing
-  - partially successful posts now remain in the queue for the failed targets only, so they do not vanish after mixed success
-- `backend/scripts/queue/rebalance-pinterest-mix.mjs`
-  - owns the daily Pinterest mix plan: `amazon-a`, `amazon-b`, `digital`, `wildcard`
-  - treats `amazon-a` and `amazon-b` as flexible aliases for any `amazon-*` category
-  - enforces max 2 posts from the same product group per day by default
-  - supports CLI use with `--start-date`, `--dry-run`, `--slots`, `--plan`, and `--max-same-product`
+### Frontend support code
 
-## Posting Pipeline
+- `frontend/UXUI/Components/*` - shared UI and page-specific component trees
+- `frontend/UXUI/Global/PostComposer/*` - composer-specific controls and state
+- `frontend/UXUI/utils/*` - client-side helpers for statuses, tags, products, and platform rules
+- `frontend/UXUI/scripts/postToAllPlatforms.js` - thin client-side posting helper
 
-- Worker chooses due posts and handles retries: `backend/scripts/postingJob.mjs`
-- Target normalization, account lookup, and product-link injection: `backend/scripts/platforms/post-to-all.js`
-- Account loading and lookup: `backend/utils/accountStore.mjs`
-- Possible future fallback for unstable social platforms: browser-scheduling automation via Playwright, instead of API-first posting
+Some folders are legacy or parallel support trees, not primary entrypoints. In particular, `frontend/UXUI/Pages/PostLib.jsx` exists, but the live archive route is `/archive`.
 
-### Per-platform handlers
+## 3. Backend Structure and Major Subsystems
 
-- Dev.to: `backend/scripts/platforms/dev/post-to-devto.js`
-- Hashnode: `backend/scripts/platforms/dev/post-to-hashnode.js`
-- Product Hunt: `backend/scripts/platforms/dev/post-to-producthunt.js`
-- X: `backend/scripts/platforms/social/post-to-x.js`
-- Facebook: `backend/scripts/platforms/social/post-to-facebook.js`
-- Facebook browser lane: `backend/scripts/platforms/social/post-to-facebook-browser.js`
-- Instagram: `backend/scripts/platforms/social/post-to-instagram.js`
-- LinkedIn: `backend/scripts/platforms/social/post-to-linkedin.js`
-- Pinterest: `backend/scripts/platforms/social/post-to-pinterest.js`
-- Substack: `backend/scripts/platforms/social/post-to-substack.js`
-- Reddit: `backend/scripts/platforms/social/post-to-reddit.js`
-- Threads: `backend/scripts/platforms/social/post-to-threads.js`
-- Tumblr: `backend/scripts/platforms/social/post-to-tumblr.js`
-- Ko-fi: `backend/scripts/platforms/content/post-to-kofi.js`
-- Discord: `backend/scripts/platforms/adult/post-to-discord.js`
-- Amazon: `backend/scripts/platforms/marketplaces/post-to-amazon.js`
-- Pinterest session bootstrap helper: `backend/scripts/platforms/social/capture-pinterest-state.js`
+The backend entrypoint is `backend/server.mjs`.
 
-### Current primary lane focus
+It is an Express app that owns:
 
-- `Dev.to`: trusted canonical-article syndication lane
-- `Facebook`: trusted social distribution lane
-- `Pinterest`: trusted evergreen visual discovery lane
-- `Reddit`: active strategic target, but still needs operational proving
+- posts CRUD
+- archive/history APIs
+- account and platform health APIs
+- rotation/settings APIs
+- media upload
+- analytics summaries
+- SEO and campaign generation
+- Pinterest queue rebalance
+- generic platform dispatch
+- content API mounting at `/api/content`
+
+### Content API
+
+`backend/routes/content/*` is a separate Prisma-backed content subsystem.
+
+It is not the same thing as the SQLite queue store.
+
+Current content API pieces:
+
+- `backend/routes/content/index.js`
+- `backend/routes/content/create.js`
+- `backend/routes/content/update.js`
+- `backend/routes/content/list.js`
+- `backend/routes/content/show.js`
+- `backend/routes/content/validators.js`
+- `backend/routes/content/serializers.js`
+
+The schema lives in `backend/prisma/schema.prisma` and includes:
+
+- `users`
+- `content_items`
+- `content_assets`
+- `platform_targets`
+
+This is useful for structured content records, but it is not the primary queue source of truth.
+
+### Main backend utility layers
+
+- `backend/utils/localDb.mjs` - SQLite queue store and JSON mirror sync
+- `backend/utils/contentModel.mjs` - canonical content metadata normalization
+- `backend/utils/rssSyndication.mjs` - RSS article selection and feed generation
+- `backend/utils/articlePipeline.mjs` - portfolio/article export pipeline
+- `backend/utils/astroMarkdownExport.mjs` - Astro frontmatter and markdown export
+- `backend/utils/accountStore.mjs` - account loading and secret resolution
+- `backend/utils/platformHealth.mjs` - credential/platform health checks
+- `backend/utils/platformProfiles.mjs` - platform writing guidance
+- `backend/utils/postStatus.mjs` - status normalization and rules
+- `backend/utils/distributionTags.mjs` - platform/tag target mapping
+- `backend/utils/archiveEntry.mjs` - archive/history row shape
+- `backend/utils/queueGuard.mjs` - duplicate and schedule safety checks
+- `backend/utils/seoGeneration.mjs` - SEO generation helpers
+- `backend/utils/campaignGeneration.mjs` - campaign generation helpers
+- `backend/utils/devtoCoverPrompt.mjs` - DEV cover image prompt builder
+- `backend/utils/pinterestCreative.mjs` - Pinterest creative rules
+- `backend/utils/pinterestPerformanceAnalysis.mjs` - Pinterest analytics scoring
+- `backend/utils/scheduleHealth.mjs` - schedule health checks
+- `backend/utils/analyticsSummary.mjs` - funnel and summary reporting
+- `backend/utils/telegramAlerts.mjs` - Telegram status alerts
+- `backend/utils/productProfiles.mjs` - product profile metadata
+
+## 4. Queue and Scheduling Flow
+
+The operational queue is SQLite-backed.
+
+Primary queue/history storage lives in `backend/data/postpunk.sqlite` through `backend/utils/localDb.mjs`.
+
+The JSON files under `backend/queue/` are mirrors kept for compatibility:
+
+- `backend/queue/postQueue.json`
+- `backend/queue/postedLog.json`
+- `backend/queue/rejections.json`
+
+The worker flow is:
+
+1. Load due posts from the SQLite queue
+2. Normalize targets and platform/account routing
+3. Send each post to the selected platform adapters
+4. Record successes and failures
+5. Append archive/history rows
+6. Retry or defer failed items when appropriate
+7. Send Telegram alerts
+8. Optionally regenerate RSS feeds
+
+Important queue/status behavior:
+
+- `draft`, `approved`, `queued`, `scheduled`, `posted`, `failed`, and related states are normalized in code
+- approved posts are the ones the worker is meant to act on
+- per-platform limits and cooldown logic are enforced in the worker
+- Pinterest queue remixing is handled separately from normal dispatch
+
+### Pinterest queue flow
+
+- `backend/scripts/queue/rebalance-pinterest-mix.mjs` owns the Pinterest mix logic
+- `POST /api/queue/rebalance-pinterest` exposes it in `backend/server.mjs`
+- the calendar page has a `Remix Pinterest` action that calls that API
+
+### Worker entrypoint
+
+- `backend/scripts/postingJob.mjs` is the main scheduled worker
+- it acquires a lock file at `backend/data/posting-job.lock`
+- it respects platform limits, duplicate checks, and Pinterest media-family avoidance
+- it can regenerate RSS feeds after processing when RSS auto-generation is enabled
+
+## 5. Attribution Subsystem
+
+The attribution subsystem exists, but it should be treated as experimental / partially integrated.
+
+Files:
+
+- `backend/attribution/events.js`
+- `backend/attribution/stitching.js`
+
+Storage:
+
+- `backend/stats/attribution-events.json`
+- `backend/stats/attribution-conversions.json`
+
+What it does now:
+
+- records touchpoints and conversions
+- stitches journeys by identifier and time window
+- applies simple attribution models such as linear, first-touch, last-touch, and time-decay
+
+What it is not:
+
+- a primary production source of truth
+- a fully wired reporting system in the main publishing loop
+
+## 6. Platform Integrations and Current Status
+
+### Proven working
+
+- `Facebook`
+- `Dev.to`
+- `Pinterest`
+
+These are the lanes the project currently treats as live and operational.
+
+### Active but more cautious
+
+- `Reddit`
+
+The adapter exists and the code routes to it, but it should still be treated as less operationally proven than the three lanes above.
 
 ### Present in code but not current strategic focus
 
@@ -180,184 +232,210 @@ Use it before adding features so we do not recreate logic, duplicate helpers, or
 - `Tumblr`
 - `Ko-fi`
 - `Discord`
-- `Amazon` as an unattended posting lane
+- `Amazon`
 
-### Adapter files present but not currently dispatched in `post-to-all.js`
+### Platform dispatch
 
-- TikTok adapter file exists: `backend/scripts/platforms/social/post-to-tiktok.js`
+`backend/scripts/platforms/post-to-all.js` is the platform router.
 
-### Meta lane notes
+It:
 
-- Current proven Meta lane: Facebook page posting through `post-to-facebook.js`
-- Proven now:
-  - text posts
-  - image posts using a local `mediaPath`
-  - browser-only posting through `post-to-facebook-browser.js`
-  - personal-profile posting routed by `profileUrl`
-  - page posting routed by `pageUrl`
-  - `Color With Ash` page flow using `Next -> Post`
-- Not wired yet:
-  - Facebook Stories API flow
-  - Facebook video publishing flow
-- Instagram and Threads have adapter files, but they rely on separate `INSTAGRAM_*` and `THREADS_*` credentials and should not be treated as automatically covered by Facebook page tokens
+- resolves platform handlers dynamically
+- applies affiliate/product-link helpers
+- normalizes targets and accounts
+- keeps platform-specific logic out of the worker
 
-### Pinterest lane notes
+Per-platform handlers live under:
 
-- Current proven Pinterest lane: `post-to-pinterest.js`
-- Proven now:
-  - single live pin posting
-  - image upload from local `mediaPath`
-  - title/description/link fill
-  - board selection from `backend/config/pinterest-boards.json`
-  - saved-session reuse through a dedicated Pinterest Chrome profile
-  - product-link passthrough from queued metadata into the Pinterest `Link` field
-  - draft-rail handling for single-pin publish flows
-- Supporting helper:
-  - `capture-pinterest-state.js` creates/saves the Pinterest automation session
-- Queue remix support:
-  - backend logic lives in `backend/scripts/queue/rebalance-pinterest-mix.mjs`
-  - API route lives in `backend/server.mjs` at `POST /api/queue/rebalance-pinterest`
-  - calendar button lives in `frontend/UXUI/Pages/PostCalendar.jsx`
-  - default schedule slots are `15:00`, `15:20`, `15:40`, and `16:00` UTC
-- Not wired yet:
-  - publish-later scheduling
-  - alt text
-  - tagged topics / product tagging
-  - sequential multi-pin posting in one run
+- `backend/scripts/platforms/social/*`
+- `backend/scripts/platforms/dev/*`
+- `backend/scripts/platforms/content/*`
+- `backend/scripts/platforms/marketplaces/*`
+- `backend/scripts/platforms/adult/*`
 
-### Substack lane notes
+The important reality is that adapter files existing in the tree does not mean the lane is operationally proven.
 
-- Current Substack lane: `post-to-substack.js`
-- Wired now:
-  - browser-only posting through Playwright
-  - dedicated persistent profile at `backend/config/substack-chrome-profile`
-  - account/config support through `backend/config/accounts.json`
-  - frontend platform visibility in the composer and queue views
-  - worker/platform routing through `post-to-all.js` and `postingJob.mjs`
-- Current blocker:
-  - Substack auth/session has not been completed yet
-  - the automation currently lands on `https://substack.com/` / `https://substack.com/home` without a signed-in writer session
-  - the next resume step is to sign in once inside the dedicated Substack automation browser profile, then rerun the editor flow
-- Helper test harness:
-  - `backend/test-substack.js`
+## 7. Data Storage Locations and Sources of Truth
 
-### Canonical publishing note
+### Primary source of truth
 
-- PostPunk is not the canonical publishing home for long-form authority content
-- the intended future direction is for PostPunk content metadata and derivatives to feed Astro / `AshB4 Studio`
-- markdown/content export is still a future integration point, not a completed path
+- `backend/data/postpunk.sqlite`
 
-### Affiliate workflow notes
+Used by `backend/utils/localDb.mjs` for:
 
-- `/affiliate` is the strategy layer, not the posting engine
-- `/affiliate/builder` is the operational affiliate batch builder
-- The builder currently feeds Pinterest-oriented affiliate posts into the normal queue one by one
-- Default affiliate cadence in the builder is `3/day`, with date-range overrides for sale windows such as `25th-30th -> 6/day`
-- Builder queueing now spreads same-product rows across different days before allowing repeats on the same day when enough other products exist
-- The builder supports one immediate `board` plus optional per-row `boards` for future reposting to niche-fit boards on different days
-- The builder does not export paid Pinterest bulk CSV workflows; it prepares and queues rows into PostPunk instead
-- `backend/scripts/import-affiliate-batch.mjs` is the headless equivalent for remote hosts. It reads the same repo-native batch JSON, mixes rows across batches, and schedules them directly into SQLite/queue storage with same-product rows spread across separate days first.
+- queue posts
+- posted log
+- rejections
+- settings
+- Pinterest metrics snapshots
 
-### JSON shapes to reuse
+### Compatibility mirrors
 
-- Affiliate builder grouped import shape:
+- `backend/queue/postQueue.json`
+- `backend/queue/postedLog.json`
+- `backend/queue/rejections.json`
 
-```json
-{
-  "productLink": "https://www.amazon.com/your-affiliate-link",
-  "platforms": ["pinterest"],
-  "board": "Fun Ideas",
-  "campaign": "campaign-slug",
-  "items": [
-    {
-      "cluster": "cluster_name",
-      "variantId": "cluster-01",
-      "keyword": "",
-      "angle": "",
-      "title": "",
-      "description": "",
-      "image": "frontend/assets/spring2026/example.png",
-      "board": "Fun Ideas",
-      "boards": ["Fun Ideas", "Epic cuteness"],
-      "tags": ["", "", "", "", ""]
-    }
-  ]
-}
-```
+These are mirrors, not the primary store.
 
-- What the affiliate builder queues into the main system for Pinterest posts:
+### Separate structured content store
 
-```json
-{
-  "title": "Pin title",
-  "body": "Pin description",
-  "platforms": ["pinterest"],
-  "targets": [{ "platform": "pinterest", "accountId": null }],
-  "scheduledAt": "2026-03-25T15:00:00.000Z",
-  "status": "approved",
-  "mediaPath": "frontend/assets/spring2026/example.png",
-  "metadata": {
-    "contentMode": "affiliate",
-    "pinterestBoard": "Fun Ideas",
-    "pinterestBoards": ["Fun Ideas", "Epic cuteness"],
-    "pinterestTags": ["tag one", "tag two"],
-    "productLinks": {
-      "primary": "https://www.amazon.com/your-affiliate-link",
-      "amazon": "https://www.amazon.com/your-affiliate-link"
-    },
-    "includeProductLink": true
-  }
-}
-```
+- `backend/prisma/schema.prisma`
+- database pointed to by `DATABASE_URL`
 
-- Distinction that matters:
-  - builder-import JSON is what you copy/paste into `/affiliate/builder`
-  - queued-post JSON is the internal shape PostPunk stores in SQLite and hands to the platform posters
-  - the remote importer consumes the same builder-import JSON, so repo-native batch files can be loaded over `ssh` without opening the HP UI
+This powers the content API tables and should not be confused with the queue DB.
 
-## AI And Prompting
+### Generated or derived outputs
 
-- SEO generation orchestration: `backend/utils/seoGeneration.mjs`
-- Prompt builder: `backend/utils/GptPromptBuilder.js`
-- Provider client: `backend/utils/aiClient.mjs`
-- Campaign planning/generation: `backend/utils/campaignGeneration.mjs`
+- `backend/public/portfolio/blog/*`
+- `backend/public/rss/*`
+- `backend/stats/*`
+- `backend/media/*`
+- `backend/tmp/*`
+- `backend/backups/*`
 
-## Local Storage And Scheduling
+These are outputs, logs, or operational artifacts, not canonical source data.
 
-- SQLite storage layer and migration/mirroring: `backend/utils/localDb.mjs`
-- Archive entry normalization: `backend/utils/archiveEntry.mjs`
-- Rotation settings persistence: `backend/utils/localDb.mjs`
-- Queue bulk scheduling and auto-schedule-after-last-date UI: `frontend/UXUI/Pages/PostLib.jsx`
-- Batch save, approve, and continue-after-last-date flow: `frontend/UXUI/Pages/BatchPage.jsx`
+### Configuration and planning data
 
-## Health, Analytics, Alerts
+- `backend/config/settings.json`
+- `backend/config/accounts.json`
+- `backend/config/pinterest-boards.json`
+- `backend/config/product-media-pools.json`
+- `backend/config/affiliate-batches/*`
+- `backend/config/recycle.js`
+- `backend/config/2BpostedQ.js`
+- `backend/config/rejected-log.js`
+- `backend/config/posted-log.js`
 
-- Platform credential checks: `backend/utils/platformHealth.mjs`
-- Analytics aggregation: `backend/utils/analyticsSummary.mjs`
-- Telegram alerts: `backend/utils/telegramAlerts.mjs`
+### Frontend and content assets
 
-## AI Provider Reality
+- `frontend/assets/*`
+- `frontend/posts/seoVault.json`
+- `backend/posts/seoVault.json`
+- `content/drafts/*`
+- `content/bts/*`
 
-- `backend/utils/aiClient.mjs` supports both OpenAI and Ollama
-- operational default should be treated as `OpenAI`
-- Ollama remains optional/testing-only on this Mac because local inference was not reliable enough for daily use
+### External portfolio target
 
-## Avoid Duplicates
+The article pipeline writes to the external AshB4 GitHub Pages repo at:
 
-- Do not create another status mapper. Use `postStatus`.
-- Do not create another target parser. Use `distributionTags` and `normalizeTargets`.
-- Do not create another product-profile store. Use `productProfiles`.
-- Do not create another platform-style prompt map. Use `platformProfiles`.
-- Do not create a second storage layer. SQLite in `localDb.mjs` is the source of truth.
-- Do not put posting logic in the frontend. Route it through the backend.
-- Do not treat the JSON mirrors as the primary queue. They exist for compatibility only.
+- `/Users/ash/Desktop/Portfolio/AshB4.github.io`
 
-## Rules Of Thumb
+That repo is outside this tree and is treated as the portfolio deployment target.
 
-- UI behavior belongs in page and component files.
-- Shared frontend logic belongs in `frontend/UXUI/utils/*` or React hooks.
-- API and data mutation belong in `backend/server.mjs`.
-- Scheduling belongs in `backend/scripts/postingJob.mjs`.
-- Posting behavior belongs in `backend/scripts/platforms/*`.
-- Cross-platform posting rules belong in `backend/scripts/platforms/post-to-all.js`.
-- Do not add or update routes in `frontend/app.jsx`. `frontend/main.jsx` is the active router.
+## 8. Worker and Automation Flow
+
+The core automation entrypoint is `backend/scripts/postingJob.mjs`.
+
+In practice it does this:
+
+1. acquire a lock
+2. read queue state from SQLite
+3. choose due approved posts
+4. normalize targets
+5. dispatch to `postToAllPlatforms`
+6. record success/failure outcomes
+7. archive successful posts
+8. reschedule or retry failures
+9. send Telegram alerts
+10. optionally regenerate RSS feeds
+11. release the lock
+
+Supporting automation:
+
+- `backend/scripts/backup/snapshot.mjs` - queue/data snapshotting
+- `backend/scripts/health/check-tokens.mjs` - credential checks
+- `backend/scripts/health/daily-summary.mjs` - daily summary output
+- `backend/scripts/health/storage-audit-report.mjs` - storage audit
+- `backend/scripts/daily-cron.sh` - shell wrapper for scheduled work
+- `backend/systemd/*` - Linux service/timer units
+- `backend/launchd/*` - macOS launchd units
+
+Operator-only scripts live under `backend/scripts/manual/*` and should be treated as repair/test tools, not normal automation.
+
+## 9. Important Scripts and Utilities
+
+### Portfolio and article pipeline
+
+- `backend/scripts/pipeline/generate-portfolio.mjs`
+- `backend/scripts/pipeline/deploy-portfolio.mjs`
+- `backend/scripts/pipeline/publish-one-article.mjs`
+- `backend/scripts/pipeline/publish-devto-drafts.mjs`
+
+### RSS pipeline
+
+- `backend/scripts/rss/generate-feeds.mjs`
+- `backend/scripts/rss/backfill-devto-metadata.mjs`
+- `backend/utils/rssSyndication.mjs`
+
+### Article/SEO helpers
+
+- `backend/utils/articlePipeline.mjs`
+- `backend/utils/astroMarkdownExport.mjs`
+- `backend/utils/devtoCoverPrompt.mjs`
+- `backend/utils/seoGeneration.mjs`
+- `backend/scripts/generateSeo.js`
+- `backend/scripts/generateSummary.js`
+- `backend/scripts/seoCheckRunner.js`
+- `backend/scripts/seoChecker.js`
+
+### Queue and Pinterest helpers
+
+- `backend/scripts/queue/rebalance-pinterest-mix.mjs`
+- `backend/scripts/queue/repair-pinterest-queue.mjs`
+- `backend/scripts/queue/repair-pinterest-diversity.mjs`
+- `backend/scripts/queue/dry-run-next24h.mjs`
+- `backend/scripts/pinterest/capture-pin-analytics.mjs`
+- `backend/scripts/pinterest/capture-pin-analytics-batch.mjs`
+- `backend/scripts/pinterest/analyze-pin-performance.mjs`
+
+### Platform helpers
+
+- `backend/scripts/platforms/post-to-all.js`
+- `backend/scripts/platforms/social/post-to-facebook.js`
+- `backend/scripts/platforms/social/post-to-facebook-browser.js`
+- `backend/scripts/platforms/social/post-to-pinterest.js`
+- `backend/scripts/platforms/social/capture-pinterest-state.js`
+- `backend/scripts/platforms/dev/post-to-devto.js`
+- `backend/scripts/platforms/social/post-to-reddit.js`
+- `backend/scripts/platforms/social/post-to-substack.js`
+
+### Product / revenue / security / health
+
+- `backend/scripts/productFinder/*`
+- `backend/scripts/revenue/export-template.mjs`
+- `backend/scripts/security/block-compromised-deps.mjs`
+- `backend/utils/platformHealth.mjs`
+- `backend/utils/scheduleHealth.mjs`
+- `backend/utils/telegramAlerts.mjs`
+- `backend/utils/productProfiles.mjs`
+- `backend/utils/pinterestPerformanceAnalysis.mjs`
+
+## 10. Known Areas of Technical Debt or Caution
+
+- There are two content systems in the repo: the SQLite queue system and the Prisma content API. They are related, but they are not the same source of truth.
+- JSON mirrors still exist for compatibility. Do not hand-edit them unless you know exactly why.
+- The frontend has some legacy or parallel folders, so check the route entrypoint before adding new pages.
+- Some platform adapters exist only as adapters. Presence in code is not proof of operational reliability.
+- RSS and portfolio generation are real now, but they depend on the article pipeline and external repo paths being correct.
+- The worker can look healthy while the queue shape is wrong. Use queue and schedule health checks, not just process status.
+- `Docs/` and `docs/` both exist in the repository tree. References in the codebase still point at `Docs/`.
+- Generated assets, backups, queue files, and affiliate batch files are large and should stay out of normal source commits.
+
+## Bottom Line
+
+If you are changing core behavior, start in this order:
+
+1. `backend/utils/localDb.mjs`
+2. `backend/scripts/postingJob.mjs`
+3. `backend/scripts/platforms/post-to-all.js`
+4. `backend/server.mjs`
+5. `frontend/main.jsx`
+
+If you are changing article syndication or portfolio publishing, check:
+
+- `backend/utils/contentModel.mjs`
+- `backend/utils/rssSyndication.mjs`
+- `backend/utils/articlePipeline.mjs`
+- `backend/scripts/pipeline/*`
+

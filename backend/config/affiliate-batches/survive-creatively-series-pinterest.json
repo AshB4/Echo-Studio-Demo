@@ -1,0 +1,63 @@
+{
+  "campaign": "survive-creatively-series",
+  "productLink": "https://my-store-10fedc5.creator-spring.com/listing/chaos-goblin-certified",
+  "platforms": ["pinterest"],
+  "board": "Infj memes",
+  "items": [
+    {
+      "keyword": "burnout meme shirt",
+      "angle": "creative survival humor",
+      "title": "Some Of Us Survive Creatively",
+      "description": "Funny goblin-core burnout apparel for exhausted creatives surviving entirely on chaos and caffeine.",
+      "image": "frontend/assets/goblinaffs/GoblinTees/ShirtMemes/ChaosLoveLangSurviveCreativly.png",
+      "productLink": "https://my-store-10fedc5.creator-spring.com/listing/chaos-goblin-certified",
+      "board": "Infj memes",
+      "boards": ["Infj memes", "Funny Stuff"],
+      "tags": ["burnout humor", "creative chaos", "goblin meme", "adhd humor", "artist burnout"]
+    },
+    {
+      "keyword": "adhd burnout humor",
+      "angle": "emotionally exhausted relatability",
+      "title": "Creativity Is Just Fancy Emotional Survival",
+      "description": "Funny chaos goblin apparel for overstimulated creatives and exhausted weird little artists.",
+      "image": "frontend/assets/goblinaffs/GoblinTees/ShirtMemes/ChaosLoveLangSurviveCreativly.png",
+      "productLink": "https://my-store-10fedc5.creator-spring.com/listing/chaos-goblin-certified?product=212",
+      "board": "Funny Stuff",
+      "boards": ["Funny Stuff", "Infj memes"],
+      "tags": ["adhd burnout", "creative meme", "goblin hoodie", "chaos artist", "burnout shirt"]
+    },
+    {
+      "keyword": "funny creator meme",
+      "angle": "anti hustle validation",
+      "title": "Burnout But Make It Artistic",
+      "description": "Funny goblin-core creator humor for emotionally exhausted artists avoiding emails professionally.",
+      "image": "frontend/assets/goblinaffs/GoblinTees/ShirtMemes/ChaosLoveLangSurviveCreativly.png",
+      "productLink": "https://my-store-10fedc5.creator-spring.com/listing/chaos-goblin-certified?product=345",
+      "board": "Infj memes",
+      "boards": ["Infj memes", "Beautiful me."],
+      "tags": ["creator burnout", "artist humor", "anti hustle", "goblin chaos", "funny shirt"]
+    },
+    {
+      "keyword": "artist burnout meme",
+      "angle": "cozy exhausted identity",
+      "title": "Emotionally Tired But Still Making Weird Art",
+      "description": "Funny goblin-core burnout apparel for exhausted creatives and chaos cryptids.",
+      "image": "frontend/assets/goblinaffs/GoblinTees/ShirtMemes/ChaosLoveLangSurviveCreativly.png",
+      "productLink": "https://my-store-10fedc5.creator-spring.com/listing/chaos-goblin-certified",
+      "board": "Beautiful me.",
+      "boards": ["Beautiful me.", "Infj memes"],
+      "tags": ["artist burnout", "creative life", "goblin core", "burnout meme", "chaos aesthetic"]
+    },
+    {
+      "keyword": "creative goblin energy",
+      "angle": "this is literally me",
+      "title": "My Entire Personality Is Creative Chaos",
+      "description": "Funny goblin-core shirt for emotionally exhausted creatives powered by caffeine and bad sleep.",
+      "image": "frontend/assets/goblinaffs/GoblinTees/ShirtMemes/ChaosLoveLangSurviveCreativly.png",
+      "productLink": "https://my-store-10fedc5.creator-spring.com/listing/chaos-goblin-certified",
+      "board": "Funny Stuff",
+      "boards": ["Funny Stuff", "Infj memes", "Beautiful me."],
+      "tags": ["creative goblin", "artist meme", "burnout humor", "chaotic energy", "funny apparel"]
+    }
+  ]
+}

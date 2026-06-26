@@ -73,6 +73,11 @@ export function normalizeSeoResult(raw, input, context = null) {
       : [];
   const emotionTags = Array.isArray(raw.emotion_tags) ? raw.emotion_tags.filter(Boolean) : [];
   const identityTags = Array.isArray(raw.identity_tags) ? raw.identity_tags.filter(Boolean) : [];
+  const productFitReasons = Array.isArray(raw.product_fit_reasons)
+    ? raw.product_fit_reasons.filter(Boolean)
+    : Array.isArray(raw.productFitReasons)
+      ? raw.productFitReasons.filter(Boolean)
+      : [];
 
   const normalized = {
     product_name: raw.product_name || input.productName,
@@ -112,6 +117,45 @@ export function normalizeSeoResult(raw, input, context = null) {
     curiosity_score: Number.isFinite(Number(raw.curiosity_score)) ? Number(raw.curiosity_score) : 0,
     save_score: Number.isFinite(Number(raw.save_score)) ? Number(raw.save_score) : 0,
     share_score: Number.isFinite(Number(raw.share_score)) ? Number(raw.share_score) : 0,
+    identity_archetype: raw.identity_archetype || "",
+    ecosystem_cluster: raw.ecosystem_cluster || "",
+    future_self_signal: raw.future_self_signal || "",
+    save_reason: raw.save_reason || "",
+    utility_type: raw.utility_type || "",
+    discovery_score: Number.isFinite(Number(raw.discovery_score)) ? Number(raw.discovery_score) : 0,
+    retail_commonality_score: Number.isFinite(Number(raw.retail_commonality_score))
+      ? Number(raw.retail_commonality_score)
+      : 0,
+    rabbit_hole_score: Number.isFinite(Number(raw.rabbit_hole_score)) ? Number(raw.rabbit_hole_score) : 0,
+    visual_clarity_score: Number.isFinite(Number(raw.visual_clarity_score))
+      ? Number(raw.visual_clarity_score)
+      : 0,
+    save_potential_score: Number.isFinite(Number(raw.save_potential_score))
+      ? Number(raw.save_potential_score)
+      : 0,
+    amazon_discovery_score: Number.isFinite(Number(raw.amazon_discovery_score))
+      ? Number(raw.amazon_discovery_score)
+      : 0,
+    seasonality_score: Number.isFinite(Number(raw.seasonality_score))
+      ? Number(raw.seasonality_score)
+      : 0,
+    landing_page_match_score: Number.isFinite(Number(raw.landing_page_match_score))
+      ? Number(raw.landing_page_match_score)
+      : 0,
+    landing_page_match_reason: raw.landing_page_match_reason || "",
+    product_fit_score: Number.isFinite(Number(raw.product_fit_score))
+      ? Number(raw.product_fit_score)
+      : 0,
+    product_fit_state: raw.product_fit_state || "",
+    product_fit_reasons: productFitReasons,
+    product_fit_recommended:
+      typeof raw.product_fit_recommended === "boolean"
+        ? raw.product_fit_recommended
+        : Boolean(raw.productFitRecommended),
+    product_fit_blocked:
+      typeof raw.product_fit_blocked === "boolean"
+        ? raw.product_fit_blocked
+        : Boolean(raw.productFitBlocked),
     intent_primary: raw.intent_primary || intentLayer.primary_intent || "",
     intent_secondary: raw.intent_secondary || "",
     awareness_stage: raw.awareness_stage || "",

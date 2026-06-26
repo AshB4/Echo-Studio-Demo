@@ -11,6 +11,8 @@ const BACKEND_ROOT = path.join(__dirname, "..");
 const PINTEREST_LOOKBACK_LIMIT = 50;
 const PINTEREST_CATEGORY_THROTTLE_LIMIT = 3;
 const PINTEREST_CATEGORY_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
+const PINTEREST_PRODUCT_FIT_BLOCK_THRESHOLD = 4;
+const PINTEREST_PRODUCT_FIT_RECOMMEND_THRESHOLD = 7;
 
 const PRIORITY_LANES = [
   "seasonal affiliate",
@@ -27,6 +29,442 @@ const LANE_PRIORITY = {
   dev_products: 10,
   experimental: 5,
 };
+
+const GENERIC_RETAIL_TERMS = [
+  "gift",
+  "gift guide",
+  "best",
+  "top",
+  "candle",
+  "mug",
+  "blanket",
+  "charger",
+  "speaker",
+  "lamp",
+  "planner",
+  "notebook",
+  "wallet",
+  "bottle",
+  "water bottle",
+  "headphones",
+  "calendar",
+  "electronics",
+  "camping gear",
+];
+
+const RABBIT_HOLE_TERMS = [
+  "magnetic",
+  "modular",
+  "levitating",
+  "electric whiskey smoker",
+  "whiskey smoker",
+  "rangefinder",
+  "flat edc flashlight",
+  "edc",
+  "oscillating camping fan lantern",
+  "desk whiteboard wireless charger",
+  "tiny upgrade",
+  "micro upgrade",
+  "garage gadget",
+  "hobby upgrade",
+  "productivity toy",
+];
+
+const CLUSTER_RULES = [
+  {
+    cluster: "masculine luxury",
+    terms: ["whiskey", "smoker", "golf", "edc", "leather", "desk", "bar", "ritual"],
+    archetype: "taste-driven upgrader",
+    utility: "ritual-tool",
+    futureSelf: "feels more intentional, expensive, and put-together",
+  },
+  {
+    cluster: "cozy productivity",
+    terms: ["desk", "wireless charger", "monitor", "calendar", "workspace", "home office", "productivity"],
+    archetype: "calm operator",
+    utility: "organization-tool",
+    futureSelf: "works with less friction and more control",
+  },
+  {
+    cluster: "desk optimization",
+    terms: ["desk", "whiteboard", "charger", "mouse", "keyboard", "monitor", "workspace"],
+    archetype: "desk optimizer",
+    utility: "organization-tool",
+    futureSelf: "turns a messy desk into a system",
+  },
+  {
+    cluster: "tactical-lite utility",
+    terms: ["flashlight", "edc", "modular", "magnetic", "tool", "carry", "sling", "pack"],
+    archetype: "utility tinkerer",
+    utility: "problem-fixer",
+    futureSelf: "has a smarter, more capable everyday carry",
+  },
+  {
+    cluster: "outdoor comfort",
+    terms: ["camp", "camping", "patio", "backyard", "outdoor", "travel", "road trip", "fan", "lantern"],
+    archetype: "outdoor comfort seeker",
+    utility: "comfort-upgrade",
+    futureSelf: "enjoys the outside without the usual annoyance",
+  },
+  {
+    cluster: "garage gadgets",
+    terms: ["garage", "shop", "workbench", "tool", "magnetic", "drill", "utility"],
+    archetype: "garage builder",
+    utility: "problem-fixer",
+    futureSelf: "has a garage that behaves like a workshop",
+  },
+  {
+    cluster: "hobby micro-upgrades",
+    terms: ["rangefinder", "golf", "hobby", "kit", "accessory", "strap", "smoker"],
+    archetype: "hobby upgrader",
+    utility: "tiny-upgrade",
+    futureSelf: "makes one hobby feel more dialed in",
+  },
+  {
+    cluster: "whiskey rituals",
+    terms: ["whiskey", "smoker", "bar", "cocktail", "bourbon", "glass", "ritual"],
+    archetype: "ritual-minded adult",
+    utility: "ritual-tool",
+    futureSelf: "makes a small ritual feel premium",
+  },
+  {
+    cluster: "golf upgrades",
+    terms: ["golf", "rangefinder", "strap", "tee", "cart", "green"],
+    archetype: "golf upgrader",
+    utility: "tiny-upgrade",
+    futureSelf: "plays with better feel and less clutter",
+  },
+  {
+    cluster: "aesthetic utility",
+    terms: ["beautiful", "aesthetic", "nice", "cute", "stylish", "minimal", "design", "globe"],
+    archetype: "taste-driven organizer",
+    utility: "identity-boost",
+    futureSelf: "likes what they use every day",
+  },
+  {
+    cluster: "practical transformation",
+    terms: ["before", "after", "transform", "upgrade", "fix", "solve", "better"],
+    archetype: "problem solver",
+    utility: "problem-fixer",
+    futureSelf: "feels the improvement immediately",
+  },
+];
+
+function clampScore(value, min = 0, max = 10) {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return min;
+  return Math.max(min, Math.min(max, Math.round(numeric)));
+}
+
+function scoreTerms(text, terms = []) {
+  const normalized = normalizeText(text);
+  if (!normalized) return 0;
+  let score = 0;
+  for (const term of terms) {
+    if (normalized.includes(normalizeText(term))) score += 1;
+  }
+  return score;
+}
+
+function pickCluster(text, productProfile) {
+  const source = normalizeText([text, productProfile?.label, productProfile?.productType, productProfile?.audience].filter(Boolean).join(" "));
+  let winner = {
+    cluster: "practical transformation",
+    archetype: "future planner",
+    utility: "problem-fixer",
+    futureSelf: "makes a useful upgrade feel obvious",
+    score: 0,
+  };
+  for (const rule of CLUSTER_RULES) {
+    const score = scoreTerms(source, rule.terms);
+    if (score > winner.score) {
+      winner = {
+        cluster: rule.cluster,
+        archetype: rule.archetype,
+        utility: rule.utility,
+        futureSelf: rule.futureSelf,
+        score,
+      };
+    }
+  }
+  if (winner.score === 0 && productProfile?.category === "Physical products") {
+    return {
+      cluster: "aesthetic utility",
+      archetype: "taste-driven organizer",
+      utility: "identity-boost",
+      futureSelf: "wants the thing that looks good and works",
+      score: 1,
+    };
+  }
+  return winner;
+}
+
+function inferIdentityArchetype(text, productProfile, cluster) {
+  const source = normalizeText([text, productProfile?.label, productProfile?.audience].filter(Boolean).join(" "));
+  if (/golf/.test(source)) return "golf upgrader";
+  if (/whiskey|bourbon|bar|cocktail/.test(source)) return "ritual-minded adult";
+  if (/desk|workspace|office|productivity/.test(source)) return "desk optimizer";
+  if (/camp|outdoor|backyard|patio|travel/.test(source)) return "outdoor comfort seeker";
+  if (/garage|shop|tool|workbench/.test(source)) return "garage builder";
+  if (/flashlight|edc|magnetic|modular/.test(source)) return "utility tinkerer";
+  if (/coloring|printable|affirmation|goblin/.test(source)) return "comfort-focused creator";
+  return cluster?.archetype || cluster?.identityArchetype || "future planner";
+}
+
+function inferUtilityType(text, productProfile, cluster) {
+  const source = normalizeText([text, productProfile?.label, productProfile?.productType].filter(Boolean).join(" "));
+  if (/before|after|transform|upgrade|fix/.test(source)) return "problem-fixer";
+  if (/ritual|whiskey|cocktail|bar/.test(source)) return "ritual-tool";
+  if (/desk|workspace|organize|calendar|charger/.test(source)) return "organization-tool";
+  if (/camp|outdoor|patio|travel|backyard/.test(source)) return "comfort-upgrade";
+  if (/golf|rangefinder|strap|accessory/.test(source)) return "tiny-upgrade";
+  if (/magnetic|modular|flashlight|edc|tool/.test(source)) return "problem-fixer";
+  return cluster?.utility || cluster?.utilityType || "tiny-upgrade";
+}
+
+function inferEcosystemCluster(text, productProfile, trigger, category) {
+  const source = normalizeText([text, productProfile?.label, productProfile?.productType, category, trigger].filter(Boolean).join(" "));
+  for (const rule of CLUSTER_RULES) {
+    if (rule.terms.some((term) => source.includes(normalizeText(term)))) {
+      return rule.cluster;
+    }
+  }
+  if (productProfile?.category === "Physical products") return "aesthetic utility";
+  return "practical transformation";
+}
+
+function scoreRetailCommonality(text, productProfile, category) {
+  const source = normalizeText([text, productProfile?.label, productProfile?.productType, category].filter(Boolean).join(" "));
+  const genericHits = scoreTerms(source, GENERIC_RETAIL_TERMS);
+  const rabbitHoleHits = scoreTerms(source, RABBIT_HOLE_TERMS);
+  const physicalBonus = productProfile?.category === "Physical products" ? 1 : 0;
+  const categoryPenalty =
+    /seasonal affiliate|home\/garden affiliate/.test(String(category || "")) ? 1 : 0;
+  return clampScore(5 + genericHits * 1.5 + physicalBonus + categoryPenalty - rabbitHoleHits * 0.75);
+}
+
+function scoreRabbitHole(text, productProfile, category) {
+  const source = normalizeText([text, productProfile?.label, productProfile?.productType, category].filter(Boolean).join(" "));
+  const rabbitHoleHits = scoreTerms(source, RABBIT_HOLE_TERMS);
+  const nicheSignals = [
+    /magnetic/,
+    /modular/,
+    /levitating/,
+    /whiskey/,
+    /smoker/,
+    /rangefinder/,
+    /edc/,
+    /garage/,
+    /golf/,
+    /desk/,
+    /backyard/,
+    /patio/,
+    /camp/,
+    /fan lantern/,
+    /whiteboard/,
+  ].reduce((sum, pattern) => sum + (pattern.test(source) ? 1 : 0), 0);
+  const retailPenalty = scoreTerms(source, GENERIC_RETAIL_TERMS) * 0.75;
+  return clampScore(3 + rabbitHoleHits * 1.5 + nicheSignals * 0.75 - retailPenalty);
+}
+
+function scoreVisualClarity(text, productProfile, category) {
+  const source = normalizeText([text, productProfile?.label, productProfile?.productType, category].filter(Boolean).join(" "));
+  const objectSignals = [
+    /strap/,
+    /charger/,
+    /flashlight/,
+    /thermometer/,
+    /fan/,
+    /lantern/,
+    /smoker/,
+    /globe/,
+    /whiteboard/,
+    /book/,
+    /book series/,
+    /mask/,
+    /mat/,
+    /tool/,
+  ].reduce((sum, pattern) => sum + (pattern.test(source) ? 1 : 0), 0);
+  const clutterPenalty = scoreTerms(source, ["guide", "gift", "ideas", "generic", "bundle"]) * 0.5;
+  const digitalPenalty = productProfile?.category === "Devtools" ? 1 : 0;
+  return clampScore(4 + objectSignals * 1.2 - clutterPenalty - digitalPenalty);
+}
+
+function scoreSavePotential({ utilityType, ecosystemCluster, productProfile, category }) {
+  const source = normalizeText([utilityType, ecosystemCluster, productProfile?.category, category].filter(Boolean).join(" "));
+  let score = 4;
+  if (/organization|problem-fixer|comfort-upgrade|ritual-tool/.test(source)) score += 2;
+  if (/aesthetic utility|desk optimization|cozy productivity|outdoor comfort|garage gadgets|golf upgrades/.test(source)) score += 2;
+  if (/devtools/.test(normalizeText(productProfile?.category || ""))) score += 1;
+  if (/gift/.test(source)) score -= 1;
+  return clampScore(score);
+}
+
+function scoreAmazonDiscovery({ destinationUrl, productProfile, category, rabbitHoleScore }) {
+  const destination = normalizeText(destinationUrl);
+  const source = normalizeText([productProfile?.label, productProfile?.productType, category].filter(Boolean).join(" "));
+  let score = 2;
+  if (/amazon\.com/.test(destination)) score += 4;
+  if (productProfile?.links?.amazon) score += 2;
+  if (productProfile?.category === "Physical products") score += 1;
+  if (rabbitHoleScore >= 7) score += 1;
+  if (/gift guide|generic|retail/.test(source)) score -= 1;
+  return clampScore(score);
+}
+
+function scoreSeasonality(text, productProfile, category, trigger) {
+  const source = normalizeText([text, productProfile?.label, productProfile?.productType, category, trigger].filter(Boolean).join(" "));
+  if (/father|dad|golf|summer|backyard|patio|camp|outdoor|holiday|christmas|halloween/.test(source)) {
+    return 8;
+  }
+  if (productProfile?.category === "Physical products") return 6;
+  return 3;
+}
+
+function assessLandingPageMatch({ destinationUrl, productProfile, text, category }) {
+  const destination = String(destinationUrl || "").trim();
+  if (!destination) {
+    return {
+      landing_page_match_score: 0,
+      landing_page_match_reason: "missing destination URL",
+    };
+  }
+
+  const normalizedDestination = normalizeText(destination);
+  const source = normalizeText([text, productProfile?.label, productProfile?.productType, category].filter(Boolean).join(" "));
+  const allowedMatches = [
+    productProfile?.links?.primary,
+    productProfile?.links?.amazon,
+    productProfile?.links?.gumroad,
+  ]
+    .filter(Boolean)
+    .some((candidate) => normalizeText(candidate) === normalizedDestination);
+
+  if (allowedMatches) {
+    return {
+      landing_page_match_score: 10,
+      landing_page_match_reason: "matches product profile link",
+    };
+  }
+
+  if (/amazon\.com/.test(normalizedDestination) && productProfile?.links?.amazon) {
+    return {
+      landing_page_match_score: 9,
+      landing_page_match_reason: "Amazon destination matches a physical product lane",
+    };
+  }
+
+  if (/gumroad\.com/.test(normalizedDestination) && productProfile?.links?.gumroad) {
+    return {
+      landing_page_match_score: 9,
+      landing_page_match_reason: "Gumroad destination matches a digital product lane",
+    };
+  }
+
+  if (source && normalizedDestination.includes(source.split(" ").slice(0, 2).join(" "))) {
+    return {
+      landing_page_match_score: 7,
+      landing_page_match_reason: "destination and product naming are loosely aligned",
+    };
+  }
+
+  return {
+    landing_page_match_score: 4,
+    landing_page_match_reason: "destination exists but is not obviously aligned",
+  };
+}
+
+function assessPinterestProductFit({ text, destinationUrl, productProfile, trigger, category }) {
+  const ecosystemCluster = inferEcosystemCluster(text, productProfile, trigger, category);
+  const clusterInfo = CLUSTER_RULES.find((rule) => rule.cluster === ecosystemCluster) || null;
+  const identityArchetype = inferIdentityArchetype(text, productProfile, clusterInfo);
+  const utilityType = inferUtilityType(text, productProfile, clusterInfo);
+  const retailCommonalityScore = scoreRetailCommonality(text, productProfile, category);
+  const rabbitHoleScore = scoreRabbitHole(text, productProfile, category);
+  const visualClarityScore = scoreVisualClarity(text, productProfile, category);
+  const savePotentialScore = scoreSavePotential({
+    utilityType,
+    ecosystemCluster,
+    productProfile,
+    category,
+  });
+  const amazonDiscoveryScore = scoreAmazonDiscovery({
+    destinationUrl,
+    productProfile,
+    category,
+    rabbitHoleScore,
+  });
+  const seasonalityScore = scoreSeasonality(text, productProfile, category, trigger);
+  const landingPage = assessLandingPageMatch({
+    destinationUrl,
+    productProfile,
+    text,
+    category,
+  });
+
+  const discoveryScore = clampScore(
+    rabbitHoleScore * 0.35 +
+      savePotentialScore * 0.25 +
+      visualClarityScore * 0.2 +
+      amazonDiscoveryScore * 0.1 +
+      (10 - retailCommonalityScore) * 0.1,
+  );
+  const productFitScore = clampScore(
+    discoveryScore * 0.4 +
+      landingPage.landing_page_match_score * 0.2 +
+      savePotentialScore * 0.2 +
+      visualClarityScore * 0.1 +
+      (10 - retailCommonalityScore) * 0.1,
+  );
+
+  let productFitState = "downgraded";
+  if (
+    landingPage.landing_page_match_score <= 4 ||
+    visualClarityScore <= 4 ||
+    retailCommonalityScore >= 8 ||
+    rabbitHoleScore <= 3
+  ) {
+    productFitState = "blocked";
+  } else if (productFitScore >= PINTEREST_PRODUCT_FIT_RECOMMEND_THRESHOLD) {
+    productFitState = "recommended";
+  } else if (productFitScore >= 5) {
+    productFitState = "acceptable";
+  }
+
+  const reasons = [
+    `cluster:${ecosystemCluster}`,
+    `identity:${identityArchetype}`,
+    `utility:${utilityType}`,
+    `rabbit_hole:${rabbitHoleScore}`,
+    `retail_commonality:${retailCommonalityScore}`,
+    `visual_clarity:${visualClarityScore}`,
+    `save_potential:${savePotentialScore}`,
+    `landing_page_match:${landingPage.landing_page_match_score}`,
+  ];
+
+  return {
+    identity_archetype: identityArchetype,
+    ecosystem_cluster: ecosystemCluster,
+    future_self_signal: CLUSTER_RULES.find((rule) => rule.cluster === ecosystemCluster)?.futureSelf ||
+      "wants the thing that feels useful and specific",
+    save_reason: `Reusable ${utilityType.replace(/-/g, " ")} for ${ecosystemCluster}`,
+    utility_type: utilityType,
+    discovery_score: discoveryScore,
+    retail_commonality_score: retailCommonalityScore,
+    rabbit_hole_score: rabbitHoleScore,
+    visual_clarity_score: visualClarityScore,
+    save_potential_score: savePotentialScore,
+    amazon_discovery_score: amazonDiscoveryScore,
+    seasonality_score: seasonalityScore,
+    landing_page_match_score: landingPage.landing_page_match_score,
+    landing_page_match_reason: landingPage.landing_page_match_reason,
+    product_fit_score: productFitScore,
+    product_fit_state: productFitState,
+    product_fit_reasons: reasons,
+    product_fit_recommended: productFitState === "recommended",
+    product_fit_blocked: productFitState === "blocked",
+  };
+}
 
 function deriveSeasonality(text, productProfile) {
   const normalized = normalizeText(text);
@@ -483,6 +921,9 @@ function buildCreativeHistoryItem(post) {
     intentSecondary: String(post?.metadata?.intentSecondary || post?.metadata?.intent_secondary || "").trim(),
     awarenessStage: String(post?.metadata?.awarenessStage || post?.metadata?.awareness_stage || "").trim(),
     pinAngle: String(post?.metadata?.pinAngle || post?.metadata?.pin_angle || "").trim(),
+    ecosystemCluster: String(post?.metadata?.ecosystemCluster || post?.metadata?.ecosystem_cluster || "").trim(),
+    identityArchetype: String(post?.metadata?.identityArchetype || post?.metadata?.identity_archetype || "").trim(),
+    productFitState: String(post?.metadata?.productFitState || post?.metadata?.product_fit_state || "").trim(),
     timestamp: timestampForEntry(post),
   };
 }
@@ -577,6 +1018,18 @@ export async function buildPinterestCreativeContext(input = {}) {
     .join(" ");
   const trigger = inferTriggerFromText(seedText, productProfile);
   const category = inferCategoryFromText(seedText, productProfile, trigger);
+  const productFit = assessPinterestProductFit({
+    text: seedText,
+    destinationUrl:
+      input.destinationUrl ||
+      productProfile?.links?.primary ||
+      productProfile?.links?.amazon ||
+      productProfile?.links?.gumroad ||
+      "",
+    productProfile,
+    trigger,
+    category,
+  });
   const categoryCounts = recentCountsByCategory(combined);
   const categoryThrottleCount = categoryCounts.get(category) || 0;
 
@@ -586,6 +1039,10 @@ export async function buildPinterestCreativeContext(input = {}) {
     category,
     categoryThrottleCount,
     categoryThrottleHit: categoryThrottleCount >= PINTEREST_CATEGORY_THROTTLE_LIMIT,
+    productFit,
+    productFitState: productFit.product_fit_state,
+    productFitBlocked: productFit.product_fit_blocked,
+    productFitRecommended: productFit.product_fit_recommended,
     recentHooks: combined.slice(0, 10).map((entry) => entry.hook || entry.title || "").filter(Boolean),
     recentVisuals: combined
       .slice(0, 10)
@@ -615,6 +1072,17 @@ export function enrichPinterestCreativeResult(raw = {}, input = {}, context = nu
     input,
     raw,
   });
+  const fitAssessment =
+    context?.productFit ||
+    assessPinterestProductFit({
+      text: [raw.product, raw.hook, raw.visual_style, raw.image_concept, input.productName, input.productType]
+        .filter(Boolean)
+        .join(" "),
+      destinationUrl,
+      productProfile,
+      trigger,
+      category,
+    });
   const recentHistory = Array.isArray(context?.recentHistory) ? context.recentHistory : [];
   const hookCandidates = [
     raw.hook,
@@ -671,12 +1139,30 @@ export function enrichPinterestCreativeResult(raw = {}, input = {}, context = nu
           ? 10
           : category === "coloring books" && /coloring/i.test(`${productProfile?.productType || ""} ${input.productType || ""}`)
             ? 10
-            : category === "home/garden affiliate" || category === "seasonal affiliate"
-              ? 8
-              : 0;
+        : category === "home/garden affiliate" || category === "seasonal affiliate"
+          ? 8
+          : 0;
     const similarityPenalty = Math.round(Math.max(hookSimilarity, visualSimilarity) * 30);
     const throttlePenalty = categoryThrottleCount >= PINTEREST_CATEGORY_THROTTLE_LIMIT ? 18 : 0;
-    confidenceScore = Math.max(35, Math.min(99, 82 + laneFit - similarityPenalty - throttlePenalty));
+    const fitBonus = fitAssessment.product_fit_state === "recommended"
+      ? 8
+      : fitAssessment.product_fit_state === "acceptable"
+        ? 3
+        : fitAssessment.product_fit_state === "blocked"
+          ? -18
+          : 0;
+    confidenceScore = Math.max(
+      20,
+      Math.min(
+        99,
+        82 +
+          laneFit +
+          fitBonus -
+          similarityPenalty -
+          throttlePenalty -
+          Math.max(0, fitAssessment.retail_commonality_score - 6),
+      ),
+    );
   }
 
   const adjacentProducts = buildAdjacentProducts(productProfile, trigger);
@@ -738,6 +1224,7 @@ export function enrichPinterestCreativeResult(raw = {}, input = {}, context = nu
     destination_url: destinationUrl,
     confidence_score: confidenceScore,
     ...intentMetadata,
+    ...fitAssessment,
     image_similarity_score: Math.round(visualSimilarity * 100),
     hook_similarity_score: Math.round(hookSimilarity * 100),
     category_throttle_count: categoryThrottleCount,
@@ -759,7 +1246,11 @@ export function enrichPinterestCreativeResult(raw = {}, input = {}, context = nu
       },
     },
     creative_strategy: isPinterestRelevant
-      ? "Repeat the trigger, not the visual. Rotate product, angle, and format before reusing a creative lane."
+      ? fitAssessment.product_fit_blocked
+        ? "Downgrade this lane: the product looks too generic or poorly matched for Pinterest discovery. Rewrite the angle or move it to another platform."
+        : fitAssessment.product_fit_recommended
+          ? "Repeat the trigger, not the visual. Rotate product, angle, and format before reusing a creative lane."
+          : "The product can work, but it needs sharper identity, stronger utility framing, and a clearer landing-page match."
       : "",
     winner_expansion: winnerExpansion,
   };

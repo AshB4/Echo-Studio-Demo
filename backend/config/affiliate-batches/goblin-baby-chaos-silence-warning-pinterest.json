@@ -1,0 +1,63 @@
+{
+  "campaign": "goblin-baby-chaos-silence-warning",
+  "productLink": "https://my-store-10fedc5.creator-spring.com/listing/chaos-is-my-love-language?product=287&variation=6097",
+  "platforms": ["pinterest"],
+  "board": "Baby Shower!",
+  "items": [
+    {
+      "keyword": "funny baby onesie",
+      "angle": "silence means destruction",
+      "title": "Parents Know Silence Is Never A Good Sign",
+      "description": "Funny chaos goblin baby outfit for exhausted parents raising tiny adorable disasters. Perfect for chaotic babies, goblin parenting humor, and tiny cryptid energy.",
+      "image": "frontend/assets/goblinaffs/GoblinTees/ShirtMemes/BabyChaosLookedAway.png",
+      "productLink": "https://my-store-10fedc5.creator-spring.com/listing/chaos-is-my-love-language?product=287&variation=6097",
+      "board": "Baby Shower!",
+      "boards": ["Baby Shower!", "Funny Stuff", "Epic cuteness"],
+      "tags": ["funny baby", "baby chaos", "goblin baby", "parent humor", "cute onesie"]
+    },
+    {
+      "keyword": "chaotic baby humor",
+      "angle": "adorable destruction energy",
+      "title": "Tiny Goblins Create Chaos In Complete Silence",
+      "description": "Funny baby chaos shirt for parents who looked away for two seconds and instantly regretted it. Tiny gremlin energy but somehow still cute.",
+      "image": "frontend/assets/goblinaffs/GoblinTees/ShirtMemes/BabyChaosLookedAway.png",
+      "productLink": "https://my-store-10fedc5.creator-spring.com/listing/chaos-is-my-love-language?product=287&variation=6097",
+      "board": "Epic cuteness",
+      "boards": ["Epic cuteness", "Funny Stuff"],
+      "tags": ["chaotic baby", "funny parenting", "baby meme", "tiny goblin", "mom humor"]
+    },
+    {
+      "keyword": "parenting meme outfit",
+      "angle": "this is literally my child",
+      "title": "This Baby Has Strong Goblin Energy",
+      "description": "Funny baby outfit for exhausted parents raising affectionate little disasters. Chaos, crumbs, and emotional support screaming included.",
+      "image": "frontend/assets/goblinaffs/GoblinTees/ShirtMemes/BabyChaosBathroomRedocorated.png",
+      "productLink": "https://my-store-10fedc5.creator-spring.com/listing/chaos-is-my-love-language?product=287&variation=6097",
+      "board": "Funny Stuff",
+      "boards": ["Funny Stuff", "Baby Shower!"],
+      "tags": ["baby goblin", "funny baby clothes", "mom life", "chaos child", "baby meme"]
+    },
+    {
+      "keyword": "baby shower gift funny",
+      "angle": "giftable chaos humor",
+      "title": "The Perfect Gift For Parents Of Tiny Chaos Gremlins",
+      "description": "Funny goblin baby apparel for parents surviving on caffeine, vibes, and emergency snacks. Weirdly relatable parenting humor.",
+      "image": "frontend/assets/goblinaffs/GoblinTees/ShirtMemes/BabyChaosBathroomRedocorated.png",
+      "productLink": "https://my-store-10fedc5.creator-spring.com/listing/chaos-is-my-love-language?product=287&variation=6097",
+      "board": "Baby Shower!",
+      "boards": ["Baby Shower!", "Epic cuteness"],
+      "tags": ["baby shower", "funny gift", "baby humor", "chaos baby", "new parents"]
+    },
+    {
+      "keyword": "cute goblin baby",
+      "angle": "tiny cryptid aesthetic",
+      "title": "Tiny Cryptid. Huge Chaos Energy.",
+      "description": "Cute funny goblin-core baby design for tiny lovable disasters who redecorate bathrooms and destroy peace with confidence.",
+      "image": "frontend/assets/goblinaffs/GoblinTees/ShirtMemes/BabyChaosLookedAway.png",
+      "productLink": "https://my-store-10fedc5.creator-spring.com/listing/chaos-is-my-love-language?product=287&variation=6097",
+      "board": "Epic cuteness",
+      "boards": ["Epic cuteness", "Freaking Weird or mild..."],
+      "tags": ["cryptid baby", "goblin core", "cute chaos", "baby aesthetic", "funny parenting"]
+    }
+  ]
+}

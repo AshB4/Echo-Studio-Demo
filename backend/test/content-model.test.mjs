@@ -13,6 +13,35 @@ test("normalizeContentState supports lifecycle-aware content progression", () =>
 	assert.equal(normalizeContentState("queued"), "seed");
 });
 
+test("normalizeContentMetadata keeps RSS syndication fields centralized", () => {
+	const metadata = normalizeContentMetadata({
+		canonicalUrl: "https://ashb4.github.io/blog/postpunk-rss/",
+		excerpt: "RSS generated from PostPunk metadata.",
+		publishDate: "2026-06-12T15:00:00.000Z",
+		externalUrls: {
+			devto: "https://dev.to/ashb4/postpunk-rss",
+			medium: "",
+		},
+		syndicationStatus: "ready",
+		platformIds: {
+			devto: 456,
+		},
+	});
+
+	assert.deepEqual(metadata, {
+		canonicalUrl: "https://ashb4.github.io/blog/postpunk-rss/",
+		excerpt: "RSS generated from PostPunk metadata.",
+		publishDate: "2026-06-12T15:00:00.000Z",
+		externalUrls: {
+			devto: "https://dev.to/ashb4/postpunk-rss",
+		},
+		syndicationStatus: "ready",
+		platformIds: {
+			devto: 456,
+		},
+	});
+});
+
 test("normalizeContentMetadata keeps discoverability fields compact and consistent", () => {
 	const metadata = normalizeContentMetadata({
 		searchIntent: "how to structure evergreen content",
@@ -41,6 +70,25 @@ test("normalizeContentMetadata keeps discoverability fields compact and consiste
 		curiosityScore: "61",
 		saveScore: "88",
 		shareScore: "55",
+		identityArchetype: "desk optimizer",
+		ecosystemCluster: "cozy productivity",
+		futureSelfSignal: "works with less friction",
+		saveReason: "Reusable organization tool",
+		utilityType: "organization-tool",
+		discoveryScore: "8",
+		retailCommonalityScore: "2",
+		rabbitHoleScore: "7",
+		visualClarityScore: "9",
+		savePotentialScore: "8",
+		amazonDiscoveryScore: "6",
+		seasonalityScore: "4",
+		landingPageMatchScore: "9",
+		landingPageMatchReason: "matches product page",
+		productFitScore: "8",
+		productFitState: "recommended",
+		productFitReasons: ["cluster:cozy productivity"],
+		productFitRecommended: true,
+		productFitBlocked: false,
 		painProximity: "8",
 		commercialityScore: "6",
 		emotionTags: ["frustrated", "curious"],
@@ -80,6 +128,25 @@ test("normalizeContentMetadata keeps discoverability fields compact and consiste
 		curiosityScore: 61,
 		saveScore: 88,
 		shareScore: 55,
+		identityArchetype: "desk optimizer",
+		ecosystemCluster: "cozy productivity",
+		futureSelfSignal: "works with less friction",
+		saveReason: "Reusable organization tool",
+		utilityType: "organization-tool",
+		discoveryScore: 8,
+		retailCommonalityScore: 2,
+		rabbitHoleScore: 7,
+		visualClarityScore: 9,
+		savePotentialScore: 8,
+		amazonDiscoveryScore: 6,
+		seasonalityScore: 4,
+		landingPageMatchScore: 9,
+		landingPageMatchReason: "matches product page",
+		productFitScore: 8,
+		productFitState: "recommended",
+		productFitReasons: ["cluster:cozy productivity"],
+		productFitRecommended: true,
+		productFitBlocked: false,
 	});
 
 	assert.deepEqual(metadata, {
@@ -109,6 +176,25 @@ test("normalizeContentMetadata keeps discoverability fields compact and consiste
 		curiosityScore: 61,
 		saveScore: 88,
 		shareScore: 55,
+		identityArchetype: "desk optimizer",
+		ecosystemCluster: "cozy productivity",
+		futureSelfSignal: "works with less friction",
+		saveReason: "Reusable organization tool",
+		utilityType: "organization-tool",
+		discoveryScore: 8,
+		retailCommonalityScore: 2,
+		rabbitHoleScore: 7,
+		visualClarityScore: 9,
+		savePotentialScore: 8,
+		amazonDiscoveryScore: 6,
+		seasonalityScore: 4,
+		landingPageMatchScore: 9,
+		landingPageMatchReason: "matches product page",
+		productFitScore: 8,
+		productFitState: "recommended",
+		productFitReasons: ["cluster:cozy productivity"],
+		productFitRecommended: true,
+		productFitBlocked: false,
 		painProximity: 8,
 		commercialityScore: 6,
 		emotionTags: ["frustrated", "curious"],
@@ -148,6 +234,25 @@ test("normalizeContentMetadata keeps discoverability fields compact and consiste
 		curiosityScore: 61,
 		saveScore: 88,
 		shareScore: 55,
+		identityArchetype: "desk optimizer",
+		ecosystemCluster: "cozy productivity",
+		futureSelfSignal: "works with less friction",
+		saveReason: "Reusable organization tool",
+		utilityType: "organization-tool",
+		discoveryScore: 8,
+		retailCommonalityScore: 2,
+		rabbitHoleScore: 7,
+		visualClarityScore: 9,
+		savePotentialScore: 8,
+		amazonDiscoveryScore: 6,
+		seasonalityScore: 4,
+		landingPageMatchScore: 9,
+		landingPageMatchReason: "matches product page",
+		productFitScore: 8,
+		productFitState: "recommended",
+		productFitReasons: ["cluster:cozy productivity"],
+		productFitRecommended: true,
+		productFitBlocked: false,
 	});
 });
 
@@ -204,6 +309,25 @@ test("buildAstroFrontmatter emits metadata Astro can consume directly", () => {
 			curiosityScore: 61,
 			saveScore: 88,
 			shareScore: 55,
+			identityArchetype: "desk optimizer",
+			ecosystemCluster: "cozy productivity",
+			futureSelfSignal: "works with less friction",
+			saveReason: "Reusable organization tool",
+			utilityType: "organization-tool",
+			discoveryScore: 8,
+			retailCommonalityScore: 2,
+			rabbitHoleScore: 7,
+			visualClarityScore: 9,
+			savePotentialScore: 8,
+			amazonDiscoveryScore: 6,
+			seasonalityScore: 4,
+			landingPageMatchScore: 9,
+			landingPageMatchReason: "matches product page",
+			productFitScore: 8,
+			productFitState: "recommended",
+			productFitReasons: ["cluster:cozy productivity"],
+			productFitRecommended: true,
+			productFitBlocked: false,
 			painProximity: 7,
 			commercialityScore: 5,
 			emotionTags: ["clarity", "control"],
@@ -250,6 +374,25 @@ test("buildAstroFrontmatter emits metadata Astro can consume directly", () => {
 	assert.equal(frontmatter.curiosityScore, 61);
 	assert.equal(frontmatter.saveScore, 88);
 	assert.equal(frontmatter.shareScore, 55);
+	assert.equal(frontmatter.identityArchetype, "desk optimizer");
+	assert.equal(frontmatter.ecosystemCluster, "cozy productivity");
+	assert.equal(frontmatter.futureSelfSignal, "works with less friction");
+	assert.equal(frontmatter.saveReason, "Reusable organization tool");
+	assert.equal(frontmatter.utilityType, "organization-tool");
+	assert.equal(frontmatter.discoveryScore, 8);
+	assert.equal(frontmatter.retailCommonalityScore, 2);
+	assert.equal(frontmatter.rabbitHoleScore, 7);
+	assert.equal(frontmatter.visualClarityScore, 9);
+	assert.equal(frontmatter.savePotentialScore, 8);
+	assert.equal(frontmatter.amazonDiscoveryScore, 6);
+	assert.equal(frontmatter.seasonalityScore, 4);
+	assert.equal(frontmatter.landingPageMatchScore, 9);
+	assert.equal(frontmatter.landingPageMatchReason, "matches product page");
+	assert.equal(frontmatter.productFitScore, 8);
+	assert.equal(frontmatter.productFitState, "recommended");
+	assert.deepEqual(frontmatter.productFitReasons, ["cluster:cozy productivity"]);
+	assert.equal(frontmatter.productFitRecommended, true);
+	assert.equal(frontmatter.productFitBlocked, false);
 	assert.equal(frontmatter.painProximity, 7);
 	assert.equal(frontmatter.commercialityScore, 5);
 	assert.deepEqual(frontmatter.emotionTags, ["clarity", "control"]);
