@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import logo from "../../assets/InteralAssets/PostPunkTransparentLogo.png";
+import logo from "../../assets/InteralAssets/EchoStudio.png";
 
 const navItems = [
   {
@@ -45,13 +45,6 @@ const navItems = [
     activeClass: "border-violet-400 bg-violet-500 text-black",
   },
   {
-    to: "/archive",
-    label: "Posted Archive",
-    baseClass:
-      "border-orange-500 text-orange-300 hover:bg-orange-500 hover:text-black",
-    activeClass: "border-orange-400 bg-orange-500 text-black",
-  },
-  {
     to: "/setup",
     label: "Tune Rotation",
     baseClass:
@@ -86,7 +79,7 @@ export default function AppTopNav({ includeLab = false }) {
         <Link to="/" className="shrink-0">
           <img
             src={logo}
-            alt="PostPunk Home"
+            alt="Echo Studio Home"
             className="h-14 md:h-16 w-auto shrink-0 drop-shadow-[0_0_12px_#ff00ff]"
           />
         </Link>
