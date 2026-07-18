@@ -6,7 +6,7 @@ import { productProfiles } from "../utils/productProfiles";
 const API_BASE = import.meta.env?.VITE_API_BASE || "http://localhost:3001";
 const ECHO_PRODUCTS = productProfiles.slice(0, 3);
 const SUPPORTED_PLATFORMS = ["Pinterest", "Facebook", "Dev.to"];
-const JOURNEY_STAGES = ["Mission", "Knowledge", "Strategy", "Draft", "Review", "Publish"];
+const JOURNEY_STAGES = ["Mission", "Knowledge", "Strategy", "Content", "Review", "Publish"];
 const KNOWLEDGE_NODE_DEFINITIONS = [
 	{ key: "product", label: "Product", className: "echo-brain-node-top" },
 	{ key: "brand", label: "Brand", className: "echo-brain-node-left-top" },
@@ -310,38 +310,83 @@ function buildWhyEchoChoseThis({ goal, audience, product, platform, campaignPlan
 	if (String(platform || "").toLowerCase().includes("dev.to")) {
 		return `${platform} fits this campaign because ${audience || "the audience"} needs useful proof before promotion. Echo shaped the strategy around practical authority, product clarity, and the goal: ${goal || "move the campaign forward"}.`;
 	}
-	return `${platform || "This channel"} fits this campaign because Echo can keep the message focused on ${goal || "the mission"} while applying product knowledge, brand voice, and platform rules before any draft is created.`;
+	return `${platform || "This channel"} fits this campaign because Echo can keep the message focused on ${goal || "the mission"} while applying product knowledge, brand voice, and platform rules before any content is created.`;
 }
 
 function getJourneyIndex({ view, loaderVisible, pipeline }) {
 	if (view === "intake") return 0;
 	if (loaderVisible || !pipeline.campaignPlan) return 1;
-	if (view === "draft") return 3;
+	if (view === "content") return 3;
 	if (view === "review") return 4;
+	if (view === "publish") return 5;
 	return 2;
 }
 
-function getDraftFields(asset = {}) {
+function getDefaultDestination(platform = "") {
+	const text = String(platform || "").toLowerCase();
+	if (text.includes("pinterest")) return "Primary Pinterest board";
+	if (text.includes("facebook")) return "Facebook page queue";
+	if (text.includes("dev.to")) return "Dev.to publishing workspace";
+	return "Publishing handoff queue";
+}
+
+function getDefaultCta({ goal, platform }) {
+	const goalText = String(goal || "").toLowerCase();
+	if (goalText.includes("launch")) return "See the launch details";
+	if (goalText.includes("sale")) return "Shop the offer";
+	if (String(platform || "").toLowerCase().includes("dev.to")) return "Read the full breakdown";
+	return "Learn more";
+}
+
+function getDefaultKeywords({ goal, product, platform }) {
+	const values = [
+		product?.label,
+		product?.category,
+		String(platform || "").includes("Pinterest") ? "visual discovery" : platform,
+		goal,
+	]
+		.filter(Boolean)
+		.flatMap((value) =>
+			String(value)
+				.split(/[,|]/)
+				.map((item) => item.trim())
+				.filter(Boolean),
+		);
+	return Array.from(new Set(values)).slice(0, 6).join(", ");
+}
+
+function getDefaultHashtags({ product, platform }) {
+	const platformText = String(platform || "").toLowerCase();
+	const tags = [];
+	if (platformText.includes("pinterest")) tags.push("#PinterestMarketing", "#CreatorBusiness");
+	if (platformText.includes("facebook")) tags.push("#SmallBusiness", "#Marketing");
+	if (platformText.includes("dev.to")) tags.push("#devjournal", "#buildinpublic");
+	if (product?.category) tags.push(`#${String(product.category).replace(/[^a-z0-9]/gi, "")}`);
+	return tags.join(" ");
+}
+
+function createEditableContent({ asset, campaignPlan, product, recommendation }) {
 	if (!asset) return [];
-	const metadata = asset.metadata || {};
 	const rawContent = String(asset.content || "").trim();
-	const content =
+	const mainCopy =
 		rawContent.toLowerCase() === "generated from blueprint."
-			? "Draft content placeholder from the approved campaign strategy."
+			? buildCoreMessage({
+				goal: campaignPlan?.goal,
+				product,
+				platform: asset.platform || campaignPlan?.primaryPlatform,
+			})
 			: rawContent;
-	return [
-		{ label: "Platform", value: asset.platform },
-		{ label: "Title", value: asset.title },
-		{ label: "Main Copy", value: content },
-		{ label: "Status", value: asset.status },
-		{ label: "CTA", value: metadata.cta || metadata.callToAction },
-		{ label: "SEO Keywords", value: Array.isArray(metadata.seoKeywords) ? metadata.seoKeywords.join(", ") : metadata.seoKeywords },
-		{ label: "Hashtags", value: Array.isArray(metadata.hashtags) ? metadata.hashtags.join(" ") : metadata.hashtags },
-	].filter((field) => {
-		if (field.value === null || field.value === undefined) return false;
-		if (Array.isArray(field.value) && field.value.length === 0) return false;
-		return String(field.value).trim().length > 0;
-	});
+	const platform = asset.platform || campaignPlan?.primaryPlatform || "";
+	return {
+		platform,
+		title: asset.title || humanizeAssetType(recommendation?.type),
+		mainCopy,
+		cta: getDefaultCta({ goal: campaignPlan?.goal, platform }),
+		keywords: getDefaultKeywords({ goal: campaignPlan?.goal, product, platform }),
+		hashtags: getDefaultHashtags({ product, platform }),
+		destination: getDefaultDestination(platform),
+		status: "Generated",
+	};
 }
 
 function JourneyHeader({ activeIndex, onStageClick }) {
@@ -408,6 +453,8 @@ export default function EchoStudioPage() {
 	const [completedNodes, setCompletedNodes] = useState([]);
 	const [loaderComplete, setLoaderComplete] = useState(false);
 	const [loaderCompleteText, setLoaderCompleteText] = useState("Campaign strategy ready");
+	const [campaignContent, setCampaignContent] = useState(null);
+	const [handoffStatus, setHandoffStatus] = useState("");
 	const [error, setError] = useState("");
 
 	const selectedProduct =
@@ -437,10 +484,7 @@ export default function EchoStudioPage() {
 			}),
 		[pipeline.campaignPlan, form.goal, form.audience, form.primaryPlatform, selectedProduct],
 	);
-	const draftFields = useMemo(
-		() => getDraftFields(pipeline.campaignAsset),
-		[pipeline.campaignAsset],
-	);
+	const selectedRecommendation = displayedRecommendations[0] || null;
 
 	function updateField(field, value) {
 		setForm((current) => ({ ...current, [field]: value }));
@@ -584,6 +628,8 @@ export default function EchoStudioPage() {
 				assetBlueprints: [],
 				campaignAsset: null,
 			}));
+			setCampaignContent(null);
+			setHandoffStatus("");
 		}, { completeText: "Campaign strategy ready" });
 	}
 
@@ -603,22 +649,49 @@ export default function EchoStudioPage() {
 			const campaignAsset = await postJson("/api/ai-generator/generate", {
 				assetBlueprint: blueprint,
 			});
+			const editableContent = createEditableContent({
+				asset: campaignAsset,
+				campaignPlan: pipeline.campaignPlan,
+				product: selectedProduct,
+				recommendation: selectedRecommendation,
+			});
 			setPipeline((current) => ({
 				...current,
 				assetBlueprints,
 				campaignAsset,
 			}));
-			setView("draft");
-		}, { completeText: "Campaign draft ready" });
+			setCampaignContent(editableContent);
+			setHandoffStatus("");
+			setView("content");
+		}, { completeText: "Campaign content ready" });
 	}
 
 	function handleJourneyStageClick(index) {
 		if (index === 0) setView("intake");
 		if (index === 2 && pipeline.campaignPlan) setView("strategy");
+		if (index === 3 && campaignContent) setView("content");
+		if (index === 4 && campaignContent) setView("review");
 	}
 
-	function approveDraft() {
+	function updateCampaignContent(field, value) {
+		setCampaignContent((current) => ({
+			...(current || {}),
+			[field]: value,
+		}));
+	}
+
+	function approveContentForReview() {
 		setView("review");
+	}
+
+	function approveReviewAndContinue() {
+		setHandoffStatus("");
+		setView("publish");
+	}
+
+	function confirmPublishingHandoff(mode) {
+		const action = mode === "queue" ? "queued for publishing handoff" : "prepared for publishing handoff";
+		setHandoffStatus(`Campaign ${action}. No live post was sent from this demo workflow.`);
 	}
 
 	return (
@@ -639,9 +712,9 @@ export default function EchoStudioPage() {
 			<div className="mx-auto max-w-6xl space-y-6">
 				<header>
 					<h1 className="text-3xl font-bold text-pink-300">Echo Studio</h1>
-					<p className="mt-2 text-sm text-gray-300">
-						AI Marketing Operator for turning a business goal into an approved campaign draft.
-					</p>
+						<p className="mt-2 text-sm text-gray-300">
+							AI Marketing Operator for turning a business goal into approved campaign content.
+						</p>
 				</header>
 
 				<JourneyHeader activeIndex={activeJourneyIndex} onStageClick={handleJourneyStageClick} />
@@ -654,7 +727,7 @@ export default function EchoStudioPage() {
 								Tell Echo what you want to accomplish.
 							</h2>
 							<p className="mt-2 text-sm text-gray-300">
-								Echo will consult product knowledge, brand rules, platform intelligence, and the marketing playbook before drafting a strategy.
+								Echo will consult product knowledge, brand rules, platform intelligence, and the marketing playbook before building a strategy.
 							</p>
 						</div>
 
@@ -729,29 +802,74 @@ export default function EchoStudioPage() {
 							</p>
 						</div>
 					</section>
-				) : view === "draft" && pipeline.campaignAsset ? (
+				) : view === "content" && campaignContent ? (
 					<section className="space-y-5">
 						<div>
-							<p className="text-sm uppercase tracking-[0.28em] text-cyan-300">Draft Generation</p>
-							<h2 className="mt-2 text-2xl font-semibold text-pink-200">Campaign draft</h2>
+							<p className="text-sm uppercase tracking-[0.28em] text-cyan-300">Generated Content</p>
+							<h2 className="mt-2 text-2xl font-semibold text-pink-200">Edit the campaign copy.</h2>
 							<p className="mt-2 text-sm text-gray-300">
-								Echo generated this draft from the approved strategy. Review it before moving toward publishing.
+								Echo generated platform-ready text from the approved strategy. Tune the copy before sending it to review.
 							</p>
 						</div>
 
 						<div className="rounded-lg border border-pink-600/70 bg-gray-950/80 p-5">
 							<div className="grid gap-4 md:grid-cols-2">
-								{draftFields.map((field) => (
-									<div
-										key={field.label}
-										className={field.label === "Main Copy" ? "md:col-span-2" : ""}
-									>
-										<p className="text-xs uppercase tracking-[0.22em] text-cyan-300">{field.label}</p>
-										<p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-gray-100">
-											{field.value}
-										</p>
-									</div>
-								))}
+								<label className="block text-sm text-gray-300">
+									Platform
+									<input
+										className="mt-2 w-full border border-gray-700 bg-black px-3 py-2 text-white"
+										value={campaignContent.platform || ""}
+										onChange={(event) => updateCampaignContent("platform", event.target.value)}
+									/>
+								</label>
+								<label className="block text-sm text-gray-300">
+									Destination or Board
+									<input
+										className="mt-2 w-full border border-gray-700 bg-black px-3 py-2 text-white"
+										value={campaignContent.destination || ""}
+										onChange={(event) => updateCampaignContent("destination", event.target.value)}
+									/>
+								</label>
+								<label className="block text-sm text-gray-300 md:col-span-2">
+									Title or Hook
+									<input
+										className="mt-2 w-full border border-gray-700 bg-black px-3 py-2 text-white"
+										value={campaignContent.title || ""}
+										onChange={(event) => updateCampaignContent("title", event.target.value)}
+									/>
+								</label>
+								<label className="block text-sm text-gray-300 md:col-span-2">
+									Main Copy or Description
+									<textarea
+										className="mt-2 min-h-32 w-full border border-gray-700 bg-black px-3 py-2 text-white"
+										value={campaignContent.mainCopy || ""}
+										onChange={(event) => updateCampaignContent("mainCopy", event.target.value)}
+									/>
+								</label>
+								<label className="block text-sm text-gray-300">
+									CTA
+									<input
+										className="mt-2 w-full border border-gray-700 bg-black px-3 py-2 text-white"
+										value={campaignContent.cta || ""}
+										onChange={(event) => updateCampaignContent("cta", event.target.value)}
+									/>
+								</label>
+								<label className="block text-sm text-gray-300">
+									Keywords
+									<input
+										className="mt-2 w-full border border-gray-700 bg-black px-3 py-2 text-white"
+										value={campaignContent.keywords || ""}
+										onChange={(event) => updateCampaignContent("keywords", event.target.value)}
+									/>
+								</label>
+								<label className="block text-sm text-gray-300 md:col-span-2">
+									Hashtags
+									<input
+										className="mt-2 w-full border border-gray-700 bg-black px-3 py-2 text-white"
+										value={campaignContent.hashtags || ""}
+										onChange={(event) => updateCampaignContent("hashtags", event.target.value)}
+									/>
+								</label>
 							</div>
 						</div>
 
@@ -772,33 +890,138 @@ export default function EchoStudioPage() {
 							<button
 								type="button"
 								className="border border-pink-500 bg-pink-500 px-4 py-2 font-semibold text-black hover:bg-pink-400"
-								onClick={approveDraft}
+								onClick={approveContentForReview}
 							>
-								Approve Draft
+								Continue to Review
 							</button>
 						</div>
 					</section>
 				) : view === "review" ? (
-					<section className="rounded-lg border border-cyan-600/70 bg-gray-950/80 p-5">
-						<p className="text-sm uppercase tracking-[0.28em] text-cyan-300">Review</p>
-						<h2 className="mt-2 text-2xl font-semibold text-pink-200">Draft approved for review</h2>
-						<p className="mt-3 text-sm leading-6 text-gray-200">
-							This draft is approved inside Echo Studio. Publishing handoff is the next stage, but it is not connected in this hackathon flow yet.
-						</p>
-						<div className="mt-5 flex flex-wrap gap-3">
+					<section className="space-y-5">
+						<div>
+							<p className="text-sm uppercase tracking-[0.28em] text-cyan-300">Review & Edit</p>
+							<h2 className="mt-2 text-2xl font-semibold text-pink-200">Final campaign copy</h2>
+							<p className="mt-2 text-sm text-gray-300">
+								Review the complete content package. You can make final edits here or return to Content.
+							</p>
+						</div>
+						<div className="rounded-lg border border-cyan-600/70 bg-gray-950/80 p-5">
+							<div className="grid gap-4 md:grid-cols-2">
+								<label className="block text-sm text-gray-300 md:col-span-2">
+									Title or Hook
+									<input
+										className="mt-2 w-full border border-gray-700 bg-black px-3 py-2 text-white"
+										value={campaignContent?.title || ""}
+										onChange={(event) => updateCampaignContent("title", event.target.value)}
+									/>
+								</label>
+								<label className="block text-sm text-gray-300 md:col-span-2">
+									Main Copy or Description
+									<textarea
+										className="mt-2 min-h-40 w-full border border-gray-700 bg-black px-3 py-2 text-white"
+										value={campaignContent?.mainCopy || ""}
+										onChange={(event) => updateCampaignContent("mainCopy", event.target.value)}
+									/>
+								</label>
+								<label className="block text-sm text-gray-300">
+									CTA
+									<input
+										className="mt-2 w-full border border-gray-700 bg-black px-3 py-2 text-white"
+										value={campaignContent?.cta || ""}
+										onChange={(event) => updateCampaignContent("cta", event.target.value)}
+									/>
+								</label>
+								<label className="block text-sm text-gray-300">
+									Destination or Board
+									<input
+										className="mt-2 w-full border border-gray-700 bg-black px-3 py-2 text-white"
+										value={campaignContent?.destination || ""}
+										onChange={(event) => updateCampaignContent("destination", event.target.value)}
+									/>
+								</label>
+							</div>
+							<div className="mt-5 rounded border border-gray-800 bg-black/60 p-4">
+								<p className="text-xs uppercase tracking-[0.22em] text-cyan-300">Preview</p>
+								<h3 className="mt-3 text-lg font-semibold text-pink-200">{campaignContent?.title}</h3>
+								<p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-gray-100">{campaignContent?.mainCopy}</p>
+								<p className="mt-3 text-sm text-cyan-200">{campaignContent?.cta}</p>
+								<p className="mt-2 text-xs text-gray-400">{campaignContent?.hashtags}</p>
+							</div>
+						</div>
+						<div className="flex flex-wrap gap-3">
 							<button
 								type="button"
 								className="border border-cyan-500 px-4 py-2 text-cyan-200 hover:bg-cyan-500 hover:text-black"
-								onClick={() => setView("draft")}
+								onClick={() => setView("content")}
 							>
-								Back to Draft
+								Back to Content
 							</button>
 							<button
 								type="button"
-								className="border border-gray-700 px-4 py-2 text-gray-300"
-								disabled
+								className="border border-pink-500 bg-pink-500 px-4 py-2 font-semibold text-black hover:bg-pink-400"
+								onClick={approveReviewAndContinue}
 							>
-								Publish handoff coming soon
+								Approve and Continue
+							</button>
+						</div>
+					</section>
+				) : view === "publish" ? (
+					<section className="space-y-5">
+						<div>
+							<p className="text-sm uppercase tracking-[0.28em] text-cyan-300">Publish Handoff</p>
+							<h2 className="mt-2 text-2xl font-semibold text-pink-200">Campaign ready for publishing handoff</h2>
+							<p className="mt-2 text-sm text-gray-300">
+								Choose how to hand off the prepared content. This demo does not send a live post.
+							</p>
+						</div>
+						<div className="grid gap-4 md:grid-cols-2">
+							<StrategyCard title="Product">
+								<p>{selectedProduct?.label || "Selected product"}</p>
+							</StrategyCard>
+							<StrategyCard title="Platform">
+								<p>{campaignContent?.platform || form.primaryPlatform}</p>
+							</StrategyCard>
+							<StrategyCard title="Target Destination">
+								<p>{campaignContent?.destination || getDefaultDestination(form.primaryPlatform)}</p>
+							</StrategyCard>
+							<StrategyCard title="Status">
+								<p>Approved content package, ready for handoff.</p>
+							</StrategyCard>
+						</div>
+						<div className="rounded-lg border border-pink-600/70 bg-gray-950/80 p-5">
+							<p className="text-xs uppercase tracking-[0.22em] text-cyan-300">Final Content</p>
+							<h3 className="mt-3 text-lg font-semibold text-pink-200">{campaignContent?.title}</h3>
+							<p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-gray-100">{campaignContent?.mainCopy}</p>
+							<p className="mt-3 text-sm text-cyan-200">{campaignContent?.cta}</p>
+							<p className="mt-2 text-xs text-gray-400">{campaignContent?.hashtags}</p>
+							<p className="mt-2 text-xs text-gray-500">{campaignContent?.keywords}</p>
+						</div>
+						{handoffStatus ? (
+							<div className="rounded border border-cyan-500/70 bg-cyan-950/20 p-3 text-sm text-cyan-100">
+								{handoffStatus}
+							</div>
+						) : null}
+						<div className="flex flex-wrap gap-3">
+							<button
+								type="button"
+								className="border border-cyan-500 px-4 py-2 text-cyan-200 hover:bg-cyan-500 hover:text-black"
+								onClick={() => setView("review")}
+							>
+								Back to Review
+							</button>
+							<button
+								type="button"
+								className="border border-pink-500 bg-pink-500 px-4 py-2 font-semibold text-black hover:bg-pink-400"
+								onClick={() => confirmPublishingHandoff("now")}
+							>
+								Publish Now
+							</button>
+							<button
+								type="button"
+								className="border border-cyan-500 px-4 py-2 text-cyan-200 hover:bg-cyan-500 hover:text-black"
+								onClick={() => confirmPublishingHandoff("queue")}
+							>
+								Queue
 							</button>
 						</div>
 					</section>
@@ -807,7 +1030,7 @@ export default function EchoStudioPage() {
 						<div>
 							<p className="text-sm uppercase tracking-[0.28em] text-cyan-300">Campaign Strategy</p>
 							<h2 className="mt-2 text-2xl font-semibold text-pink-200">
-								Approve the strategy before Echo drafts.
+								Approve the strategy before Echo creates content.
 							</h2>
 							<p className="mt-2 text-sm text-gray-300">
 								Echo Brain has applied the available product, brand, platform, and marketing knowledge. Your next step is approval.
@@ -859,9 +1082,9 @@ export default function EchoStudioPage() {
 
 								<div className="flex flex-col gap-3 rounded-lg border border-pink-600/60 bg-pink-950/10 p-4 sm:flex-row sm:items-center sm:justify-between">
 									<div>
-										<p className="font-semibold text-pink-200">Ready for Echo to draft?</p>
+										<p className="font-semibold text-pink-200">Ready for Echo to create content?</p>
 										<p className="mt-1 text-sm text-gray-300">
-											Approving the strategy creates the draft from the selected recommendation.
+											Approving the strategy creates editable content from the selected recommendation.
 										</p>
 									</div>
 									<button
@@ -870,7 +1093,7 @@ export default function EchoStudioPage() {
 										onClick={approveStrategyAndGenerateDraft}
 										disabled={Boolean(workingStep)}
 									>
-										Approve Strategy & Generate Draft
+										Approve Strategy & Generate Content
 									</button>
 								</div>
 							</>
