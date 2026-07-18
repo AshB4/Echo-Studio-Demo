@@ -51,7 +51,8 @@
     "sharp": "^0.33.5",
     "shelljs": "0.10.0",
     "bree": "^9.2.4",
-    "@prisma/client": "^5.15.0"
+    "@prisma/client": "^5.15.0",
+    "uuid": "^14.0.1"
   },
   "devDependencies": {
     "prisma": "^5.15.0"

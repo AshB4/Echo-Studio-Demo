@@ -9,6 +9,9 @@ import { fileURLToPath } from "url";
 import { postToAllPlatforms, normalizeTargets } from "./scripts/platforms/post-to-all.js";
 import authRouter from "./routes/auth.js";
 import contentRouter from "./routes/content/index.js";
+import { missionRouter } from "./modules/missions/index.mjs";
+import { knowledgeRouter } from "./modules/knowledge/index.mjs";
+import { knowledgeRetrievalRouter } from "./modules/knowledge-retrieval/index.mjs";
 import { processQueue } from "./scripts/postingJob.mjs";
 import { rebalancePinterestMix } from "./scripts/queue/rebalance-pinterest-mix.mjs";
 import { getPublicAccounts } from "./utils/accountStore.mjs";
@@ -66,6 +69,9 @@ app.use(cors());
 app.use(express.json({ limit: "75mb" }));
 app.use("/api/auth", authRouter);
 app.use("/api/content", contentRouter);
+app.use("/api/missions", missionRouter);
+app.use("/api/knowledge", knowledgeRouter);
+app.use("/api/knowledge-sources", knowledgeRetrievalRouter);
 const PORT = process.env.PORT || 3001;
 
 // ---- data paths
