@@ -84,6 +84,15 @@ app.use("/api/ai-generator", aiGeneratorRouter);
 app.use("/api/campaign-assets", campaignAssetsRouter);
 const PORT = process.env.PORT || 3001;
 
+function getAiErrorStatus(error) {
+	const status = Number(error?.statusCode || error?.status || 500);
+	return status >= 400 && status < 600 ? status : 500;
+}
+
+function getAiErrorDetail(error) {
+	return error?.message || String(error);
+}
+
 // ---- data paths
 const DIR_QUEUE = path.join(__dirname, "queue");
 const DIR_MEDIA = path.join(__dirname, "media");
@@ -787,9 +796,9 @@ app.post("/api/ai/seo-generate", async (req, res) => {
 		return res.json(result);
 	} catch (error) {
 		console.error("AI SEO generation failed:", error);
-		return res.status(500).json({
+		return res.status(getAiErrorStatus(error)).json({
 			error: "Failed to generate SEO suggestions",
-			detail: error?.message || String(error),
+			detail: getAiErrorDetail(error),
 		});
 	}
 });
@@ -834,9 +843,9 @@ app.post("/api/ai/campaign-generate", async (req, res) => {
 		return res.json(result);
 	} catch (error) {
 		console.error("AI campaign generation failed:", error);
-		return res.status(500).json({
+		return res.status(getAiErrorStatus(error)).json({
 			error: "Failed to generate campaign posts",
-			detail: error?.message || String(error),
+			detail: getAiErrorDetail(error),
 		});
 	}
 });

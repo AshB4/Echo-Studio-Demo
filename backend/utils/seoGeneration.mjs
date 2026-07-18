@@ -305,8 +305,11 @@ export async function generateSeoPayload(input, options = {}) {
     options.pinterestCreativeContext || (await buildPinterestCreativeContext(input));
   const context = buildPromptContext(input, { ...options, pinterestCreativeContext });
   const config = resolveAiConfig(options);
+  const shouldUseChunkedGeneration =
+    config.provider === "ollama" ||
+    String(config.model || "").trim().toLowerCase().startsWith("gpt-5");
   const parsed =
-    config.provider === "ollama"
+    shouldUseChunkedGeneration
       ? await runChunkedSeoGeneration(input, options, context)
       : extractJsonObject(
           await generateStructuredText(
@@ -320,7 +323,10 @@ export async function generateSeoPayload(input, options = {}) {
 export function getDryRunPayload(input, options = {}) {
   const config = resolveAiConfig(options);
   const context = buildPromptContext(input, options);
-  if (config.provider === "ollama") {
+  const shouldUseChunkedGeneration =
+    config.provider === "ollama" ||
+    String(config.model || "").trim().toLowerCase().startsWith("gpt-5");
+  if (shouldUseChunkedGeneration) {
     const stages = buildChunkedPromptStages(
       input.productName,
       input.productType,

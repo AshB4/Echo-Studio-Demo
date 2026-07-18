@@ -232,6 +232,28 @@ test("dry run for openai keeps monolithic prompt", () => {
   assert.match(payload.prompt, /Target platforms: x, linkedin/);
 });
 
+test("dry run for GPT-5 OpenAI uses staged prompts", () => {
+  const payload = getDryRunPayload(
+    {
+      productName: "PostPunk",
+      productType: "Automation Tool",
+      audience: "Indie devs",
+      platformIds: ["pinterest"],
+    },
+    {
+      provider: "openai",
+      model: "gpt-5.5",
+    },
+  );
+
+  assert.equal(payload.mode, "dry-run");
+  assert.equal(payload.provider, "openai");
+  assert.equal(payload.model, "gpt-5.5");
+  assert.equal(payload.stages.length, 4);
+  assert.match(payload.prompt, /## Strategy/);
+  assert.match(payload.prompt, /## Visual/);
+});
+
 test("Ko-fi plus Amara profile carries fictional-universe guidance into prompts", () => {
   const prompt = buildSeoPrompt(
     "Church Archive Fragment",

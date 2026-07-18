@@ -135,7 +135,7 @@ async function getRawJson(path) {
 	const response = await fetch(`${API_BASE}${path}`);
 	const body = await response.json().catch(() => ({}));
 	if (!response.ok) {
-		const message = body?.message || body?.error || `Request failed: ${response.status}`;
+		const message = body?.detail || body?.message || body?.error || `Request failed: ${response.status}`;
 		throw new Error(message);
 	}
 	return body;
@@ -163,7 +163,7 @@ async function postRawJson(path, payload) {
 	});
 	const body = await response.json().catch(() => ({}));
 	if (!response.ok) {
-		const message = body?.message || body?.error || body?.detail || `Request failed: ${response.status}`;
+		const message = body?.detail || body?.message || body?.error || `Request failed: ${response.status}`;
 		throw new Error(message);
 	}
 	return body;
@@ -1165,10 +1165,10 @@ export default function EchoStudioPage() {
 				productType: selectedProduct?.productType || selectedProduct?.category || "Product",
 				audience: pipeline.campaignStrategy.audience,
 				platformIds: [platformId],
-				campaignPhases: ["launch", "follow_up", "evergreen"],
+				campaignPhases: ["launch"],
 				productProfileId: selectedProduct?.id || null,
 				postIntent: pipeline.campaignStrategy.primaryMessage,
-				maxPosts: 4,
+				maxPosts: 1,
 			};
 			setWorkingStep("Building AI campaign prompts...");
 			const promptPreview = await postRawJson("/api/ai/campaign-generate", {
