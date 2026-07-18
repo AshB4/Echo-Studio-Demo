@@ -292,6 +292,16 @@ app.get("/api/pinterest-boards", async (_req, res) => {
 			boards: Array.isArray(config?.boards)
 				? config.boards.map((board) => String(board || "").trim()).filter(Boolean)
 				: [],
+			rules: Array.isArray(config?.rules)
+				? config.rules
+					.map((rule) => ({
+						board: String(rule?.board || "").trim(),
+						keywords: Array.isArray(rule?.keywords)
+							? rule.keywords.map((keyword) => String(keyword || "").trim()).filter(Boolean)
+							: [],
+					}))
+					.filter((rule) => rule.board)
+				: [],
 		});
 	} catch (error) {
 		return res.status(500).json({

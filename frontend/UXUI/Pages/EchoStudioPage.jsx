@@ -6,7 +6,7 @@ import { productProfiles } from "../utils/productProfiles";
 const API_BASE = import.meta.env?.VITE_API_BASE || "http://localhost:3001";
 const ECHO_PRODUCTS = productProfiles.slice(0, 3);
 const SUPPORTED_PLATFORMS = ["Pinterest", "Facebook", "Dev.to"];
-const JOURNEY_STAGES = ["Mission", "Knowledge", "Strategy", "Content", "Review", "Publish"];
+const JOURNEY_STAGES = ["Mission", "Knowledge", "Strategy", "Content", "Review", "Schedule", "Publish"];
 const KNOWLEDGE_NODE_DEFINITIONS = [
 	{ key: "product", label: "Product", className: "echo-brain-node-top" },
 	{ key: "brand", label: "Brand", className: "echo-brain-node-left-top" },
@@ -105,6 +105,7 @@ const emptyPipeline = {
 	knowledgeContext: null,
 	campaignPlan: null,
 	campaignStrategy: null,
+	campaignGeneration: null,
 	assetBlueprints: [],
 	campaignAsset: null,
 };
@@ -130,6 +131,16 @@ async function getJson(path) {
 	return body.data;
 }
 
+async function getRawJson(path) {
+	const response = await fetch(`${API_BASE}${path}`);
+	const body = await response.json().catch(() => ({}));
+	if (!response.ok) {
+		const message = body?.message || body?.error || `Request failed: ${response.status}`;
+		throw new Error(message);
+	}
+	return body;
+}
+
 async function postJson(path, payload) {
 	const response = await fetch(`${API_BASE}${path}`, {
 		method: "POST",
@@ -142,6 +153,20 @@ async function postJson(path, payload) {
 		throw new Error(message);
 	}
 	return body.data;
+}
+
+async function postRawJson(path, payload) {
+	const response = await fetch(`${API_BASE}${path}`, {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify(payload),
+	});
+	const body = await response.json().catch(() => ({}));
+	if (!response.ok) {
+		const message = body?.message || body?.error || body?.detail || `Request failed: ${response.status}`;
+		throw new Error(message);
+	}
+	return body;
 }
 
 async function patchJson(path, payload) {
@@ -430,7 +455,8 @@ function getJourneyIndex({ view, loaderVisible, pipeline }) {
 	if (loaderVisible || !pipeline.campaignPlan) return 1;
 	if (view === "content") return 3;
 	if (view === "review") return 4;
-	if (view === "publish") return 5;
+	if (view === "schedule") return 5;
+	if (view === "publish") return 6;
 	return 2;
 }
 
@@ -485,49 +511,236 @@ function getDefaultHashtags({ product, platform }) {
 	return tags.join(" ");
 }
 
-function appendCallToAction(copy, callToAction) {
-	const content = String(copy || "").trim();
-	const cta = String(callToAction || "").trim();
-	if (!cta) return content;
-	if (content.toLowerCase().includes(cta.toLowerCase())) return content;
-	return `${content}\n\n${cta}`;
+function normalizePlatformId(platform = "") {
+	const text = String(platform || "").trim().toLowerCase();
+	if (text === "dev.to" || text === "devto") return "devto";
+	if (text.includes("pinterest")) return "pinterest";
+	if (text.includes("facebook")) return "facebook";
+	return text || "general";
 }
 
-function createEditableContent({ asset, campaignPlan, campaignStrategy, product, recommendation }) {
-	if (!asset) return [];
-	const rawContent = String(asset.content || "").trim();
-	const baseCopy =
-		rawContent.toLowerCase() === "generated from blueprint."
-			? campaignStrategy?.primaryMessage || buildCoreMessage({
-				goal: campaignPlan?.goal,
-				product,
-				platform: asset.platform || campaignPlan?.primaryPlatform,
-			})
-			: rawContent;
-	const platform = asset.platform || campaignPlan?.primaryPlatform || "";
-	const cta = campaignStrategy?.callToAction || getDefaultCta({ goal: campaignPlan?.goal, platform });
+function humanizePlatformId(platform = "") {
+	const text = normalizePlatformId(platform);
+	if (text === "devto") return "Dev.to";
+	if (text === "pinterest") return "Pinterest";
+	if (text === "facebook") return "Facebook";
+	return String(platform || "General").trim();
+}
+
+function normalizeList(value) {
+	if (Array.isArray(value)) return value.map((item) => String(item || "").trim()).filter(Boolean);
+	if (typeof value === "string") {
+		return value
+			.split(/[,\n]/)
+			.map((item) => item.trim())
+			.filter(Boolean);
+	}
+	return [];
+}
+
+function joinForSearch(values = []) {
+	return values
+		.flatMap((value) => normalizeList(value))
+		.concat(values.filter((value) => typeof value === "string"))
+		.join(" ")
+		.toLowerCase();
+}
+
+function recommendPinterestBoard(post, pinterestBoards) {
+	const boards = Array.isArray(pinterestBoards?.boards) ? pinterestBoards.boards : [];
+	const rules = Array.isArray(pinterestBoards?.rules) ? pinterestBoards.rules : [];
+	const defaultBoard = pinterestBoards?.defaultBoard || boards[0] || "";
+	const searchText = joinForSearch([
+		post.title,
+		post.body,
+		post.hook,
+		post.keywords,
+		post.hashtags,
+		post.campaignAngle,
+		post.imageConcept,
+	]);
+	let best = null;
+	for (const rule of rules) {
+		const keywords = normalizeList(rule.keywords);
+		const matches = keywords.filter((keyword) => searchText.includes(keyword.toLowerCase()));
+		if (!matches.length) continue;
+		if (!best || matches.length > best.matches.length) {
+			best = { board: rule.board, matches };
+		}
+	}
+	const board = best?.board && boards.includes(best.board) ? best.board : defaultBoard;
 	return {
-		platform,
-		title: campaignStrategy?.primaryHook || asset.title || humanizeAssetType(recommendation?.type),
-		mainCopy: appendCallToAction(baseCopy, cta),
-		cta,
-		keywords: Array.isArray(campaignStrategy?.seoKeywords) && campaignStrategy.seoKeywords.length
-			? campaignStrategy.seoKeywords.join(", ")
-			: getDefaultKeywords({ goal: campaignPlan?.goal, product, platform }),
-		hashtags: getDefaultHashtags({ product, platform }),
-		destination: getDefaultDestination(platform),
-		status: "Generated",
+		board,
+		confidence: best?.matches?.length > 1 ? "High" : best?.matches?.length === 1 ? "Medium" : "Default",
+		matches: best?.matches || [],
+		reason: best?.matches?.length
+			? `Matches keywords: ${best.matches.join(", ")}`
+			: "No keyword rule matched, so Echo selected the configured default.",
 	};
+}
+
+function buildScheduledAt(index) {
+	const date = new Date();
+	date.setDate(date.getDate() + Math.floor(index / 2) + 1);
+	date.setHours(index % 2 === 0 ? 10 : 15, 0, 0, 0);
+	return date.toISOString();
+}
+
+function formatLocalSchedule(iso) {
+	if (!iso) return "";
+	const date = new Date(iso);
+	if (Number.isNaN(date.getTime())) return "";
+	const offset = date.getTimezoneOffset();
+	const local = new Date(date.getTime() - offset * 60_000);
+	return local.toISOString().slice(0, 16);
+}
+
+function parseLocalSchedule(value) {
+	if (!value) return null;
+	const date = new Date(value);
+	return Number.isNaN(date.getTime()) ? null : date.toISOString();
+}
+
+function getPromptSections(post) {
+	return [
+		["Campaign Prompt", post.prompts?.campaign],
+		["Content Prompt", post.prompts?.content],
+		["SEO Prompt", post.prompts?.seo],
+		["Image Prompt", post.imagePrompt],
+	].filter(([, value]) => String(value || "").trim());
+}
+
+function normalizeGeneratedCampaignPost(post, index, { campaignPrompt, seoPrompt, pinterestBoards }) {
+	const generated = post.generated || {};
+	const platform = humanizePlatformId(post.platform);
+	const hashtags = normalizeList(post.hashtags || generated.hashtags?.All);
+	const keywords = normalizeList(generated.keywords || post.keywords);
+	const normalized = {
+		localId: `generated-${index}`,
+		platform,
+		title: post.title || generated.headline || post.hook || `Campaign Post ${index + 1}`,
+		body: post.body || generated.seo_human_pitch || generated.meta_description || "",
+		hook: post.hook || generated.hook || post.title || "",
+		cta: post.cta || generated.primary_cta || "",
+		hashtags,
+		keywords,
+		imageConcept: post.image_concept || generated.image_concept || "",
+		imagePrompt: post.image_prompt || generated.image_prompt || "",
+		altText: post.alt_text || "",
+		destinationUrl: post.destination_url || generated.destination_url || "",
+		campaignPhase: post.phase || generated.campaign_phase || "",
+		campaignAngle: post.campaign_angle || generated.campaign_angle || "",
+		postIntent: post.post_intent || generated.post_intent || "",
+		product: post.product || generated.product || "",
+		prompts: {
+			campaign: campaignPrompt || "",
+			content: seoPrompt || "",
+			seo: seoPrompt || "",
+		},
+		raw: post,
+		scheduledAt: buildScheduledAt(index),
+	};
+	const boardRecommendation =
+		normalizePlatformId(platform) === "pinterest"
+			? recommendPinterestBoard(normalized, pinterestBoards)
+			: null;
+	return {
+		...normalized,
+		destination: boardRecommendation?.board || getDefaultDestination(platform),
+		boardRecommendation,
+	};
+}
+
+function buildQueuePayload(post, { mission, campaignStrategy, selectedProduct }) {
+	const platformId = normalizePlatformId(post.platform);
+	const hashtags = normalizeList(post.hashtags);
+	return {
+		title: post.title,
+		body: post.body,
+		platforms: [platformId],
+		targets: [platformId],
+		scheduledAt: post.scheduledAt || null,
+		hashtags,
+		altText: post.altText || "",
+		status: "approved",
+		metadata: {
+			echoStudio: true,
+			missionId: mission?.id || null,
+			productProfileId: selectedProduct?.id || null,
+			productName: selectedProduct?.label || "",
+			campaignStrategy,
+			campaignPhase: post.campaignPhase || "",
+			campaignAngle: post.campaignAngle || "",
+			hook: post.hook || "",
+			cta: post.cta || "",
+			imageConcept: post.imageConcept || "",
+			imagePrompt: post.imagePrompt || "",
+			destinationUrl: post.destinationUrl || "",
+			pinterestBoard: platformId === "pinterest" ? post.destination || "" : "",
+			pinterestBoards: platformId === "pinterest" && post.destination ? [post.destination] : [],
+			prompts: post.prompts || {},
+			contentTags: ["echo-studio", post.campaignPhase, platformId].filter(Boolean),
+			distributionTags: [`post:${platformId}`],
+		},
+		tags: ["echo-studio", post.campaignPhase, post.campaignAngle].filter(Boolean),
+	};
+}
+
+function getScheduleWarnings(posts) {
+	const warnings = [];
+	const byDayPlatform = new Map();
+	const seenBoards = new Map();
+	const seenHooks = new Map();
+	const seenImages = new Map();
+	const sorted = [...posts].sort((left, right) =>
+		String(left.scheduledAt || "").localeCompare(String(right.scheduledAt || "")),
+	);
+	for (const post of sorted) {
+		const platformId = normalizePlatformId(post.platform);
+		const day = String(post.scheduledAt || "").slice(0, 10);
+		const key = `${day}:${platformId}`;
+		byDayPlatform.set(key, (byDayPlatform.get(key) || 0) + 1);
+		if (platformId === "pinterest" && post.destination) {
+			const boardKey = `${day}:${post.destination}`;
+			if (seenBoards.has(boardKey)) warnings.push(`Duplicate Pinterest board on ${day}: ${post.destination}`);
+			seenBoards.set(boardKey, true);
+		}
+		const hookKey = String(post.hook || post.title || "").trim().toLowerCase();
+		if (hookKey) {
+			if (seenHooks.has(hookKey)) warnings.push(`Duplicate hook: ${post.hook || post.title}`);
+			seenHooks.set(hookKey, true);
+		}
+		const imageKey = String(post.imagePrompt || post.imageConcept || "").trim().toLowerCase();
+		if (imageKey) {
+			if (seenImages.has(imageKey)) warnings.push(`Duplicate image direction: ${post.title}`);
+			seenImages.set(imageKey, true);
+		}
+	}
+	for (let index = 1; index < sorted.length; index += 1) {
+		const previous = sorted[index - 1];
+		const current = sorted[index];
+		if (normalizePlatformId(previous.platform) !== normalizePlatformId(current.platform)) continue;
+		const previousTime = new Date(previous.scheduledAt).getTime();
+		const currentTime = new Date(current.scheduledAt).getTime();
+		if (Number.isFinite(previousTime) && Number.isFinite(currentTime) && currentTime - previousTime < 2 * 60 * 60 * 1000) {
+			warnings.push(`${current.platform} posts are too close together.`);
+		}
+	}
+	for (const [key, count] of byDayPlatform.entries()) {
+		if (key.endsWith(":pinterest") && count > 5) warnings.push("More than daily Pinterest limit.");
+		if (count > 3) warnings.push("Campaign clustering detected on one platform/day.");
+	}
+	return Array.from(new Set(warnings));
 }
 
 function JourneyHeader({ activeIndex, onStageClick }) {
 	return (
 		<nav className="rounded-lg border border-gray-800 bg-gray-950/80 p-3" aria-label="Campaign journey">
-			<ol className="grid grid-cols-2 gap-2 text-xs sm:grid-cols-3 lg:grid-cols-6">
+			<ol className="grid grid-cols-2 gap-2 text-xs sm:grid-cols-3 lg:grid-cols-7">
 				{JOURNEY_STAGES.map((stage, index) => {
 					const completed = index < activeIndex;
 					const active = index === activeIndex;
-					const clickable = completed && (index === 0 || index === 2);
+					const clickable = completed && [0, 2, 3, 4, 5].includes(index);
 					const className = [
 						"flex items-center justify-center gap-2 border px-3 py-2 text-center transition",
 						active
@@ -569,6 +782,169 @@ function StrategyCard({ title, children }) {
 	);
 }
 
+function PromptInspector({ post }) {
+	const sections = getPromptSections(post);
+	if (!sections.length) return null;
+	return (
+		<details className="mt-4 rounded border border-gray-800 bg-black/50 p-3">
+			<summary className="cursor-pointer text-sm font-semibold text-cyan-200">AI Prompts</summary>
+			<div className="mt-3 space-y-3">
+				{sections.map(([label, value]) => (
+					<div key={label}>
+						<p className="text-xs uppercase tracking-[0.18em] text-pink-300">{label}</p>
+						<pre className="mt-2 max-h-56 overflow-auto whitespace-pre-wrap rounded bg-black p-3 text-xs leading-5 text-gray-200">
+							{value}
+						</pre>
+					</div>
+				))}
+			</div>
+		</details>
+	);
+}
+
+function GeneratedPostEditor({ post, index, boards = [], onChange, compact = false }) {
+	return (
+		<section className="rounded-lg border border-pink-600/60 bg-gray-950/80 p-5">
+			<div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+				<div>
+					<p className="text-xs uppercase tracking-[0.22em] text-cyan-300">{post.platform}</p>
+					<h3 className="mt-2 text-xl font-semibold text-pink-200">{post.title}</h3>
+					<p className="mt-2 text-sm text-gray-400">
+						{post.campaignPhase || "Campaign"} · {post.campaignAngle || "Generated angle"}
+					</p>
+				</div>
+				<p className="text-xs text-gray-500">Post {index + 1}</p>
+			</div>
+
+			<div className="mt-5 rounded border border-gray-800 bg-black/60 p-4">
+				<p className="text-xs uppercase tracking-[0.18em] text-cyan-300">Publish Preview</p>
+				<p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-gray-100">{post.body}</p>
+				{post.hashtags.length ? (
+					<p className="mt-3 text-xs text-gray-400">{post.hashtags.join(" ")}</p>
+				) : null}
+			</div>
+
+			{post.boardRecommendation ? (
+				<div className="mt-4 rounded border border-cyan-700/70 bg-cyan-950/20 p-4 text-sm">
+					<p className="font-semibold text-cyan-100">Recommended Board</p>
+					<p className="mt-2 text-gray-100">✓ {post.destination}</p>
+					<p className="mt-1 text-gray-300">Confidence: {post.boardRecommendation.confidence}</p>
+					<p className="mt-1 text-gray-400">{post.boardRecommendation.reason}</p>
+				</div>
+			) : null}
+
+			{compact ? null : (
+				<div className="mt-5 grid gap-4 md:grid-cols-2">
+					<label className="block text-sm text-gray-300">
+						Platform
+						<input
+							className="mt-2 w-full border border-gray-700 bg-black px-3 py-2 text-white"
+							value={post.platform}
+							onChange={(event) => onChange(index, "platform", event.target.value)}
+						/>
+					</label>
+					<label className="block text-sm text-gray-300">
+						Board / Page
+						{normalizePlatformId(post.platform) === "pinterest" && boards.length ? (
+							<select
+								className="mt-2 w-full border border-gray-700 bg-black px-3 py-2 text-white"
+								value={post.destination || ""}
+								onChange={(event) => onChange(index, "destination", event.target.value)}
+							>
+								{boards.map((board) => (
+									<option key={board} value={board}>
+										{board}
+									</option>
+								))}
+							</select>
+						) : (
+							<input
+								className="mt-2 w-full border border-gray-700 bg-black px-3 py-2 text-white"
+								value={post.destination || ""}
+								onChange={(event) => onChange(index, "destination", event.target.value)}
+							/>
+						)}
+					</label>
+					<label className="block text-sm text-gray-300 md:col-span-2">
+						Title
+						<input
+							className="mt-2 w-full border border-gray-700 bg-black px-3 py-2 text-white"
+							value={post.title}
+							onChange={(event) => onChange(index, "title", event.target.value)}
+						/>
+					</label>
+					<label className="block text-sm text-gray-300 md:col-span-2">
+						Body
+						<textarea
+							className="mt-2 min-h-36 w-full border border-gray-700 bg-black px-3 py-2 text-white"
+							value={post.body}
+							onChange={(event) => onChange(index, "body", event.target.value)}
+						/>
+					</label>
+					<label className="block text-sm text-gray-300">
+						Hook
+						<input
+							className="mt-2 w-full border border-gray-700 bg-black px-3 py-2 text-white"
+							value={post.hook}
+							onChange={(event) => onChange(index, "hook", event.target.value)}
+						/>
+					</label>
+					<label className="block text-sm text-gray-300">
+						CTA
+						<input
+							className="mt-2 w-full border border-gray-700 bg-black px-3 py-2 text-white"
+							value={post.cta}
+							onChange={(event) => onChange(index, "cta", event.target.value)}
+						/>
+					</label>
+					<label className="block text-sm text-gray-300">
+						Hashtags
+						<input
+							className="mt-2 w-full border border-gray-700 bg-black px-3 py-2 text-white"
+							value={post.hashtags.join(", ")}
+							onChange={(event) => onChange(index, "hashtags", normalizeList(event.target.value))}
+						/>
+					</label>
+					<label className="block text-sm text-gray-300">
+						Keywords
+						<input
+							className="mt-2 w-full border border-gray-700 bg-black px-3 py-2 text-white"
+							value={post.keywords.join(", ")}
+							onChange={(event) => onChange(index, "keywords", normalizeList(event.target.value))}
+						/>
+					</label>
+					<label className="block text-sm text-gray-300 md:col-span-2">
+						Destination URL
+						<input
+							className="mt-2 w-full border border-gray-700 bg-black px-3 py-2 text-white"
+							value={post.destinationUrl}
+							onChange={(event) => onChange(index, "destinationUrl", event.target.value)}
+						/>
+					</label>
+					<label className="block text-sm text-gray-300 md:col-span-2">
+						Image Concept
+						<input
+							className="mt-2 w-full border border-gray-700 bg-black px-3 py-2 text-white"
+							value={post.imageConcept}
+							onChange={(event) => onChange(index, "imageConcept", event.target.value)}
+						/>
+					</label>
+					<label className="block text-sm text-gray-300 md:col-span-2">
+						Image Prompt
+						<textarea
+							className="mt-2 min-h-24 w-full border border-gray-700 bg-black px-3 py-2 text-white"
+							value={post.imagePrompt}
+							onChange={(event) => onChange(index, "imagePrompt", event.target.value)}
+						/>
+					</label>
+				</div>
+			)}
+
+			<PromptInspector post={post} />
+		</section>
+	);
+}
+
 export default function EchoStudioPage() {
 	const [form, setForm] = useState({
 		goal: "Launch my new book with authority",
@@ -583,7 +959,10 @@ export default function EchoStudioPage() {
 	const [completedNodes, setCompletedNodes] = useState([]);
 	const [loaderComplete, setLoaderComplete] = useState(false);
 	const [loaderCompleteText, setLoaderCompleteText] = useState("Campaign strategy ready");
-	const [campaignContent, setCampaignContent] = useState(null);
+	const [campaignPosts, setCampaignPosts] = useState([]);
+	const [pinterestBoards, setPinterestBoards] = useState({ defaultBoard: "", boards: [], rules: [] });
+	const [queueResults, setQueueResults] = useState([]);
+	const [publishResults, setPublishResults] = useState([]);
 	const [handoffStatus, setHandoffStatus] = useState("");
 	const [error, setError] = useState("");
 
@@ -603,7 +982,7 @@ export default function EchoStudioPage() {
 			}),
 		[campaignStrategy, pipeline.campaignPlan, form.primaryPlatform, selectedProduct],
 	);
-	const selectedRecommendation = displayedRecommendations[0] || null;
+	const scheduleWarnings = useMemo(() => getScheduleWarnings(campaignPosts), [campaignPosts]);
 
 	function updateField(field, value) {
 		setForm((current) => ({ ...current, [field]: value }));
@@ -637,6 +1016,17 @@ export default function EchoStudioPage() {
 		setCompletedNodes((current) =>
 			current.includes(nodeKey) ? current : [...current, nodeKey],
 		);
+	}
+
+	async function loadPinterestBoards() {
+		const boards = await getRawJson("/api/pinterest-boards");
+		const normalized = {
+			defaultBoard: boards.defaultBoard || "",
+			boards: Array.isArray(boards.boards) ? boards.boards : [],
+			rules: Array.isArray(boards.rules) ? boards.rules : [],
+		};
+		setPinterestBoards(normalized);
+		return normalized;
 	}
 
 	async function loadBrainForMission(mission) {
@@ -752,43 +1142,79 @@ export default function EchoStudioPage() {
 				...current,
 				campaignPlan,
 				campaignStrategy: nextCampaignStrategy,
+				campaignGeneration: null,
 				assetBlueprints: [],
 				campaignAsset: null,
 			}));
-			setCampaignContent(null);
+			setCampaignPosts([]);
+			setQueueResults([]);
+			setPublishResults([]);
 			setHandoffStatus("");
 		}, { completeText: "Campaign strategy ready" });
 	}
 
 	function approveStrategyAndGenerateDraft() {
-		if (!pipeline.campaignPlan) return null;
-		return runStep("Preparing campaign draft...", async () => {
+		if (!pipeline.campaignPlan || !pipeline.campaignStrategy) return null;
+		return runStep("Generating campaign content...", async () => {
 			setCompletedNodes(KNOWLEDGE_NODE_DEFINITIONS.map((node) => node.key));
-			setWorkingStep("Translating strategy into draft instructions...");
-			const assetBlueprints = await postJson("/api/asset-blueprints/generate", {
-				campaignPlan: pipeline.campaignPlan,
+			setWorkingStep("Loading publishing destinations...");
+			const boards = await loadPinterestBoards();
+			const platformId = normalizePlatformId(form.primaryPlatform);
+			const generationPayload = {
+				productName: selectedProduct?.label || "Selected product",
+				productType: selectedProduct?.productType || selectedProduct?.category || "Product",
+				audience: pipeline.campaignStrategy.audience,
+				platformIds: [platformId],
+				campaignPhases: ["launch", "follow_up", "evergreen"],
+				productProfileId: selectedProduct?.id || null,
+				postIntent: pipeline.campaignStrategy.primaryMessage,
+				maxPosts: 4,
+			};
+			setWorkingStep("Building AI campaign prompts...");
+			const promptPreview = await postRawJson("/api/ai/campaign-generate", {
+				...generationPayload,
+				dryRun: true,
 			});
-			const blueprint = assetBlueprints[0];
-			if (!blueprint) {
-				throw new Error("Echo could not prepare a draft from this strategy.");
+			setWorkingStep("Generating campaign posts...");
+			const campaignGeneration = await postRawJson("/api/ai/campaign-generate", generationPayload);
+			const posts = Array.isArray(campaignGeneration.posts) ? campaignGeneration.posts : [];
+			if (!posts.length) {
+				throw new Error("Echo did not return any campaign posts.");
 			}
-			setWorkingStep("Generating campaign draft...");
-			const campaignAsset = await postJson("/api/ai-generator/generate", {
-				assetBlueprint: blueprint,
-			});
-			const editableContent = createEditableContent({
-				asset: campaignAsset,
-				campaignPlan: pipeline.campaignPlan,
-				campaignStrategy: pipeline.campaignStrategy,
-				product: selectedProduct,
-				recommendation: selectedRecommendation,
-			});
+			const seoPromptPreviews = await Promise.all(
+				posts.map((post) =>
+					postRawJson("/api/ai/seo-generate", {
+						productName: generationPayload.productName,
+						productType: generationPayload.productType,
+						audience: generationPayload.audience,
+						platformIds: [normalizePlatformId(post.platform)],
+						productProfileId: generationPayload.productProfileId,
+						postIntent: post.post_intent || generationPayload.postIntent,
+						campaignPhase: post.phase || null,
+						campaignAngle: post.campaign_angle || null,
+						visualHook: post.visual_hook || null,
+						dryRun: true,
+					}).catch((promptError) => ({
+						prompt: `Prompt preview unavailable: ${promptError.message || "request failed"}`,
+					})),
+				),
+			);
+			const normalizedPosts = posts.map((post, index) =>
+				normalizeGeneratedCampaignPost(post, index, {
+					campaignPrompt: promptPreview.planner_prompt || promptPreview.prompt || "",
+					seoPrompt: seoPromptPreviews[index]?.prompt || "",
+					pinterestBoards: boards,
+				}),
+			);
 			setPipeline((current) => ({
 				...current,
-				assetBlueprints,
-				campaignAsset,
+				campaignGeneration,
+				assetBlueprints: [],
+				campaignAsset: null,
 			}));
-			setCampaignContent(editableContent);
+			setCampaignPosts(normalizedPosts);
+			setQueueResults([]);
+			setPublishResults([]);
 			setHandoffStatus("");
 			setView("content");
 		}, { completeText: "Campaign content ready" });
@@ -797,15 +1223,17 @@ export default function EchoStudioPage() {
 	function handleJourneyStageClick(index) {
 		if (index === 0) setView("intake");
 		if (index === 2 && pipeline.campaignPlan) setView("strategy");
-		if (index === 3 && campaignContent) setView("content");
-		if (index === 4 && campaignContent) setView("review");
+		if (index === 3 && campaignPosts.length) setView("content");
+		if (index === 4 && campaignPosts.length) setView("review");
+		if (index === 5 && campaignPosts.length) setView("schedule");
 	}
 
-	function updateCampaignContent(field, value) {
-		setCampaignContent((current) => ({
-			...(current || {}),
-			[field]: value,
-		}));
+	function updateCampaignPost(index, field, value) {
+		setCampaignPosts((current) =>
+			current.map((post, postIndex) =>
+				postIndex === index ? { ...post, [field]: value } : post,
+			),
+		);
 	}
 
 	function approveContentForReview() {
@@ -814,15 +1242,61 @@ export default function EchoStudioPage() {
 
 	function approveReviewAndContinue() {
 		setHandoffStatus("");
+		setView("schedule");
+	}
+
+	function approveScheduleAndContinue() {
+		setHandoffStatus("");
 		setView("publish");
 	}
 
-	function confirmPublishingHandoff(mode) {
-		const action = mode === "schedule" ? "scheduled for publishing handoff" : "prepared for publishing handoff";
-		setHandoffStatus(`Campaign ${action}. This demo does not perform live publishing.`);
+	async function queueCampaign() {
+		setHandoffStatus("Queueing campaign...");
+		setError("");
+		setQueueResults([]);
+		try {
+			const results = [];
+			for (const post of campaignPosts) {
+				const payload = buildQueuePayload(post, {
+					mission: pipeline.mission,
+					campaignStrategy: pipeline.campaignStrategy,
+					selectedProduct,
+				});
+				results.push(await postRawJson("/api/posts", payload));
+			}
+			setQueueResults(results);
+			setHandoffStatus(`${results.length} campaign post${results.length === 1 ? "" : "s"} queued with approved status.`);
+		} catch (queueError) {
+			setHandoffStatus("");
+			setError(queueError.message || "Echo could not queue the campaign. Please try again.");
+		}
 	}
 
-	const publishingDestinations = getPublishingDestinations(campaignContent?.platform || form.primaryPlatform);
+	async function publishCampaignNow() {
+		setHandoffStatus("Publishing campaign now...");
+		setError("");
+		setPublishResults([]);
+		try {
+			const results = [];
+			for (const post of campaignPosts) {
+				const payload = buildQueuePayload(post, {
+					mission: pipeline.mission,
+					campaignStrategy: pipeline.campaignStrategy,
+					selectedProduct,
+				});
+				results.push(await postRawJson("/api/post-to-all", {
+					post: payload,
+					targets: payload.targets,
+					platforms: payload.platforms,
+				}));
+			}
+			setPublishResults(results);
+			setHandoffStatus(`${results.length} campaign post${results.length === 1 ? "" : "s"} sent to the publishing endpoint.`);
+		} catch (publishError) {
+			setHandoffStatus("");
+			setError(publishError.message || "Echo could not publish the campaign. Please try again.");
+		}
+	}
 
 	return (
 		<div className="min-h-screen bg-black px-4 py-4 text-white">
@@ -923,86 +1397,28 @@ export default function EchoStudioPage() {
 							</p>
 						</div>
 					</section>
-				) : view === "content" && campaignContent ? (
-					<section className="space-y-5">
-						<div>
-							<p className="text-sm uppercase tracking-[0.28em] text-cyan-300">Campaign Created</p>
-							<h2 className="mt-2 text-2xl font-semibold text-pink-200">Echo created your campaign content.</h2>
-							<p className="mt-2 text-sm text-gray-300">
-								Review the finished artifact first. Editing controls are below when you want to tune the copy.
-							</p>
-						</div>
-
-						<div className="rounded-lg border border-pink-600/70 bg-gray-950/80 p-5 shadow-[0_0_30px_rgba(236,72,153,0.08)]">
-							<p className="text-xs uppercase tracking-[0.22em] text-cyan-300">Platform</p>
-							<p className="mt-2 text-lg font-semibold text-pink-100">{campaignContent.platform || form.primaryPlatform}</p>
-							<div className="mt-5 rounded border border-gray-800 bg-black/60 p-5">
-								<p className="text-xs uppercase tracking-[0.22em] text-cyan-300">Headline</p>
-								<h3 className="mt-3 text-xl font-semibold text-pink-200">{campaignContent.title}</h3>
-								<p className="mt-5 text-xs uppercase tracking-[0.22em] text-cyan-300">Generated Content</p>
-								<p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-gray-100">{campaignContent.mainCopy}</p>
+					) : view === "content" && campaignPosts.length ? (
+						<section className="space-y-5">
+							<div>
+								<p className="text-sm uppercase tracking-[0.28em] text-cyan-300">Campaign Created</p>
+								<h2 className="mt-2 text-2xl font-semibold text-pink-200">Echo generated {campaignPosts.length} campaign post{campaignPosts.length === 1 ? "" : "s"}.</h2>
+								<p className="mt-2 text-sm text-gray-300">
+									These posts came from the real campaign generation API. Review the content, prompts, and publishing destination before approval.
+								</p>
 							</div>
-							<div className="mt-5 grid gap-4 md:grid-cols-2">
-								<StrategyCard title="Keywords">
-									<p>{campaignContent.keywords}</p>
-								</StrategyCard>
-								<StrategyCard title="Hashtags">
-									<p>{campaignContent.hashtags}</p>
-								</StrategyCard>
-							</div>
-						</div>
 
-						<div className="rounded-lg border border-cyan-700/70 bg-gray-950/70 p-5">
-							<p className="text-sm font-semibold text-cyan-200">Edit campaign content</p>
-							<p className="mt-1 text-sm text-gray-400">
-								Keep this as one coherent piece of marketing content. Echo will handle the publishing destination later.
-							</p>
-							<div className="grid gap-4 md:grid-cols-2">
-								<label className="block text-sm text-gray-300">
-									Platform
-									<input
-										className="mt-2 w-full border border-gray-700 bg-black px-3 py-2 text-white"
-										value={campaignContent.platform || ""}
-										onChange={(event) => updateCampaignContent("platform", event.target.value)}
-									/>
-								</label>
-								<label className="block text-sm text-gray-300 md:col-span-2">
-									Headline
-									<input
-										className="mt-2 w-full border border-gray-700 bg-black px-3 py-2 text-white"
-										value={campaignContent.title || ""}
-										onChange={(event) => updateCampaignContent("title", event.target.value)}
-									/>
-								</label>
-								<label className="block text-sm text-gray-300 md:col-span-2">
-									Generated Content
-									<textarea
-										className="mt-2 min-h-32 w-full border border-gray-700 bg-black px-3 py-2 text-white"
-										value={campaignContent.mainCopy || ""}
-										onChange={(event) => updateCampaignContent("mainCopy", event.target.value)}
-									/>
-								</label>
-								<label className="block text-sm text-gray-300">
-									Keywords
-									<input
-										className="mt-2 w-full border border-gray-700 bg-black px-3 py-2 text-white"
-										value={campaignContent.keywords || ""}
-										onChange={(event) => updateCampaignContent("keywords", event.target.value)}
-									/>
-								</label>
-								<label className="block text-sm text-gray-300 md:col-span-2">
-									Hashtags
-									<input
-										className="mt-2 w-full border border-gray-700 bg-black px-3 py-2 text-white"
-										value={campaignContent.hashtags || ""}
-										onChange={(event) => updateCampaignContent("hashtags", event.target.value)}
-									/>
-								</label>
-							</div>
-						</div>
+							{campaignPosts.map((post, index) => (
+								<GeneratedPostEditor
+									key={post.localId}
+									post={post}
+									index={index}
+									boards={pinterestBoards.boards}
+									onChange={updateCampaignPost}
+								/>
+							))}
 
-						{error ? (
-							<div className="rounded border border-red-500/70 bg-red-950/30 p-3 text-sm text-red-200">
+							{error ? (
+								<div className="rounded border border-red-500/70 bg-red-950/30 p-3 text-sm text-red-200">
 								{error}
 							</div>
 						) : null}
@@ -1021,55 +1437,30 @@ export default function EchoStudioPage() {
 								onClick={approveContentForReview}
 							>
 								Continue to Review
-							</button>
-						</div>
-					</section>
-				) : view === "review" ? (
-					<section className="space-y-5">
-						<div>
-							<p className="text-sm uppercase tracking-[0.28em] text-cyan-300">Review & Edit</p>
-							<h2 className="mt-2 text-2xl font-semibold text-pink-200">Final campaign copy</h2>
-							<p className="mt-2 text-sm text-gray-300">
-								See the finished result first, then make final edits if needed.
-							</p>
-						</div>
-						<div className="rounded-lg border border-cyan-600/70 bg-gray-950/80 p-5">
-							<div className="rounded border border-pink-600/60 bg-black/60 p-5 shadow-[0_0_24px_rgba(236,72,153,0.08)]">
-								<p className="text-xs uppercase tracking-[0.22em] text-cyan-300">Preview</p>
-								<h3 className="mt-3 text-xl font-semibold text-pink-200">{campaignContent?.title}</h3>
-								<p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-gray-100">{campaignContent?.mainCopy}</p>
-								<p className="mt-2 text-xs text-gray-400">{campaignContent?.hashtags}</p>
+								</button>
 							</div>
-							<div className="mt-5 grid gap-4 md:grid-cols-2">
-								<label className="block text-sm text-gray-300 md:col-span-2">
-									Headline
-									<input
-										className="mt-2 w-full border border-gray-700 bg-black px-3 py-2 text-white"
-										value={campaignContent?.title || ""}
-										onChange={(event) => updateCampaignContent("title", event.target.value)}
-									/>
-								</label>
-								<label className="block text-sm text-gray-300 md:col-span-2">
-									Generated Content
-									<textarea
-										className="mt-2 min-h-40 w-full border border-gray-700 bg-black px-3 py-2 text-white"
-										value={campaignContent?.mainCopy || ""}
-										onChange={(event) => updateCampaignContent("mainCopy", event.target.value)}
-									/>
-								</label>
-								<label className="block text-sm text-gray-300 md:col-span-2">
-									Hashtags
-									<input
-										className="mt-2 w-full border border-gray-700 bg-black px-3 py-2 text-white"
-										value={campaignContent?.hashtags || ""}
-										onChange={(event) => updateCampaignContent("hashtags", event.target.value)}
-									/>
-								</label>
+						</section>
+					) : view === "review" ? (
+						<section className="space-y-5">
+							<div>
+								<p className="text-sm uppercase tracking-[0.28em] text-cyan-300">Campaign Review</p>
+								<h2 className="mt-2 text-2xl font-semibold text-pink-200">Approve the generated campaign.</h2>
+								<p className="mt-2 text-sm text-gray-300">
+									Every generated post remains editable. Inspect the prompts and final fields before schedule review.
+								</p>
 							</div>
-						</div>
-						<div className="flex flex-wrap gap-3">
-							<button
-								type="button"
+							{campaignPosts.map((post, index) => (
+								<GeneratedPostEditor
+									key={post.localId}
+									post={post}
+									index={index}
+									boards={pinterestBoards.boards}
+									onChange={updateCampaignPost}
+								/>
+							))}
+							<div className="flex flex-wrap gap-3">
+								<button
+									type="button"
 								className="border border-cyan-500 px-4 py-2 text-cyan-200 hover:bg-cyan-500 hover:text-black"
 								onClick={() => setView("content")}
 							>
@@ -1078,79 +1469,149 @@ export default function EchoStudioPage() {
 							<button
 								type="button"
 								className="border border-pink-500 bg-pink-500 px-4 py-2 font-semibold text-black hover:bg-pink-400"
-								onClick={approveReviewAndContinue}
-							>
-								Approve and Continue
-							</button>
-						</div>
-					</section>
-				) : view === "publish" ? (
-					<section className="space-y-5">
-						<div>
+									onClick={approveReviewAndContinue}
+								>
+									Approve Content & Review Schedule
+								</button>
+							</div>
+						</section>
+					) : view === "schedule" ? (
+						<section className="space-y-5">
+							<div>
+								<p className="text-sm uppercase tracking-[0.28em] text-cyan-300">Schedule Review</p>
+								<h2 className="mt-2 text-2xl font-semibold text-pink-200">Review the campaign timeline.</h2>
+								<p className="mt-2 text-sm text-gray-300">
+									Echo checked spacing, board reuse, hooks, image direction, and campaign clustering before queueing.
+								</p>
+							</div>
+							<div className={`rounded-lg border p-4 ${scheduleWarnings.length ? "border-yellow-500/70 bg-yellow-950/20 text-yellow-100" : "border-cyan-500/70 bg-cyan-950/20 text-cyan-100"}`}>
+								{scheduleWarnings.length ? (
+									<ul className="space-y-2 text-sm">
+										{scheduleWarnings.map((warning) => (
+											<li key={warning}>⚠ {warning}</li>
+										))}
+									</ul>
+								) : (
+									<p className="text-sm">✓ Schedule spacing looks healthy.</p>
+								)}
+							</div>
+							<div className="space-y-4">
+								{campaignPosts.map((post, index) => (
+									<section key={post.localId} className="rounded-lg border border-gray-800 bg-gray-950/80 p-4">
+										<div className="grid gap-4 md:grid-cols-2">
+											<StrategyCard title="Platform">
+												<p>{post.platform}</p>
+											</StrategyCard>
+											<StrategyCard title="Destination">
+												<p>{post.destination || getDefaultDestination(post.platform)}</p>
+											</StrategyCard>
+											<StrategyCard title="Product">
+												<p>{selectedProduct?.label || post.product || "Selected product"}</p>
+											</StrategyCard>
+											<StrategyCard title="Campaign Phase">
+												<p>{post.campaignPhase || "Launch"}</p>
+											</StrategyCard>
+										</div>
+										<label className="mt-4 block text-sm text-gray-300">
+											Scheduled time
+											<input
+												type="datetime-local"
+												className="mt-2 w-full border border-gray-700 bg-black px-3 py-2 text-white"
+												value={formatLocalSchedule(post.scheduledAt)}
+												onChange={(event) => updateCampaignPost(index, "scheduledAt", parseLocalSchedule(event.target.value))}
+											/>
+										</label>
+									</section>
+								))}
+							</div>
+							<div className="flex flex-wrap gap-3">
+								<button
+									type="button"
+									className="border border-cyan-500 px-4 py-2 text-cyan-200 hover:bg-cyan-500 hover:text-black"
+									onClick={() => setView("review")}
+								>
+									Back to Review
+								</button>
+								<button
+									type="button"
+									className="border border-pink-500 bg-pink-500 px-4 py-2 font-semibold text-black hover:bg-pink-400"
+									onClick={approveScheduleAndContinue}
+								>
+									Approve Schedule
+								</button>
+							</div>
+						</section>
+					) : view === "publish" ? (
+						<section className="space-y-5">
+							<div>
 							<p className="text-sm uppercase tracking-[0.28em] text-cyan-300">Campaign Complete</p>
 							<h2 className="mt-2 text-2xl font-semibold text-pink-200">
 								Echo has successfully created your marketing campaign.
 							</h2>
 							<p className="mt-2 text-sm text-gray-300">
 								This demo prepares the publishing handoff but does not send a live post.
-							</p>
-						</div>
-						<div className="grid gap-4 md:grid-cols-2">
-							<StrategyCard title="Platform">
-								<p>{campaignContent?.platform || form.primaryPlatform}</p>
-							</StrategyCard>
-							<StrategyCard title="Publishing Destinations">
-								<p className="font-semibold text-pink-100">{campaignContent?.platform || form.primaryPlatform}</p>
-								<p className="mt-2 text-gray-400">Will publish to:</p>
-								<ul className="mt-3 space-y-2">
-									{publishingDestinations.map((destination) => (
-										<li key={destination} className="flex gap-2">
-											<span className="text-cyan-300">✓</span>
-											<span>{destination}</span>
-										</li>
-									))}
-								</ul>
-							</StrategyCard>
-							<StrategyCard title="Status">
-								<p>Approved content package, ready for handoff.</p>
-							</StrategyCard>
-						</div>
-						<div className="rounded-lg border border-pink-600/70 bg-gray-950/80 p-5">
-							<p className="text-xs uppercase tracking-[0.22em] text-cyan-300">Final Content</p>
-							<h3 className="mt-3 text-lg font-semibold text-pink-200">{campaignContent?.title}</h3>
-							<p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-gray-100">{campaignContent?.mainCopy}</p>
-							<p className="mt-2 text-xs text-gray-400">{campaignContent?.hashtags}</p>
-							<p className="mt-2 text-xs text-gray-500">{campaignContent?.keywords}</p>
-						</div>
-						{handoffStatus ? (
-							<div className="rounded border border-cyan-500/70 bg-cyan-950/20 p-3 text-sm text-cyan-100">
-								{handoffStatus}
+								</p>
 							</div>
-						) : null}
-						<div className="flex flex-wrap gap-3">
-							<button
-								type="button"
-								className="border border-cyan-500 px-4 py-2 text-cyan-200 hover:bg-cyan-500 hover:text-black"
-								onClick={() => setView("review")}
-							>
-								Back
-							</button>
-							<button
-								type="button"
-								className="border border-pink-500 bg-pink-500 px-4 py-2 font-semibold text-black hover:bg-pink-400"
-								onClick={() => confirmPublishingHandoff("now")}
-							>
-								Publish Now
-							</button>
-							<button
-								type="button"
-								className="border border-cyan-500 px-4 py-2 text-cyan-200 hover:bg-cyan-500 hover:text-black"
-								onClick={() => confirmPublishingHandoff("schedule")}
-							>
-								Schedule
-							</button>
-						</div>
-					</section>
+							{campaignPosts.map((post, index) => (
+								<section key={post.localId} className="rounded-lg border border-pink-600/70 bg-gray-950/80 p-5">
+									<div className="grid gap-4 md:grid-cols-2">
+										<StrategyCard title="Platform">
+											<p>{post.platform}</p>
+										</StrategyCard>
+										<StrategyCard title="Publishing Destination">
+											<p>{post.destination || getDefaultDestination(post.platform)}</p>
+											<p className="mt-2 text-gray-400">Scheduled: {new Date(post.scheduledAt).toLocaleString()}</p>
+										</StrategyCard>
+									</div>
+									<div className="mt-4 rounded border border-gray-800 bg-black/60 p-4">
+										<p className="text-xs uppercase tracking-[0.22em] text-cyan-300">Final Content</p>
+										<h3 className="mt-3 text-lg font-semibold text-pink-200">{post.title}</h3>
+										<p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-gray-100">{post.body}</p>
+										<p className="mt-2 text-xs text-gray-400">{post.hashtags.join(" ")}</p>
+									</div>
+									<p className="mt-3 text-xs text-gray-500">Post {index + 1}</p>
+								</section>
+							))}
+							{handoffStatus ? (
+								<div className="rounded border border-cyan-500/70 bg-cyan-950/20 p-3 text-sm text-cyan-100">
+									{handoffStatus}
+								</div>
+							) : null}
+							{error ? (
+								<div className="rounded border border-red-500/70 bg-red-950/30 p-3 text-sm text-red-200">
+									{error}
+								</div>
+							) : null}
+							{queueResults.length || publishResults.length ? (
+								<div className="rounded border border-gray-800 bg-black/50 p-3 text-xs text-gray-300">
+									{queueResults.length ? <p>Queued posts: {queueResults.map((post) => post.id).join(", ")}</p> : null}
+									{publishResults.length ? <p>Publish results returned: {publishResults.length}</p> : null}
+								</div>
+							) : null}
+							<div className="flex flex-wrap gap-3">
+								<button
+									type="button"
+									className="border border-cyan-500 px-4 py-2 text-cyan-200 hover:bg-cyan-500 hover:text-black"
+									onClick={() => setView("schedule")}
+								>
+									Back
+								</button>
+								<button
+									type="button"
+									className="border border-pink-500 bg-pink-500 px-4 py-2 font-semibold text-black hover:bg-pink-400"
+									onClick={publishCampaignNow}
+								>
+									Publish Now
+								</button>
+								<button
+									type="button"
+									className="border border-cyan-500 px-4 py-2 text-cyan-200 hover:bg-cyan-500 hover:text-black"
+									onClick={queueCampaign}
+								>
+									Queue Campaign
+								</button>
+							</div>
+						</section>
 				) : (
 					<section className="space-y-5">
 						<div>
