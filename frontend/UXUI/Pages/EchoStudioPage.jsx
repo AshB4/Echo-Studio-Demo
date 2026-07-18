@@ -7,13 +7,23 @@ const API_BASE = import.meta.env?.VITE_API_BASE || "http://localhost:3001";
 const ECHO_PRODUCTS = productProfiles.slice(0, 3);
 const SUPPORTED_PLATFORMS = ["Pinterest", "Facebook", "Dev.to"];
 const KNOWLEDGE_NODE_DEFINITIONS = [
-	{ key: "product", label: "Product Knowledge", className: "echo-brain-node-top" },
-	{ key: "brand", label: "Brand Voice", className: "echo-brain-node-left-top" },
-	{ key: "platform", label: "Platform Intelligence", className: "echo-brain-node-right-top" },
-	{ key: "playbook", label: "Marketing Playbook", className: "echo-brain-node-left-bottom" },
+	{ key: "product", label: "Product", className: "echo-brain-node-top" },
+	{ key: "brand", label: "Brand", className: "echo-brain-node-left-top" },
+	{ key: "platform", label: "Platform", className: "echo-brain-node-right-top" },
+	{ key: "playbook", label: "Playbook", className: "echo-brain-node-left-bottom" },
 	{ key: "performance", label: "Previous Campaigns", className: "echo-brain-node-right-bottom" },
-	{ key: "seo", label: "SEO Strategy", className: "echo-brain-node-bottom" },
+	{ key: "seo", label: "SEO", className: "echo-brain-node-bottom" },
 ];
+
+function getActiveKnowledgeNode(statusText) {
+	if (statusText.includes("Product Knowledge")) return "product";
+	if (statusText.includes("Brand Voice")) return "brand";
+	if (statusText.includes("Platform Intelligence")) return "platform";
+	if (statusText.includes("Marketing Playbook")) return "playbook";
+	if (statusText.includes("Previous Campaigns")) return "performance";
+	if (statusText.includes("SEO Strategy")) return "seo";
+	return "";
+}
 
 const BRAIN_SOURCE_DEFINITIONS = [
 	{
@@ -208,9 +218,10 @@ function EchoBrainActivation({
 }) {
 	if (!visible) return null;
 	const completedNodeSet = new Set(completedNodes);
+	const activeNodeKey = complete ? "" : getActiveKnowledgeNode(statusText);
 
 	return (
-		<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 px-4">
+		<div className="echo-brain-backdrop">
 			<div
 				className={`echo-brain-loader ${complete ? "echo-brain-loader-ready" : ""}`}
 				role="status"
@@ -225,17 +236,22 @@ function EchoBrainActivation({
 					<div className="echo-brain-ring" />
 					{KNOWLEDGE_NODE_DEFINITIONS.map((node) => {
 						const loaded = completedNodeSet.has(node.key);
+						const active = activeNodeKey === node.key && !loaded;
 						return (
 							<div
 								key={node.key}
 								className={`echo-brain-node ${node.className} ${
 									loaded ? "echo-brain-node-loaded" : ""
-								}`}
+								} ${active ? "echo-brain-node-active" : ""}`}
+								aria-label={node.label}
 								title={node.label}
 							>
-								<span className="echo-brain-node-line" />
-								<span className="echo-brain-node-dot" />
-								<span className="sr-only">{node.label}</span>
+								<span className="echo-brain-node-dot">
+									{loaded ? <span className="echo-brain-node-check">✓</span> : null}
+								</span>
+								<span className="echo-brain-node-label" aria-hidden="true">
+									{node.label}
+								</span>
 							</div>
 						);
 					})}
@@ -243,8 +259,8 @@ function EchoBrainActivation({
 						<img src={echoArrow} alt="" className="echo-brain-logo" />
 					</div>
 				</div>
-				<h2 className="mt-8 text-2xl font-bold text-cyan-200">Echo Brain</h2>
-				<p className="mt-2 text-sm text-pink-200">
+				<h2 className="mt-8 text-2xl font-bold text-cyan-100">Echo Brain</h2>
+				<p className="mt-2 min-h-5 text-sm text-pink-100">
 					{complete ? "✓ Echo Brain Ready" : statusText || "Connecting knowledge..."}
 				</p>
 			</div>
@@ -326,7 +342,7 @@ export default function EchoStudioPage() {
 			: BRAIN_SOURCE_DEFINITIONS;
 
 		for (const sourceDefinition of sourceDefinitions) {
-			if (sourceDefinition.type === "product") setWorkingStep("Loading Product Knowledge...");
+			if (sourceDefinition.type === "product") setWorkingStep("Reading Product Knowledge...");
 			if (sourceDefinition.type === "brand") setWorkingStep("Reading Brand Voice...");
 			if (sourceDefinition.type === "platform") setWorkingStep("Reviewing Platform Intelligence...");
 			if (sourceDefinition.type === "playbook") setWorkingStep("Loading Marketing Playbook...");
@@ -387,7 +403,7 @@ export default function EchoStudioPage() {
 	}
 
 	function continueToBrain() {
-		return runStep("Creating Mission", async () => {
+		return runStep("Reading Product Knowledge...", async () => {
 			setCompletedNodes([]);
 			const mission = await postJson("/api/missions", {
 				title: form.goal,
