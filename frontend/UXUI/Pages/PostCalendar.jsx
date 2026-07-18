@@ -491,50 +491,244 @@ export default function PostCalendar() {
     <div className="min-h-screen bg-black text-pink-500 font-mono p-4">
       <AppTopNav includeLab />
 
-      <div className="grid grid-cols-1 md:grid-cols-[320px_1fr_260px] gap-4">
-        <aside
-          className="bg-black text-teal-300 p-4 border-2 border-pink-600 shadow-lg rounded cursor-pointer hover:border-teal-400 transition-colors"
-          onClick={() => navigate('/archive')}
-        >
-          <h2 className="text-pink-500 text-2xl mb-4 border-b border-pink-500 pb-1">QUEUE</h2>
-          {upcomingScheduled.length === 0 ? (
-            <p className="text-sm text-teal-500 italic">
-              No upcoming posts. Summon one from the Lab or Composer.
-            </p>
-          ) : (
-            upcomingScheduled.map((post) => (
-              <div key={post.__queueIndex} className="mb-3">
-                <div className="uppercase">
-                  {new Date(post.__date).toLocaleDateString("en-US", {
-                    weekday: "short",
-                    month: "short",
-                    day: "numeric",
-                  })}
-                </div>
-                <div className="pl-2">
-                  {isAffiliatePost(post) && (
-                    <span
-                      className={`mb-1 inline-flex h-6 w-6 items-center justify-center rounded-full border text-[11px] ${getWorkflowPalette(post).badgeClass}`}
-                      aria-label="Affiliate post"
-                      title="Affiliate post"
-                    >
-                      🛒
-                    </span>
-                  )}
-                  <div className="text-pink-300 font-bold">"{post.title}"</div>
-                </div>
-                <div className="pl-2 text-sm text-teal-400">
-                  {formatTargetsLabel(post.__targets, post.platforms)}
-                </div>
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1.85fr)_minmax(300px,1fr)]">
+        <main className="space-y-4">
+          <aside
+            className="bg-black text-teal-300 p-4 border-2 border-pink-600 shadow-lg rounded cursor-pointer hover:border-teal-400 transition-colors"
+            onClick={() => navigate('/archive')}
+          >
+            <h2 className="text-pink-500 text-2xl mb-4 border-b border-pink-500 pb-1">
+              TODAY'S QUEUE
+            </h2>
+            {upcomingScheduled.length === 0 ? (
+              <p className="text-sm text-teal-500 italic">
+                No upcoming posts. Summon one from the Lab or Composer.
+              </p>
+            ) : (
+              <div className="max-h-[360px] overflow-y-auto pr-1">
+                {upcomingScheduled.map((post) => (
+                  <div key={post.__queueIndex} className="mb-3">
+                    <div className="uppercase">
+                      {new Date(post.__date).toLocaleDateString("en-US", {
+                        weekday: "short",
+                        month: "short",
+                        day: "numeric",
+                      })}
+                    </div>
+                    <div className="pl-2">
+                      {isAffiliatePost(post) && (
+                        <span
+                          className={`mb-1 inline-flex h-6 w-6 items-center justify-center rounded-full border text-[11px] ${getWorkflowPalette(post).badgeClass}`}
+                          aria-label="Affiliate post"
+                          title="Affiliate post"
+                        >
+                          🛒
+                        </span>
+                      )}
+                      <div className="text-pink-300 font-bold">"{post.title}"</div>
+                    </div>
+                    <div className="pl-2 text-sm text-teal-400">
+                      {formatTargetsLabel(post.__targets, post.platforms)}
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))
-          )}
-          {pastScheduled.length > 0 && (
-            <div className="mt-6 pt-4 border-t border-pink-600">
-              <h3 className="text-pink-400 text-lg mb-2 uppercase tracking-[0.2em]">
-                Past echoes
-              </h3>
-              <ul className="space-y-2 text-xs text-teal-500 max-h-40 overflow-y-auto pr-1">
+            )}
+          </aside>
+
+          <section className="border-2 border-pink-600 rounded p-2">
+            <h2 className="text-pink-500 text-2xl mb-2 border-b border-pink-500 pb-1">
+              MANUAL PIPELINE
+            </h2>
+            <FullCalendar
+              plugins={[dayGridPlugin, interactionPlugin]}
+              initialView="dayGridMonth"
+              initialDate={initialDate}
+              events={eventz}
+              eventContent={(eventInfo) => {
+                const title =
+                  eventInfo.event.extendedProps.originalTitle || eventInfo.event.title;
+                return (
+                  <div className="overflow-hidden">
+                    <span className="truncate text-[11px] font-semibold leading-tight">
+                      {title}
+                    </span>
+                  </div>
+                );
+              }}
+              eventClick={(info) => {
+                handleDaySelection(info.event.startStr);
+              }}
+              dateClick={(info) => {
+                handleDaySelection(info.dateStr);
+              }}
+              headerToolbar={{
+                left: "prev",
+                center: "title",
+                right: "next",
+              }}
+              titleFormat={{ year: "numeric", month: "long" }}
+              height="auto"
+              dayMaxEventRows={3}
+              eventDisplay="block"
+              eventOrder={(left, right) => {
+                const leftRank = Number(left?.extendedProps?.sortRank ?? 1);
+                const rightRank = Number(right?.extendedProps?.sortRank ?? 1);
+                if (leftRank !== rightRank) return leftRank - rightRank;
+                const leftTitle = String(
+                  left?.extendedProps?.originalTitle || left?.title || ""
+                );
+                const rightTitle = String(
+                  right?.extendedProps?.originalTitle || right?.title || ""
+                );
+                return leftTitle.localeCompare(rightTitle);
+              }}
+              dayCellClassNames={(arg) => {
+                const dateStr = toLocalDateKey(arg.date);
+                const classes = [];
+                if (dateStr === todayIso) {
+                  classes.push("bg-pink-900/20");
+                }
+                if (selectedDate && dateStr === selectedDate) {
+                  classes.push("ring-2", "ring-pink-500");
+                }
+                return classes;
+              }}
+              dayCellContent={(arg) => {
+                const dateStr = toLocalDateKey(arg.date);
+                const affiliateWorkflow = affiliateDayMap.get(dateStr);
+                const affiliateBadgeStyle = affiliateWorkflow
+                  ? getAffiliateDayBadgeStyle(affiliateWorkflow)
+                  : null;
+
+                return (
+                  <div className="flex items-start justify-between px-1 pt-1">
+                    <div className="flex items-center gap-1.5">
+                      {affiliateBadgeStyle ? (
+                        <span
+                          className="inline-flex h-6 w-6 items-center justify-center rounded-full text-[11px] leading-none shadow-[0_0_0_1px_rgba(0,0,0,0.35)]"
+                          style={affiliateBadgeStyle}
+                          aria-label="Affiliate post scheduled"
+                          title={`Affiliate post: ${affiliateWorkflow}`}
+                        >
+                          🛒
+                        </span>
+                      ) : (
+                        <span className="inline-flex h-6 w-6" aria-hidden="true" />
+                      )}
+                      <span>{arg.dayNumberText}</span>
+                    </div>
+                  </div>
+                );
+              }}
+            />
+            <DayPostsModal
+              date={selectedDate}
+              posts={selectedDayPosts}
+              onClose={() => {
+                setSelectedDate(null);
+                setSelectedDayPosts([]);
+              }}
+              onEditPost={handleEditPost}
+              onRewriteAll={handleRewriteAll}
+              onRetryPost={retryFailedPost}
+              onRetryNow={retryFailedPostNow}
+              workingPostId={workingPostId}
+            />
+          </section>
+
+          <section className="w-full text-teal-300 text-sm">
+            <h2 className="text-pink-500 text-2xl mb-4 border-b border-pink-500 pb-1">
+              RECENT ACTIVITY
+            </h2>
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+              <button
+                type="button"
+                onClick={handleRemixPinterestQueue}
+                disabled={remixingQueue}
+                className="border border-cyan-400 p-3 rounded bg-black text-left hover:border-pink-500 hover:shadow-[0_0_12px_rgba(34,211,238,0.35)] transition disabled:cursor-wait disabled:opacity-60"
+              >
+                <h3 className="text-pink-400 text-lg mb-1">↻ Remix Pinterest</h3>
+                <p>
+                  {remixingQueue
+                    ? "Remixing..."
+                    : remixResult?.ok
+                    ? remixResult.message ||
+                      `Moved ${remixResult.moved} posts from ${remixResult.startDate}`
+                    : remixResult?.message || "amazon-a / amazon-b / digital / wildcard"}
+                </p>
+                {remixResult?.ok && remixResult.dailyPlan?.length ? (
+                  <p className="mt-1 text-xs text-cyan-300">
+                    {remixResult.dailyPlan.join(" / ")} • max {remixResult.maxSameProductPerDay} per product/day
+                  </p>
+                ) : null}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleViewCharts("overview")}
+                className="border border-teal-400 p-3 rounded bg-black text-left hover:border-pink-500 hover:shadow-[0_0_12px_rgba(255,0,255,0.35)] transition"
+              >
+                <h3 className="text-pink-400 text-lg mb-1">📊 Mini Stats</h3>
+                <p>Total Posts: {postQueue.length}</p>
+                <p>Scheduled: {scheduledPosts.length} ({percentScheduled}%)</p>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleViewCharts("platforms")}
+                className="border border-pink-600 p-3 rounded bg-black text-left hover:border-teal-500 hover:shadow-[0_0_12px_rgba(13,148,136,0.35)] transition"
+              >
+                <h3 className="text-pink-400 text-lg mb-1">🎯 Platform Mix</h3>
+                <ul>
+                  {Object.entries(platformCounts).map(([platform, count]) => (
+                    <li key={platform}>{platform}: {count}</li>
+                  ))}
+                </ul>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleViewCharts("engagement")}
+                className="border border-red-500 p-3 rounded bg-black text-left hover:border-teal-400 hover:shadow-[0_0_12px_rgba(239,68,68,0.35)] transition"
+              >
+                <h3 className="text-pink-400 text-lg mb-1">💀 Engagement Alerts</h3>
+                {oldestUnscheduled && (
+                  <p>Oldest unscheduled: “{oldestUnscheduled.title}”</p>
+                )}
+                {mostEngaged && mostEngaged.engagement > 0 && (
+                  <p>Most engaged: “{mostEngaged.title}” ({mostEngaged.engagement} reactions)</p>
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleViewCharts("pipeline")}
+                className="border border-teal-500 p-3 rounded bg-black text-left hover:border-pink-400 hover:shadow-[0_0_12px_rgba(56,189,248,0.35)] transition md:col-span-2 xl:col-span-4"
+              >
+                <h3 className="text-pink-400 text-lg mb-1">🔋 Content Fuel</h3>
+                <div className="bg-gray-800 h-4 w-full rounded overflow-hidden">
+                  <div
+                    className="bg-teal-400 h-4"
+                    style={{ width: `${Math.min(percentScheduled, 100)}%` }}
+                  ></div>
+                </div>
+                <p className="mt-1">{percentScheduled}% scheduled</p>
+              </button>
+            </div>
+          </section>
+        </main>
+
+        <aside className="space-y-4 text-teal-300 text-sm">
+          <section
+            className="bg-black text-teal-300 p-4 border-2 border-pink-600 shadow-lg rounded cursor-pointer hover:border-teal-400 transition-colors"
+            onClick={() => navigate('/archive')}
+          >
+            <h2 className="text-pink-500 text-2xl mb-4 border-b border-pink-500 pb-1">
+              PAST ECHOES
+            </h2>
+            {pastScheduled.length > 0 ? (
+              <ul className="space-y-2 text-xs text-teal-500 max-h-64 overflow-y-auto pr-1">
                 {pastScheduled.map((post) => (
                   <li key={`past-${post.__queueIndex}`} className="border border-teal-700 rounded p-2 bg-black/60">
                     <div className="flex justify-between gap-2">
@@ -563,186 +757,13 @@ export default function PostCalendar() {
                   </li>
                 ))}
               </ul>
-            </div>
-          )}
-          <div className="mt-6">
-            <GuiltDaemon />
-          </div>
+            ) : (
+              <p className="text-sm text-teal-500 italic">No past echoes yet.</p>
+            )}
+          </section>
+
+          <GuiltDaemon />
         </aside>
-
-        <main className="col-span-1 md:col-span-1 border-2 border-pink-600 rounded p-2">
-          <FullCalendar
-            plugins={[dayGridPlugin, interactionPlugin]}
-            initialView="dayGridMonth"
-            initialDate={initialDate}
-            events={eventz}
-            eventContent={(eventInfo) => {
-              const title =
-                eventInfo.event.extendedProps.originalTitle || eventInfo.event.title;
-              return (
-                <div className="overflow-hidden">
-                  <span className="truncate text-[11px] font-semibold leading-tight">
-                    {title}
-                  </span>
-                </div>
-              );
-            }}
-            eventClick={(info) => {
-              handleDaySelection(info.event.startStr);
-            }}
-            dateClick={(info) => {
-              handleDaySelection(info.dateStr);
-            }}
-            headerToolbar={{
-              left: "prev",
-              center: "title",
-              right: "next",
-            }}
-            titleFormat={{ year: "numeric", month: "long" }}
-            height="auto"
-            dayMaxEventRows={3}
-            eventDisplay="block"
-            eventOrder={(left, right) => {
-              const leftRank = Number(left?.extendedProps?.sortRank ?? 1);
-              const rightRank = Number(right?.extendedProps?.sortRank ?? 1);
-              if (leftRank !== rightRank) return leftRank - rightRank;
-              const leftTitle = String(
-                left?.extendedProps?.originalTitle || left?.title || ""
-              );
-              const rightTitle = String(
-                right?.extendedProps?.originalTitle || right?.title || ""
-              );
-              return leftTitle.localeCompare(rightTitle);
-            }}
-            dayCellClassNames={(arg) => {
-              const dateStr = toLocalDateKey(arg.date);
-              const classes = [];
-              if (dateStr === todayIso) {
-                classes.push("bg-pink-900/20");
-              }
-              if (selectedDate && dateStr === selectedDate) {
-                classes.push("ring-2", "ring-pink-500");
-              }
-              return classes;
-            }}
-            dayCellContent={(arg) => {
-              const dateStr = toLocalDateKey(arg.date);
-              const affiliateWorkflow = affiliateDayMap.get(dateStr);
-              const affiliateBadgeStyle = affiliateWorkflow
-                ? getAffiliateDayBadgeStyle(affiliateWorkflow)
-                : null;
-
-              return (
-                <div className="flex items-start justify-between px-1 pt-1">
-                  <div className="flex items-center gap-1.5">
-                    {affiliateBadgeStyle ? (
-                      <span
-                        className="inline-flex h-6 w-6 items-center justify-center rounded-full text-[11px] leading-none shadow-[0_0_0_1px_rgba(0,0,0,0.35)]"
-                        style={affiliateBadgeStyle}
-                        aria-label="Affiliate post scheduled"
-                        title={`Affiliate post: ${affiliateWorkflow}`}
-                      >
-                        🛒
-                      </span>
-                    ) : (
-                      <span className="inline-flex h-6 w-6" aria-hidden="true" />
-                    )}
-                    <span>{arg.dayNumberText}</span>
-                  </div>
-                </div>
-              );
-            }}
-          />
-          <DayPostsModal
-            date={selectedDate}
-            posts={selectedDayPosts}
-            onClose={() => {
-              setSelectedDate(null);
-              setSelectedDayPosts([]);
-            }}
-            onEditPost={handleEditPost}
-            onRewriteAll={handleRewriteAll}
-            onRetryPost={retryFailedPost}
-            onRetryNow={retryFailedPostNow}
-            workingPostId={workingPostId}
-          />
-        </main>
-
-        <div className="w-full flex flex-col gap-4 text-teal-300 text-sm">
-          <button
-            type="button"
-            onClick={handleRemixPinterestQueue}
-            disabled={remixingQueue}
-            className="border border-cyan-400 p-3 rounded bg-black text-left hover:border-pink-500 hover:shadow-[0_0_12px_rgba(34,211,238,0.35)] transition disabled:cursor-wait disabled:opacity-60"
-          >
-            <h3 className="text-pink-400 text-lg mb-1">↻ Remix Pinterest</h3>
-            <p>
-              {remixingQueue
-                ? "Remixing..."
-                : remixResult?.ok
-                ? remixResult.message ||
-                  `Moved ${remixResult.moved} posts from ${remixResult.startDate}`
-                : remixResult?.message || "amazon-a / amazon-b / digital / wildcard"}
-            </p>
-            {remixResult?.ok && remixResult.dailyPlan?.length ? (
-              <p className="mt-1 text-xs text-cyan-300">
-                {remixResult.dailyPlan.join(" / ")} • max {remixResult.maxSameProductPerDay} per product/day
-              </p>
-            ) : null}
-          </button>
-
-          <button
-            type="button"
-            onClick={() => handleViewCharts("overview")}
-            className="border border-teal-400 p-3 rounded bg-black text-left hover:border-pink-500 hover:shadow-[0_0_12px_rgba(255,0,255,0.35)] transition"
-          >
-            <h3 className="text-pink-400 text-lg mb-1">📊 Mini Stats</h3>
-            <p>Total Posts: {postQueue.length}</p>
-            <p>Scheduled: {scheduledPosts.length} ({percentScheduled}%)</p>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => handleViewCharts("platforms")}
-            className="border border-pink-600 p-3 rounded bg-black text-left hover:border-teal-500 hover:shadow-[0_0_12px_rgba(13,148,136,0.35)] transition"
-          >
-            <h3 className="text-pink-400 text-lg mb-1">🎯 Platform Mix</h3>
-            <ul>
-              {Object.entries(platformCounts).map(([platform, count]) => (
-                <li key={platform}>{platform}: {count}</li>
-              ))}
-            </ul>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => handleViewCharts("engagement")}
-            className="border border-red-500 p-3 rounded bg-black text-left hover:border-teal-400 hover:shadow-[0_0_12px_rgba(239,68,68,0.35)] transition"
-          >
-            <h3 className="text-pink-400 text-lg mb-1">💀 Engagement Alerts</h3>
-            {oldestUnscheduled && (
-              <p>Oldest unscheduled: “{oldestUnscheduled.title}”</p>
-            )}
-            {mostEngaged && mostEngaged.engagement > 0 && (
-              <p>Most engaged: “{mostEngaged.title}” ({mostEngaged.engagement} reactions)</p>
-            )}
-          </button>
-
-           <button
-             type="button"
-             onClick={() => handleViewCharts("pipeline")}
-             className="border border-teal-500 p-3 rounded bg-black text-left hover:border-pink-400 hover:shadow-[0_0_12px_rgba(56,189,248,0.35)] transition"
-           >
-             <h3 className="text-pink-400 text-lg mb-1">🔋 Content Fuel</h3>
-             <div className="bg-gray-800 h-4 w-full rounded overflow-hidden">
-               <div
-                 className="bg-teal-400 h-4"
-                 style={{ width: `${Math.min(percentScheduled, 100)}%` }}
-               ></div>
-             </div>
-             <p className="mt-1">{percentScheduled}% scheduled</p>
-           </button>
-        </div>
       </div>
     </div>
   );
