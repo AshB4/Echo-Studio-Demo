@@ -1,10 +1,19 @@
 import { useMemo, useState } from "react";
 import AppTopNav from "../Components/AppTopNav";
+import echoArrow from "../../assets/InteralAssets/EchoArrow.png";
 import { productProfiles } from "../utils/productProfiles";
 
 const API_BASE = import.meta.env?.VITE_API_BASE || "http://localhost:3001";
 const ECHO_PRODUCTS = productProfiles.slice(0, 3);
 const SUPPORTED_PLATFORMS = ["Pinterest", "Facebook", "Dev.to"];
+const KNOWLEDGE_NODE_DEFINITIONS = [
+	{ key: "product", label: "Product Knowledge", className: "echo-brain-node-top" },
+	{ key: "brand", label: "Brand Voice", className: "echo-brain-node-left-top" },
+	{ key: "platform", label: "Platform Intelligence", className: "echo-brain-node-right-top" },
+	{ key: "playbook", label: "Marketing Playbook", className: "echo-brain-node-left-bottom" },
+	{ key: "performance", label: "Previous Campaigns", className: "echo-brain-node-right-bottom" },
+	{ key: "seo", label: "SEO Strategy", className: "echo-brain-node-bottom" },
+];
 
 const BRAIN_SOURCE_DEFINITIONS = [
 	{
@@ -190,6 +199,59 @@ function formatJson(value) {
 	return JSON.stringify(value, null, 2);
 }
 
+function EchoBrainActivation({
+	visible,
+	statusText,
+	completedNodes = [],
+	complete = false,
+	onReadyAnimationEnd,
+}) {
+	if (!visible) return null;
+	const completedNodeSet = new Set(completedNodes);
+
+	return (
+		<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 px-4">
+			<div
+				className={`echo-brain-loader ${complete ? "echo-brain-loader-ready" : ""}`}
+				role="status"
+				aria-live="polite"
+				onAnimationEnd={(event) => {
+					if (complete && event.animationName === "echoBrainReadyFade") {
+						onReadyAnimationEnd?.();
+					}
+				}}
+			>
+				<div className="echo-brain-orbit" aria-hidden="true">
+					<div className="echo-brain-ring" />
+					{KNOWLEDGE_NODE_DEFINITIONS.map((node) => {
+						const loaded = completedNodeSet.has(node.key);
+						return (
+							<div
+								key={node.key}
+								className={`echo-brain-node ${node.className} ${
+									loaded ? "echo-brain-node-loaded" : ""
+								}`}
+								title={node.label}
+							>
+								<span className="echo-brain-node-line" />
+								<span className="echo-brain-node-dot" />
+								<span className="sr-only">{node.label}</span>
+							</div>
+						);
+					})}
+					<div className="echo-brain-core">
+						<img src={echoArrow} alt="" className="echo-brain-logo" />
+					</div>
+				</div>
+				<h2 className="mt-8 text-2xl font-bold text-cyan-200">Echo Brain</h2>
+				<p className="mt-2 text-sm text-pink-200">
+					{complete ? "✓ Echo Brain Ready" : statusText || "Connecting knowledge..."}
+				</p>
+			</div>
+		</div>
+	);
+}
+
 export default function EchoStudioPage() {
 	const [form, setForm] = useState({
 		goal: "Launch my new book with authority",
@@ -201,6 +263,9 @@ export default function EchoStudioPage() {
 	const [brainSources, setBrainSources] = useState([]);
 	const [view, setView] = useState("intake");
 	const [workingStep, setWorkingStep] = useState("");
+	const [loaderVisible, setLoaderVisible] = useState(false);
+	const [completedNodes, setCompletedNodes] = useState([]);
+	const [loaderComplete, setLoaderComplete] = useState(false);
 	const [error, setError] = useState("");
 
 	const firstBlueprint = pipeline.assetBlueprints[0] || null;
@@ -220,18 +285,36 @@ export default function EchoStudioPage() {
 	}
 
 	async function runStep(label, action) {
+		let succeeded = false;
 		try {
 			setWorkingStep(label);
+			setLoaderVisible(true);
+			setLoaderComplete(false);
 			setError("");
 			await action();
+			succeeded = true;
+			setCompletedNodes(KNOWLEDGE_NODE_DEFINITIONS.map((node) => node.key));
+			setWorkingStep("Echo Brain Ready");
+			setLoaderComplete(true);
 		} catch (stepError) {
 			setError(stepError.message || "Echo Studio workflow failed.");
+			setLoaderVisible(false);
 		} finally {
-			setWorkingStep("");
+			if (!succeeded) {
+				setWorkingStep("");
+				setLoaderComplete(false);
+			}
 		}
 	}
 
+	function markNodeLoaded(nodeKey) {
+		setCompletedNodes((current) =>
+			current.includes(nodeKey) ? current : [...current, nodeKey],
+		);
+	}
+
 	async function loadBrainForMission(mission) {
+		setWorkingStep("Connecting knowledge...");
 		const existingSources = await getJson("/api/knowledge-sources");
 		const existingByTitle = new Map(
 			existingSources.map((source) => [source.title, source]),
@@ -243,9 +326,17 @@ export default function EchoStudioPage() {
 			: BRAIN_SOURCE_DEFINITIONS;
 
 		for (const sourceDefinition of sourceDefinitions) {
+			if (sourceDefinition.type === "product") setWorkingStep("Loading Product Knowledge...");
+			if (sourceDefinition.type === "brand") setWorkingStep("Reading Brand Voice...");
+			if (sourceDefinition.type === "platform") setWorkingStep("Reviewing Platform Intelligence...");
+			if (sourceDefinition.type === "playbook") setWorkingStep("Loading Marketing Playbook...");
 			const existingSource = existingByTitle.get(sourceDefinition.title);
 			if (existingSource) {
 				sources.push({ ...existingSource, loadedStatus: "Loaded" });
+				if (sourceDefinition.type === "product") markNodeLoaded("product");
+				if (sourceDefinition.type === "brand") markNodeLoaded("brand");
+				if (sourceDefinition.type === "platform") markNodeLoaded("platform");
+				if (sourceDefinition.type === "playbook") markNodeLoaded("playbook");
 				continue;
 			}
 			const source = await postJson("/api/knowledge-sources", {
@@ -256,9 +347,16 @@ export default function EchoStudioPage() {
 				tags: sourceDefinition.tags || ["echo-brain"],
 			});
 			sources.push({ ...source, loadedStatus: "Loaded" });
+			if (sourceDefinition.type === "product") markNodeLoaded("product");
+			if (sourceDefinition.type === "brand") markNodeLoaded("brand");
+			if (sourceDefinition.type === "platform") markNodeLoaded("platform");
+			if (sourceDefinition.type === "playbook") markNodeLoaded("playbook");
 		}
 
+		setWorkingStep("Reviewing Previous Campaigns...");
 		const assembledBrain = await assembleBrain(mission.id);
+		markNodeLoaded("performance");
+		setWorkingStep("Preparing SEO Strategy...");
 		const knowledgeContext = await postJson("/api/knowledge", {
 			missionId: mission.id,
 			title: `${mission.title} Echo Brain`,
@@ -272,6 +370,7 @@ export default function EchoStudioPage() {
 				productKnowledgeSourceTitle: productSource?.title || null,
 			},
 		});
+		markNodeLoaded("seo");
 		const linkedMission = await patchJson(`/api/missions/${mission.id}`, {
 			knowledgeContextId: knowledgeContext.id,
 		});
@@ -289,6 +388,7 @@ export default function EchoStudioPage() {
 
 	function continueToBrain() {
 		return runStep("Creating Mission", async () => {
+			setCompletedNodes([]);
 			const mission = await postJson("/api/missions", {
 				title: form.goal,
 				goal: form.goal,
@@ -313,6 +413,8 @@ export default function EchoStudioPage() {
 
 	function generateCampaignPlan() {
 		return runStep("Generating Campaign Plan", async () => {
+			setCompletedNodes(KNOWLEDGE_NODE_DEFINITIONS.map((node) => node.key));
+			setWorkingStep("Building Campaign Strategy...");
 			const campaignPlan = await postJson("/api/campaign-plans/generate", {
 				missionId: pipeline.mission.id,
 				mission: pipeline.mission,
@@ -329,6 +431,8 @@ export default function EchoStudioPage() {
 
 	function generateAssetBlueprints() {
 		return runStep("Generating Asset Blueprint", async () => {
+			setCompletedNodes(KNOWLEDGE_NODE_DEFINITIONS.map((node) => node.key));
+			setWorkingStep("Creating Asset Blueprints...");
 			const assetBlueprints = await postJson("/api/asset-blueprints/generate", {
 				campaignPlan: pipeline.campaignPlan,
 			});
@@ -342,6 +446,8 @@ export default function EchoStudioPage() {
 
 	function generateCampaignAsset() {
 		return runStep("Generating Campaign Asset", async () => {
+			setCompletedNodes(KNOWLEDGE_NODE_DEFINITIONS.map((node) => node.key));
+			setWorkingStep("Preparing Campaign Assets...");
 			const campaignAsset = await postJson("/api/ai-generator/generate", {
 				assetBlueprint: firstBlueprint,
 			});
@@ -351,6 +457,17 @@ export default function EchoStudioPage() {
 
 	return (
 		<div className="min-h-screen bg-black px-4 py-4 text-white">
+			<EchoBrainActivation
+				visible={loaderVisible}
+				statusText={workingStep}
+				completedNodes={completedNodes}
+				complete={loaderComplete}
+				onReadyAnimationEnd={() => {
+					setLoaderVisible(false);
+					setWorkingStep("");
+					setLoaderComplete(false);
+				}}
+			/>
 			<AppTopNav />
 			<div className="mx-auto max-w-6xl space-y-6">
 				<header>
