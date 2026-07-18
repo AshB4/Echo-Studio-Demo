@@ -13,6 +13,7 @@ import { missionRouter } from "./modules/missions/index.mjs";
 import { knowledgeRouter } from "./modules/knowledge/index.mjs";
 import { knowledgeRetrievalRouter } from "./modules/knowledge-retrieval/index.mjs";
 import { campaignPlannerRouter } from "./modules/campaign-planner/index.mjs";
+import { assetBlueprintsRouter } from "./modules/asset-blueprints/index.mjs";
 import { processQueue } from "./scripts/postingJob.mjs";
 import { rebalancePinterestMix } from "./scripts/queue/rebalance-pinterest-mix.mjs";
 import { getPublicAccounts } from "./utils/accountStore.mjs";
@@ -74,6 +75,7 @@ app.use("/api/missions", missionRouter);
 app.use("/api/knowledge", knowledgeRouter);
 app.use("/api/knowledge-sources", knowledgeRetrievalRouter);
 app.use("/api/campaign-plans", campaignPlannerRouter);
+app.use("/api/asset-blueprints", assetBlueprintsRouter);
 const PORT = process.env.PORT || 3001;
 
 // ---- data paths
