@@ -104,9 +104,21 @@ const emptyPipeline = {
 	mission: null,
 	knowledgeContext: null,
 	campaignPlan: null,
+	campaignStrategy: null,
 	assetBlueprints: [],
 	campaignAsset: null,
 };
+
+/**
+ * @typedef {Object} CampaignStrategy
+ * @property {string} audience
+ * @property {string} primaryMessage
+ * @property {string} marketingAngle
+ * @property {string} primaryHook
+ * @property {string} callToAction
+ * @property {string[]} seoKeywords
+ * @property {string} reasoning
+ */
 
 async function getJson(path) {
 	const response = await fetch(`${API_BASE}${path}`);
@@ -310,12 +322,37 @@ function getRecommendedAudience({ product, platform }) {
 	return "People most likely to care about this product and take the next step.";
 }
 
-function getRecommendedTone(product) {
-	return product?.brandVoice || "Clear, useful, confident, and practical.";
-}
-
 function getTargetKeywords({ goal, product, platform }) {
 	return getDefaultKeywords({ goal, product, platform });
+}
+
+function getSeoKeywordList({ goal, product, platform }) {
+	return getTargetKeywords({ goal, product, platform })
+		.split(",")
+		.map((keyword) => keyword.trim())
+		.filter(Boolean);
+}
+
+function buildMarketingAngle({ goal, product, platform }) {
+	const goalText = String(goal || "").toLowerCase();
+	const platformText = String(platform || "").toLowerCase();
+	const productType = product?.productType || "offer";
+	if (goalText.includes("launch")) return `Launch ${productType} with a focused proof-and-action message.`;
+	if (goalText.includes("sale")) return `Make the offer feel timely, specific, and easy to act on.`;
+	if (goalText.includes("authority")) return `Build trust by showing useful expertise before asking for the click.`;
+	if (platformText.includes("pinterest")) return `Use evergreen discovery to repeat one clear product promise.`;
+	if (platformText.includes("facebook")) return `Use conversational proof and a direct next step for a warm audience.`;
+	if (platformText.includes("dev.to")) return `Lead with practical value so the promotion feels earned.`;
+	return `Connect the product promise to the campaign goal with one practical next step.`;
+}
+
+function buildPrimaryHook({ goal, product, platform }) {
+	const productName = product?.label || "this offer";
+	const platformText = String(platform || "").toLowerCase();
+	if (platformText.includes("dev.to")) return `What I learned building ${productName}`;
+	if (platformText.includes("facebook")) return `A practical update for anyone thinking about ${productName}`;
+	if (goal) return `${productName}: ${goal}`;
+	return `A clearer way to understand ${productName}`;
 }
 
 function buildWhyEchoChoseThis({ goal, audience, product, platform, campaignPlan }) {
@@ -331,6 +368,63 @@ function buildWhyEchoChoseThis({ goal, audience, product, platform, campaignPlan
 	return `${platform || "This channel"} fits this campaign because Echo can keep the message focused on ${goal || "the mission"} while applying product knowledge, brand voice, and platform rules before any content is created.`;
 }
 
+/**
+ * Build Week CampaignStrategy model.
+ * This is the frontend strategy contract consumed by content generation while
+ * the backend Campaign Planner remains API-compatible for the demo.
+ *
+ * @returns {CampaignStrategy}
+ */
+function buildCampaignStrategy({ campaignPlan, goal, product, platform }) {
+	const strategyGoal = campaignPlan?.goal || goal || "";
+	const strategyPlatform = campaignPlan?.primaryPlatform || platform || "";
+	const audience = campaignPlan?.audience || getRecommendedAudience({
+		product,
+		platform: strategyPlatform,
+	});
+	const primaryMessage = buildCoreMessage({
+		goal: strategyGoal,
+		product,
+		platform: strategyPlatform,
+	});
+	const marketingAngle = buildMarketingAngle({
+		goal: strategyGoal,
+		product,
+		platform: strategyPlatform,
+	});
+	const primaryHook = buildPrimaryHook({
+		goal: strategyGoal,
+		product,
+		platform: strategyPlatform,
+	});
+	const callToAction = getDefaultCta({
+		goal: strategyGoal,
+		platform: strategyPlatform,
+	});
+	const seoKeywords = getSeoKeywordList({
+		goal: strategyGoal,
+		product,
+		platform: strategyPlatform,
+	});
+	const reasoning = buildWhyEchoChoseThis({
+		goal: strategyGoal,
+		audience,
+		product,
+		platform: strategyPlatform,
+		campaignPlan,
+	});
+
+	return {
+		audience,
+		primaryMessage,
+		marketingAngle,
+		primaryHook,
+		callToAction,
+		seoKeywords,
+		reasoning,
+	};
+}
+
 function getJourneyIndex({ view, loaderVisible, pipeline }) {
 	if (view === "intake") return 0;
 	if (loaderVisible || !pipeline.campaignPlan) return 1;
@@ -342,10 +436,18 @@ function getJourneyIndex({ view, loaderVisible, pipeline }) {
 
 function getDefaultDestination(platform = "") {
 	const text = String(platform || "").toLowerCase();
-	if (text.includes("pinterest")) return "Primary Pinterest board";
+	if (text.includes("pinterest")) return "Primary Pinterest destination";
 	if (text.includes("facebook")) return "Facebook page queue";
 	if (text.includes("dev.to")) return "Dev.to publishing workspace";
 	return "Publishing handoff queue";
+}
+
+function getPublishingDestinations(platform = "") {
+	const text = String(platform || "").toLowerCase();
+	if (text.includes("pinterest")) return ["Mental Health", "Coloring Books", "Self Care"];
+	if (text.includes("facebook")) return ["Primary Facebook Page"];
+	if (text.includes("dev.to")) return ["Dev.to Draft Workspace"];
+	return [getDefaultDestination(platform)];
 }
 
 function getDefaultCta({ goal, platform }) {
@@ -383,24 +485,35 @@ function getDefaultHashtags({ product, platform }) {
 	return tags.join(" ");
 }
 
-function createEditableContent({ asset, campaignPlan, product, recommendation }) {
+function appendCallToAction(copy, callToAction) {
+	const content = String(copy || "").trim();
+	const cta = String(callToAction || "").trim();
+	if (!cta) return content;
+	if (content.toLowerCase().includes(cta.toLowerCase())) return content;
+	return `${content}\n\n${cta}`;
+}
+
+function createEditableContent({ asset, campaignPlan, campaignStrategy, product, recommendation }) {
 	if (!asset) return [];
 	const rawContent = String(asset.content || "").trim();
-	const mainCopy =
+	const baseCopy =
 		rawContent.toLowerCase() === "generated from blueprint."
-			? buildCoreMessage({
+			? campaignStrategy?.primaryMessage || buildCoreMessage({
 				goal: campaignPlan?.goal,
 				product,
 				platform: asset.platform || campaignPlan?.primaryPlatform,
 			})
 			: rawContent;
 	const platform = asset.platform || campaignPlan?.primaryPlatform || "";
+	const cta = campaignStrategy?.callToAction || getDefaultCta({ goal: campaignPlan?.goal, platform });
 	return {
 		platform,
-		title: asset.title || humanizeAssetType(recommendation?.type),
-		mainCopy,
-		cta: getDefaultCta({ goal: campaignPlan?.goal, platform }),
-		keywords: getDefaultKeywords({ goal: campaignPlan?.goal, product, platform }),
+		title: campaignStrategy?.primaryHook || asset.title || humanizeAssetType(recommendation?.type),
+		mainCopy: appendCallToAction(baseCopy, cta),
+		cta,
+		keywords: Array.isArray(campaignStrategy?.seoKeywords) && campaignStrategy.seoKeywords.length
+			? campaignStrategy.seoKeywords.join(", ")
+			: getDefaultKeywords({ goal: campaignPlan?.goal, product, platform }),
 		hashtags: getDefaultHashtags({ product, platform }),
 		destination: getDefaultDestination(platform),
 		status: "Generated",
@@ -459,7 +572,6 @@ function StrategyCard({ title, children }) {
 export default function EchoStudioPage() {
 	const [form, setForm] = useState({
 		goal: "Launch my new book with authority",
-		audience: "Solo creators and developers",
 		primaryPlatform: "Pinterest",
 		productId: ECHO_PRODUCTS[0]?.id || "",
 	});
@@ -482,54 +594,14 @@ export default function EchoStudioPage() {
 		() => getDisplayedRecommendations(pipeline.campaignPlan, form.primaryPlatform),
 		[pipeline.campaignPlan, form.primaryPlatform],
 	);
-	const coreMessage = useMemo(
-		() =>
-			buildCoreMessage({
-				goal: pipeline.campaignPlan?.goal || form.goal,
-				product: selectedProduct,
-				platform: pipeline.campaignPlan?.primaryPlatform || form.primaryPlatform,
-			}),
-		[pipeline.campaignPlan, form.goal, form.primaryPlatform, selectedProduct],
-	);
+	const campaignStrategy = pipeline.campaignStrategy;
 	const recommendedAudience = useMemo(
 		() =>
-			getRecommendedAudience({
+			campaignStrategy?.audience || getRecommendedAudience({
 				product: selectedProduct,
 				platform: pipeline.campaignPlan?.primaryPlatform || form.primaryPlatform,
 			}),
-		[pipeline.campaignPlan, form.primaryPlatform, selectedProduct],
-	);
-	const recommendedTone = useMemo(
-		() => getRecommendedTone(selectedProduct),
-		[selectedProduct],
-	);
-	const ctaRecommendation = useMemo(
-		() =>
-			getDefaultCta({
-				goal: pipeline.campaignPlan?.goal || form.goal,
-				platform: pipeline.campaignPlan?.primaryPlatform || form.primaryPlatform,
-			}),
-		[pipeline.campaignPlan, form.goal, form.primaryPlatform],
-	);
-	const targetKeywords = useMemo(
-		() =>
-			getTargetKeywords({
-				goal: pipeline.campaignPlan?.goal || form.goal,
-				product: selectedProduct,
-				platform: pipeline.campaignPlan?.primaryPlatform || form.primaryPlatform,
-			}),
-		[pipeline.campaignPlan, form.goal, form.primaryPlatform, selectedProduct],
-	);
-	const whyEchoChoseThis = useMemo(
-		() =>
-			buildWhyEchoChoseThis({
-				goal: pipeline.campaignPlan?.goal || form.goal,
-				audience: pipeline.campaignPlan?.audience || form.audience,
-				product: selectedProduct,
-				platform: pipeline.campaignPlan?.primaryPlatform || form.primaryPlatform,
-				campaignPlan: pipeline.campaignPlan,
-			}),
-		[pipeline.campaignPlan, form.goal, form.audience, form.primaryPlatform, selectedProduct],
+		[campaignStrategy, pipeline.campaignPlan, form.primaryPlatform, selectedProduct],
 	);
 	const selectedRecommendation = displayedRecommendations[0] || null;
 
@@ -635,6 +707,7 @@ export default function EchoStudioPage() {
 			mission: linkedMission,
 			knowledgeContext,
 			campaignPlan: null,
+			campaignStrategy: null,
 			assetBlueprints: [],
 			campaignAsset: null,
 		}));
@@ -669,9 +742,16 @@ export default function EchoStudioPage() {
 				mission: linkedMission,
 				knowledgeContext,
 			});
+			const nextCampaignStrategy = buildCampaignStrategy({
+				campaignPlan,
+				goal: form.goal,
+				product: selectedProduct,
+				platform: form.primaryPlatform,
+			});
 			setPipeline((current) => ({
 				...current,
 				campaignPlan,
+				campaignStrategy: nextCampaignStrategy,
 				assetBlueprints: [],
 				campaignAsset: null,
 			}));
@@ -699,6 +779,7 @@ export default function EchoStudioPage() {
 			const editableContent = createEditableContent({
 				asset: campaignAsset,
 				campaignPlan: pipeline.campaignPlan,
+				campaignStrategy: pipeline.campaignStrategy,
 				product: selectedProduct,
 				recommendation: selectedRecommendation,
 			});
@@ -737,9 +818,11 @@ export default function EchoStudioPage() {
 	}
 
 	function confirmPublishingHandoff(mode) {
-		const action = mode === "queue" ? "queued for publishing handoff" : "prepared for publishing handoff";
+		const action = mode === "schedule" ? "scheduled for publishing handoff" : "prepared for publishing handoff";
 		setHandoffStatus(`Campaign ${action}. This demo does not perform live publishing.`);
 	}
+
+	const publishingDestinations = getPublishingDestinations(campaignContent?.platform || form.primaryPlatform);
 
 	return (
 		<div className="min-h-screen bg-black px-4 py-4 text-white">
@@ -774,7 +857,7 @@ export default function EchoStudioPage() {
 								Tell Echo what you want to accomplish.
 							</h2>
 							<p className="mt-2 text-sm text-gray-300">
-								Echo will infer the audience, tone, positioning, keywords, and CTA from your goal, product, and platform.
+								Echo will infer the audience, tone, positioning, keywords, and next step from your goal, product, and platform.
 							</p>
 						</div>
 
@@ -843,14 +926,37 @@ export default function EchoStudioPage() {
 				) : view === "content" && campaignContent ? (
 					<section className="space-y-5">
 						<div>
-							<p className="text-sm uppercase tracking-[0.28em] text-cyan-300">Generated Content</p>
-							<h2 className="mt-2 text-2xl font-semibold text-pink-200">Edit the campaign copy.</h2>
+							<p className="text-sm uppercase tracking-[0.28em] text-cyan-300">Campaign Created</p>
+							<h2 className="mt-2 text-2xl font-semibold text-pink-200">Echo created your campaign content.</h2>
 							<p className="mt-2 text-sm text-gray-300">
-								Echo generated platform-ready text from the approved strategy. Tune the copy before sending it to review.
+								Review the finished artifact first. Editing controls are below when you want to tune the copy.
 							</p>
 						</div>
 
-						<div className="rounded-lg border border-pink-600/70 bg-gray-950/80 p-5">
+						<div className="rounded-lg border border-pink-600/70 bg-gray-950/80 p-5 shadow-[0_0_30px_rgba(236,72,153,0.08)]">
+							<p className="text-xs uppercase tracking-[0.22em] text-cyan-300">Platform</p>
+							<p className="mt-2 text-lg font-semibold text-pink-100">{campaignContent.platform || form.primaryPlatform}</p>
+							<div className="mt-5 rounded border border-gray-800 bg-black/60 p-5">
+								<p className="text-xs uppercase tracking-[0.22em] text-cyan-300">Headline</p>
+								<h3 className="mt-3 text-xl font-semibold text-pink-200">{campaignContent.title}</h3>
+								<p className="mt-5 text-xs uppercase tracking-[0.22em] text-cyan-300">Generated Content</p>
+								<p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-gray-100">{campaignContent.mainCopy}</p>
+							</div>
+							<div className="mt-5 grid gap-4 md:grid-cols-2">
+								<StrategyCard title="Keywords">
+									<p>{campaignContent.keywords}</p>
+								</StrategyCard>
+								<StrategyCard title="Hashtags">
+									<p>{campaignContent.hashtags}</p>
+								</StrategyCard>
+							</div>
+						</div>
+
+						<div className="rounded-lg border border-cyan-700/70 bg-gray-950/70 p-5">
+							<p className="text-sm font-semibold text-cyan-200">Edit campaign content</p>
+							<p className="mt-1 text-sm text-gray-400">
+								Keep this as one coherent piece of marketing content. Echo will handle the publishing destination later.
+							</p>
 							<div className="grid gap-4 md:grid-cols-2">
 								<label className="block text-sm text-gray-300">
 									Platform
@@ -860,16 +966,8 @@ export default function EchoStudioPage() {
 										onChange={(event) => updateCampaignContent("platform", event.target.value)}
 									/>
 								</label>
-								<label className="block text-sm text-gray-300">
-									Destination or Board
-									<input
-										className="mt-2 w-full border border-gray-700 bg-black px-3 py-2 text-white"
-										value={campaignContent.destination || ""}
-										onChange={(event) => updateCampaignContent("destination", event.target.value)}
-									/>
-								</label>
 								<label className="block text-sm text-gray-300 md:col-span-2">
-									Title or Hook
+									Headline
 									<input
 										className="mt-2 w-full border border-gray-700 bg-black px-3 py-2 text-white"
 										value={campaignContent.title || ""}
@@ -882,14 +980,6 @@ export default function EchoStudioPage() {
 										className="mt-2 min-h-32 w-full border border-gray-700 bg-black px-3 py-2 text-white"
 										value={campaignContent.mainCopy || ""}
 										onChange={(event) => updateCampaignContent("mainCopy", event.target.value)}
-									/>
-								</label>
-								<label className="block text-sm text-gray-300">
-									CTA
-									<input
-										className="mt-2 w-full border border-gray-700 bg-black px-3 py-2 text-white"
-										value={campaignContent.cta || ""}
-										onChange={(event) => updateCampaignContent("cta", event.target.value)}
 									/>
 								</label>
 								<label className="block text-sm text-gray-300">
@@ -948,12 +1038,11 @@ export default function EchoStudioPage() {
 								<p className="text-xs uppercase tracking-[0.22em] text-cyan-300">Preview</p>
 								<h3 className="mt-3 text-xl font-semibold text-pink-200">{campaignContent?.title}</h3>
 								<p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-gray-100">{campaignContent?.mainCopy}</p>
-								<p className="mt-3 text-sm text-cyan-200">{campaignContent?.cta}</p>
 								<p className="mt-2 text-xs text-gray-400">{campaignContent?.hashtags}</p>
 							</div>
 							<div className="mt-5 grid gap-4 md:grid-cols-2">
 								<label className="block text-sm text-gray-300 md:col-span-2">
-									Title or Hook
+									Headline
 									<input
 										className="mt-2 w-full border border-gray-700 bg-black px-3 py-2 text-white"
 										value={campaignContent?.title || ""}
@@ -968,20 +1057,12 @@ export default function EchoStudioPage() {
 										onChange={(event) => updateCampaignContent("mainCopy", event.target.value)}
 									/>
 								</label>
-								<label className="block text-sm text-gray-300">
-									CTA
+								<label className="block text-sm text-gray-300 md:col-span-2">
+									Hashtags
 									<input
 										className="mt-2 w-full border border-gray-700 bg-black px-3 py-2 text-white"
-										value={campaignContent?.cta || ""}
-										onChange={(event) => updateCampaignContent("cta", event.target.value)}
-									/>
-								</label>
-								<label className="block text-sm text-gray-300">
-									Destination or Board
-									<input
-										className="mt-2 w-full border border-gray-700 bg-black px-3 py-2 text-white"
-										value={campaignContent?.destination || ""}
-										onChange={(event) => updateCampaignContent("destination", event.target.value)}
+										value={campaignContent?.hashtags || ""}
+										onChange={(event) => updateCampaignContent("hashtags", event.target.value)}
 									/>
 								</label>
 							</div>
@@ -1008,21 +1089,27 @@ export default function EchoStudioPage() {
 						<div>
 							<p className="text-sm uppercase tracking-[0.28em] text-cyan-300">Campaign Complete</p>
 							<h2 className="mt-2 text-2xl font-semibold text-pink-200">
-								Your marketing campaign has been successfully created and is ready for publishing.
+								Echo has successfully created your marketing campaign.
 							</h2>
 							<p className="mt-2 text-sm text-gray-300">
 								This demo prepares the publishing handoff but does not send a live post.
 							</p>
 						</div>
 						<div className="grid gap-4 md:grid-cols-2">
-							<StrategyCard title="Product">
-								<p>{selectedProduct?.label || "Selected product"}</p>
-							</StrategyCard>
 							<StrategyCard title="Platform">
 								<p>{campaignContent?.platform || form.primaryPlatform}</p>
 							</StrategyCard>
-							<StrategyCard title="Target Destination">
-								<p>{campaignContent?.destination || getDefaultDestination(form.primaryPlatform)}</p>
+							<StrategyCard title="Publishing Destinations">
+								<p className="font-semibold text-pink-100">{campaignContent?.platform || form.primaryPlatform}</p>
+								<p className="mt-2 text-gray-400">Will publish to:</p>
+								<ul className="mt-3 space-y-2">
+									{publishingDestinations.map((destination) => (
+										<li key={destination} className="flex gap-2">
+											<span className="text-cyan-300">✓</span>
+											<span>{destination}</span>
+										</li>
+									))}
+								</ul>
 							</StrategyCard>
 							<StrategyCard title="Status">
 								<p>Approved content package, ready for handoff.</p>
@@ -1032,7 +1119,6 @@ export default function EchoStudioPage() {
 							<p className="text-xs uppercase tracking-[0.22em] text-cyan-300">Final Content</p>
 							<h3 className="mt-3 text-lg font-semibold text-pink-200">{campaignContent?.title}</h3>
 							<p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-gray-100">{campaignContent?.mainCopy}</p>
-							<p className="mt-3 text-sm text-cyan-200">{campaignContent?.cta}</p>
 							<p className="mt-2 text-xs text-gray-400">{campaignContent?.hashtags}</p>
 							<p className="mt-2 text-xs text-gray-500">{campaignContent?.keywords}</p>
 						</div>
@@ -1059,41 +1145,53 @@ export default function EchoStudioPage() {
 							<button
 								type="button"
 								className="border border-cyan-500 px-4 py-2 text-cyan-200 hover:bg-cyan-500 hover:text-black"
-								onClick={() => confirmPublishingHandoff("queue")}
+								onClick={() => confirmPublishingHandoff("schedule")}
 							>
-								Queue
+								Schedule
 							</button>
 						</div>
 					</section>
 				) : (
 					<section className="space-y-5">
 						<div>
-							<p className="text-sm uppercase tracking-[0.28em] text-cyan-300">Campaign Strategy</p>
+							<p className="text-sm uppercase tracking-[0.28em] text-cyan-300">Echo Brain Recommendation</p>
 							<h2 className="mt-2 text-2xl font-semibold text-pink-200">
 								Approve the strategy before Echo creates content.
 							</h2>
 							<p className="mt-2 text-sm text-gray-300">
-								Based on your goal, product, and platform, Echo recommends the following campaign strategy.
+								Echo Brain built this reusable strategy first. Text generation will use it as the source of truth.
 							</p>
 						</div>
 
-						{pipeline.campaignPlan ? (
+						{pipeline.campaignPlan && campaignStrategy ? (
 							<>
 								<div className="grid gap-4 md:grid-cols-2">
-									<StrategyCard title="Recommended Audience">
-										<p>{recommendedAudience}</p>
-									</StrategyCard>
-									<StrategyCard title="Recommended Tone">
-										<p>{recommendedTone}</p>
+									<StrategyCard title="Audience">
+										<p>{campaignStrategy.audience}</p>
 									</StrategyCard>
 									<StrategyCard title="Primary Message">
-										<p>{coreMessage}</p>
+										<p>{campaignStrategy.primaryMessage}</p>
 									</StrategyCard>
-									<StrategyCard title="CTA Recommendation">
-										<p>{ctaRecommendation}</p>
+									<StrategyCard title="Marketing Angle">
+										<p>{campaignStrategy.marketingAngle}</p>
 									</StrategyCard>
-									<StrategyCard title="Target Keywords">
-										<p>{targetKeywords}</p>
+									<StrategyCard title="Primary Hook">
+										<p>{campaignStrategy.primaryHook}</p>
+									</StrategyCard>
+									<StrategyCard title="Call to Action">
+										<p>{campaignStrategy.callToAction}</p>
+									</StrategyCard>
+									<StrategyCard title="SEO Keywords">
+										<ul className="flex flex-wrap gap-2">
+											{campaignStrategy.seoKeywords.map((keyword) => (
+												<li
+													key={keyword}
+													className="border border-cyan-700/70 bg-cyan-950/20 px-2 py-1 text-xs text-cyan-100"
+												>
+													{keyword}
+												</li>
+											))}
+										</ul>
 									</StrategyCard>
 									<StrategyCard title="Recommended Assets">
 										<ul className="space-y-2">
@@ -1110,8 +1208,8 @@ export default function EchoStudioPage() {
 									</StrategyCard>
 								</div>
 
-								<StrategyCard title="Why Echo Chose This">
-									<p>{whyEchoChoseThis}</p>
+								<StrategyCard title="Why This Campaign Should Work">
+									<p>{campaignStrategy.reasoning}</p>
 								</StrategyCard>
 
 								{error ? (
