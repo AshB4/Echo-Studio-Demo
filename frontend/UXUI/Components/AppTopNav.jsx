@@ -3,6 +3,13 @@ import logo from "../../assets/InteralAssets/EchoStudio.png";
 
 const navItems = [
   {
+    to: "/echo-studio",
+    label: "Echo Studio",
+    baseClass:
+      "border-cyan-500 text-cyan-300 hover:bg-cyan-500 hover:text-black",
+    activeClass: "border-cyan-400 bg-cyan-500 text-black",
+  },
+  {
     to: "/today",
     label: "Today Ops",
     baseClass:

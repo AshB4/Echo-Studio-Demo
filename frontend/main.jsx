@@ -17,6 +17,7 @@ import AffiliateEnginePage from "./UXUI/Pages/AffiliateEnginePage";
 import AffiliateBuilderPage from "./UXUI/Pages/AffiliateBuilderPage";
 import SeoPages from "./UXUI/Pages/SeoPages";
 import SetupPage from "./UXUI/Pages/SetupPage";
+import EchoStudioPage from "./UXUI/Pages/EchoStudioPage";
 import ErrorPage from "./UXUI/Pages/notFound"; // This can now use useRouteError()
 
 const router = createBrowserRouter([
@@ -88,6 +89,11 @@ const router = createBrowserRouter([
   {
     path: "/setup",
     element: <SetupPage />,
+    errorElement: <ErrorPage />,
+  },
+  {
+    path: "/echo-studio",
+    element: <EchoStudioPage />,
     errorElement: <ErrorPage />,
   },
   {
