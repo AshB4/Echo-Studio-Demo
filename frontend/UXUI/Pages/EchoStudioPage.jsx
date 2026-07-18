@@ -300,6 +300,24 @@ function buildCoreMessage({ goal, product, platform }) {
 	return `Position ${productName} with a clear ${platform} message and one practical next step.`;
 }
 
+function getRecommendedAudience({ product, platform }) {
+	const productAudience = String(product?.audience || "").trim();
+	if (productAudience) return productAudience;
+	const platformText = String(platform || "").toLowerCase();
+	if (platformText.includes("dev.to")) return "Developers and technical builders evaluating practical workflows.";
+	if (platformText.includes("facebook")) return "Warm community members and small-business buyers who respond to clear offers.";
+	if (platformText.includes("pinterest")) return "Search-driven browsers looking for useful ideas, visual inspiration, and repeatable solutions.";
+	return "People most likely to care about this product and take the next step.";
+}
+
+function getRecommendedTone(product) {
+	return product?.brandVoice || "Clear, useful, confident, and practical.";
+}
+
+function getTargetKeywords({ goal, product, platform }) {
+	return getDefaultKeywords({ goal, product, platform });
+}
+
 function buildWhyEchoChoseThis({ goal, audience, product, platform, campaignPlan }) {
 	const productType = product?.productType || "offer";
 	const brandVoice = product?.brandVoice || "brand voice";
@@ -473,6 +491,35 @@ export default function EchoStudioPage() {
 			}),
 		[pipeline.campaignPlan, form.goal, form.primaryPlatform, selectedProduct],
 	);
+	const recommendedAudience = useMemo(
+		() =>
+			getRecommendedAudience({
+				product: selectedProduct,
+				platform: pipeline.campaignPlan?.primaryPlatform || form.primaryPlatform,
+			}),
+		[pipeline.campaignPlan, form.primaryPlatform, selectedProduct],
+	);
+	const recommendedTone = useMemo(
+		() => getRecommendedTone(selectedProduct),
+		[selectedProduct],
+	);
+	const ctaRecommendation = useMemo(
+		() =>
+			getDefaultCta({
+				goal: pipeline.campaignPlan?.goal || form.goal,
+				platform: pipeline.campaignPlan?.primaryPlatform || form.primaryPlatform,
+			}),
+		[pipeline.campaignPlan, form.goal, form.primaryPlatform],
+	);
+	const targetKeywords = useMemo(
+		() =>
+			getTargetKeywords({
+				goal: pipeline.campaignPlan?.goal || form.goal,
+				product: selectedProduct,
+				platform: pipeline.campaignPlan?.primaryPlatform || form.primaryPlatform,
+			}),
+		[pipeline.campaignPlan, form.goal, form.primaryPlatform, selectedProduct],
+	);
 	const whyEchoChoseThis = useMemo(
 		() =>
 			buildWhyEchoChoseThis({
@@ -600,7 +647,7 @@ export default function EchoStudioPage() {
 			const mission = await postJson("/api/missions", {
 				title: form.goal,
 				goal: form.goal,
-				audience: form.audience,
+				audience: recommendedAudience,
 				businessName: selectedProduct?.label || "",
 				productId: selectedProduct?.id || null,
 				productName: selectedProduct?.label || "",
@@ -691,7 +738,7 @@ export default function EchoStudioPage() {
 
 	function confirmPublishingHandoff(mode) {
 		const action = mode === "queue" ? "queued for publishing handoff" : "prepared for publishing handoff";
-		setHandoffStatus(`Campaign ${action}. No live post was sent from this demo workflow.`);
+		setHandoffStatus(`Campaign ${action}. This demo does not perform live publishing.`);
 	}
 
 	return (
@@ -727,7 +774,7 @@ export default function EchoStudioPage() {
 								Tell Echo what you want to accomplish.
 							</h2>
 							<p className="mt-2 text-sm text-gray-300">
-								Echo will consult product knowledge, brand rules, platform intelligence, and the marketing playbook before building a strategy.
+								Echo will infer the audience, tone, positioning, keywords, and CTA from your goal, product, and platform.
 							</p>
 						</div>
 
@@ -739,15 +786,6 @@ export default function EchoStudioPage() {
 									className="mt-2 w-full border border-gray-700 bg-black px-3 py-3 text-white outline-none focus:border-pink-500"
 									value={form.goal}
 									onChange={(event) => updateField("goal", event.target.value)}
-								/>
-							</label>
-							<label className="block text-sm text-gray-300 md:col-span-2" htmlFor="echo-audience">
-								Audience
-								<input
-									id="echo-audience"
-									className="mt-2 w-full border border-gray-700 bg-black px-3 py-3 text-white outline-none focus:border-cyan-500"
-									value={form.audience}
-									onChange={(event) => updateField("audience", event.target.value)}
 								/>
 							</label>
 							<label className="block text-sm text-gray-300" htmlFor="echo-product">
@@ -798,7 +836,7 @@ export default function EchoStudioPage() {
 								Build My Campaign
 							</button>
 							<p className="text-sm text-gray-400">
-								Next: Echo Brain reads what it knows, then proposes a strategy for approval.
+								Next: Echo Brain reads what it knows and recommends the campaign strategy.
 							</p>
 						</div>
 					</section>
@@ -839,7 +877,7 @@ export default function EchoStudioPage() {
 									/>
 								</label>
 								<label className="block text-sm text-gray-300 md:col-span-2">
-									Main Copy or Description
+									Generated Content
 									<textarea
 										className="mt-2 min-h-32 w-full border border-gray-700 bg-black px-3 py-2 text-white"
 										value={campaignContent.mainCopy || ""}
@@ -902,11 +940,18 @@ export default function EchoStudioPage() {
 							<p className="text-sm uppercase tracking-[0.28em] text-cyan-300">Review & Edit</p>
 							<h2 className="mt-2 text-2xl font-semibold text-pink-200">Final campaign copy</h2>
 							<p className="mt-2 text-sm text-gray-300">
-								Review the complete content package. You can make final edits here or return to Content.
+								See the finished result first, then make final edits if needed.
 							</p>
 						</div>
 						<div className="rounded-lg border border-cyan-600/70 bg-gray-950/80 p-5">
-							<div className="grid gap-4 md:grid-cols-2">
+							<div className="rounded border border-pink-600/60 bg-black/60 p-5 shadow-[0_0_24px_rgba(236,72,153,0.08)]">
+								<p className="text-xs uppercase tracking-[0.22em] text-cyan-300">Preview</p>
+								<h3 className="mt-3 text-xl font-semibold text-pink-200">{campaignContent?.title}</h3>
+								<p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-gray-100">{campaignContent?.mainCopy}</p>
+								<p className="mt-3 text-sm text-cyan-200">{campaignContent?.cta}</p>
+								<p className="mt-2 text-xs text-gray-400">{campaignContent?.hashtags}</p>
+							</div>
+							<div className="mt-5 grid gap-4 md:grid-cols-2">
 								<label className="block text-sm text-gray-300 md:col-span-2">
 									Title or Hook
 									<input
@@ -916,7 +961,7 @@ export default function EchoStudioPage() {
 									/>
 								</label>
 								<label className="block text-sm text-gray-300 md:col-span-2">
-									Main Copy or Description
+									Generated Content
 									<textarea
 										className="mt-2 min-h-40 w-full border border-gray-700 bg-black px-3 py-2 text-white"
 										value={campaignContent?.mainCopy || ""}
@@ -940,13 +985,6 @@ export default function EchoStudioPage() {
 									/>
 								</label>
 							</div>
-							<div className="mt-5 rounded border border-gray-800 bg-black/60 p-4">
-								<p className="text-xs uppercase tracking-[0.22em] text-cyan-300">Preview</p>
-								<h3 className="mt-3 text-lg font-semibold text-pink-200">{campaignContent?.title}</h3>
-								<p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-gray-100">{campaignContent?.mainCopy}</p>
-								<p className="mt-3 text-sm text-cyan-200">{campaignContent?.cta}</p>
-								<p className="mt-2 text-xs text-gray-400">{campaignContent?.hashtags}</p>
-							</div>
 						</div>
 						<div className="flex flex-wrap gap-3">
 							<button
@@ -968,10 +1006,12 @@ export default function EchoStudioPage() {
 				) : view === "publish" ? (
 					<section className="space-y-5">
 						<div>
-							<p className="text-sm uppercase tracking-[0.28em] text-cyan-300">Publish Handoff</p>
-							<h2 className="mt-2 text-2xl font-semibold text-pink-200">Campaign ready for publishing handoff</h2>
+							<p className="text-sm uppercase tracking-[0.28em] text-cyan-300">Campaign Complete</p>
+							<h2 className="mt-2 text-2xl font-semibold text-pink-200">
+								Your marketing campaign has been successfully created and is ready for publishing.
+							</h2>
 							<p className="mt-2 text-sm text-gray-300">
-								Choose how to hand off the prepared content. This demo does not send a live post.
+								This demo prepares the publishing handoff but does not send a live post.
 							</p>
 						</div>
 						<div className="grid gap-4 md:grid-cols-2">
@@ -1007,7 +1047,7 @@ export default function EchoStudioPage() {
 								className="border border-cyan-500 px-4 py-2 text-cyan-200 hover:bg-cyan-500 hover:text-black"
 								onClick={() => setView("review")}
 							>
-								Back to Review
+								Back
 							</button>
 							<button
 								type="button"
@@ -1033,27 +1073,27 @@ export default function EchoStudioPage() {
 								Approve the strategy before Echo creates content.
 							</h2>
 							<p className="mt-2 text-sm text-gray-300">
-								Echo Brain has applied the available product, brand, platform, and marketing knowledge. Your next step is approval.
+								Based on your goal, product, and platform, Echo recommends the following campaign strategy.
 							</p>
 						</div>
 
 						{pipeline.campaignPlan ? (
 							<>
 								<div className="grid gap-4 md:grid-cols-2">
-									<StrategyCard title="Campaign Goal">
-										<p>{pipeline.campaignPlan.goal || form.goal}</p>
+									<StrategyCard title="Recommended Audience">
+										<p>{recommendedAudience}</p>
 									</StrategyCard>
-									<StrategyCard title="Product">
-										<p>{selectedProduct?.label || "Selected product"}</p>
+									<StrategyCard title="Recommended Tone">
+										<p>{recommendedTone}</p>
 									</StrategyCard>
-									<StrategyCard title="Audience">
-										<p>{pipeline.campaignPlan.audience || form.audience}</p>
-									</StrategyCard>
-									<StrategyCard title="Primary Platform">
-										<p>{pipeline.campaignPlan.primaryPlatform || form.primaryPlatform}</p>
-									</StrategyCard>
-									<StrategyCard title="Core Message">
+									<StrategyCard title="Primary Message">
 										<p>{coreMessage}</p>
+									</StrategyCard>
+									<StrategyCard title="CTA Recommendation">
+										<p>{ctaRecommendation}</p>
+									</StrategyCard>
+									<StrategyCard title="Target Keywords">
+										<p>{targetKeywords}</p>
 									</StrategyCard>
 									<StrategyCard title="Recommended Assets">
 										<ul className="space-y-2">
