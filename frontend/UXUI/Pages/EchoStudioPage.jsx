@@ -1,7 +1,10 @@
 import { useMemo, useState } from "react";
 import AppTopNav from "../Components/AppTopNav";
+import { productProfiles } from "../utils/productProfiles";
 
 const API_BASE = import.meta.env?.VITE_API_BASE || "http://localhost:3001";
+const ECHO_PRODUCTS = productProfiles.slice(0, 3);
+const SUPPORTED_PLATFORMS = ["Pinterest", "Facebook", "Dev.to"];
 
 const BRAIN_SOURCE_DEFINITIONS = [
 	{
@@ -53,6 +56,28 @@ const BRAIN_SOURCE_DEFINITIONS = [
 		priority: 8,
 	},
 ];
+
+function createProductBrainSource(product) {
+	return {
+		type: "product",
+		title: `${product.label} Product Knowledge`,
+		location: `productProfiles:${product.id}`,
+		priority: 0,
+		description: [
+			product.productType,
+			product.primaryGoal,
+			`Audience: ${product.audience}`,
+			`Voice: ${product.brandVoice}`,
+		]
+			.filter(Boolean)
+			.join(" | "),
+		tags: ["echo-brain", "product-profile", product.id],
+		metadata: {
+			productId: product.id,
+			productName: product.label,
+		},
+	};
+}
 
 const emptyPipeline = {
 	mission: null,
@@ -170,7 +195,7 @@ export default function EchoStudioPage() {
 		goal: "Launch my new book with authority",
 		audience: "Solo creators and developers",
 		primaryPlatform: "Pinterest",
-		businessName: "Echo Studio Demo",
+		productId: ECHO_PRODUCTS[0]?.id || "",
 	});
 	const [pipeline, setPipeline] = useState(emptyPipeline);
 	const [brainSources, setBrainSources] = useState([]);
@@ -182,6 +207,8 @@ export default function EchoStudioPage() {
 	const canGeneratePlan = Boolean(pipeline.mission && pipeline.knowledgeContext);
 	const canGenerateBlueprints = Boolean(pipeline.campaignPlan);
 	const canGenerateAsset = Boolean(firstBlueprint);
+	const selectedProduct =
+		ECHO_PRODUCTS.find((product) => product.id === form.productId) || ECHO_PRODUCTS[0];
 
 	const visibleAssetSummary = useMemo(() => {
 		if (!pipeline.campaignAsset) return "No campaign asset generated yet.";
@@ -210,8 +237,12 @@ export default function EchoStudioPage() {
 			existingSources.map((source) => [source.title, source]),
 		);
 		const sources = [];
+		const productSource = selectedProduct ? createProductBrainSource(selectedProduct) : null;
+		const sourceDefinitions = productSource
+			? [productSource, ...BRAIN_SOURCE_DEFINITIONS]
+			: BRAIN_SOURCE_DEFINITIONS;
 
-		for (const sourceDefinition of BRAIN_SOURCE_DEFINITIONS) {
+		for (const sourceDefinition of sourceDefinitions) {
 			const existingSource = existingByTitle.get(sourceDefinition.title);
 			if (existingSource) {
 				sources.push({ ...existingSource, loadedStatus: "Loaded" });
@@ -219,9 +250,10 @@ export default function EchoStudioPage() {
 			}
 			const source = await postJson("/api/knowledge-sources", {
 				...sourceDefinition,
-				description: "Echo Studio marketing intelligence source",
+				description:
+					sourceDefinition.description || "Echo Studio marketing intelligence source",
 				enabled: true,
-				tags: ["echo-brain"],
+				tags: sourceDefinition.tags || ["echo-brain"],
 			});
 			sources.push({ ...source, loadedStatus: "Loaded" });
 		}
@@ -235,6 +267,9 @@ export default function EchoStudioPage() {
 			metadata: {
 				sourceCount: sources.length,
 				sourceTitles: sources.map((source) => source.title),
+				productId: selectedProduct?.id || null,
+				productName: selectedProduct?.label || "",
+				productKnowledgeSourceTitle: productSource?.title || null,
 			},
 		});
 		const linkedMission = await patchJson(`/api/missions/${mission.id}`, {
@@ -258,9 +293,17 @@ export default function EchoStudioPage() {
 				title: form.goal,
 				goal: form.goal,
 				audience: form.audience,
-				businessName: form.businessName,
+				businessName: selectedProduct?.label || "",
+				productId: selectedProduct?.id || null,
+				productName: selectedProduct?.label || "",
 				channels: [form.primaryPlatform],
 				status: "intake_complete",
+				metadata: {
+					selectedProduct: selectedProduct || null,
+					echoBrainProductSource: selectedProduct
+						? createProductBrainSource(selectedProduct)
+						: null,
+				},
 			});
 			setPipeline({ ...emptyPipeline, mission });
 			setView("brain");
@@ -338,24 +381,42 @@ export default function EchoStudioPage() {
 							value={form.audience}
 							onChange={(event) => updateField("audience", event.target.value)}
 						/>
+						<label className="block text-sm text-gray-300" htmlFor="echo-product">
+							Product
+						</label>
+						<select
+							id="echo-product"
+							className="w-full border border-gray-700 bg-gray-950 px-3 py-2 text-white"
+							value={form.productId}
+							onChange={(event) => updateField("productId", event.target.value)}
+						>
+							{ECHO_PRODUCTS.map((product) => (
+								<option key={product.id} value={product.id}>
+									{product.label}
+								</option>
+							))}
+							<option disabled value="coming-soon-add-product">
+								Add product (Coming Soon)
+							</option>
+						</select>
 						<label className="block text-sm text-gray-300" htmlFor="echo-platform">
 							Primary Platform
 						</label>
-						<input
+						<select
 							id="echo-platform"
 							className="w-full border border-gray-700 bg-gray-950 px-3 py-2 text-white"
 							value={form.primaryPlatform}
 							onChange={(event) => updateField("primaryPlatform", event.target.value)}
-						/>
-						<label className="block text-sm text-gray-300" htmlFor="echo-business">
-							Business Name
-						</label>
-						<input
-							id="echo-business"
-							className="w-full border border-gray-700 bg-gray-950 px-3 py-2 text-white"
-							value={form.businessName}
-							onChange={(event) => updateField("businessName", event.target.value)}
-						/>
+						>
+							{SUPPORTED_PLATFORMS.map((platform) => (
+								<option key={platform} value={platform}>
+									{platform}
+								</option>
+							))}
+							<option disabled value="coming-soon-add-platform">
+								Add more platforms (Coming Soon)
+							</option>
+						</select>
 						<button
 							type="button"
 							className="border border-pink-500 px-4 py-2 text-pink-200 hover:bg-pink-500 hover:text-black disabled:opacity-50"
