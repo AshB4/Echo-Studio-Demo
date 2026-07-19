@@ -218,13 +218,13 @@ export default function ChartsPage() {
 			<header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-pink-600 pb-6 mb-10">
 					<div>
 						<p className="text-sm uppercase tracking-[0.3em] text-pink-500">
-							postpunk pinterest analytics
+							ECHO STUDIO ANALYTICS
 						</p>
 						<h1 className="text-4xl md:text-5xl text-pink-400 glitchy">
-							Pinterest Signal Dashboard
+							Performance Signals
 						</h1>
 						<p className="text-sm text-teal-400 mt-2">
-							Pinterest CSV performance plus snapshot metrics from tracked pins.
+							Cross-platform scheduling, publishing, and Pinterest performance insights.
 						</p>
 					</div>
 				<div className="flex flex-wrap gap-3">
@@ -234,7 +234,7 @@ export default function ChartsPage() {
 					>
 						⬅ Back to Calendar
 					</Link>
-					<Link
+					{/* <Link
 						to="/compose"
 						className="px-3 py-2 border border-teal-500 text-teal-300 rounded hover:bg-teal-500 hover:text-black transition-colors"
 					>
@@ -245,7 +245,7 @@ export default function ChartsPage() {
 						className="px-3 py-2 border border-orange-500 text-orange-300 rounded hover:bg-orange-500 hover:text-black transition-colors"
 					>
 						📚 Posted Archive
-					</Link>
+					</Link> */}
 				</div>
 			</header>
 
@@ -491,7 +491,7 @@ export default function ChartsPage() {
 								Last updated: {formatDate(analytics?.posting?.lastUpdated)}
 							</p>
 						</div>
-						<div className="border border-orange-500 rounded p-3">
+						{/* <div className="border border-orange-500 rounded p-3">
 							<p className="uppercase text-xs tracking-[0.3em] text-orange-400">
 								Posted History
 							</p>
@@ -505,10 +505,31 @@ export default function ChartsPage() {
 							>
 								Open Posted Archive
 							</button>
-						</div>
+						</div> */}
 					</div>
 				</aside>
 			</section>
+			<div className="mt-8 rounded-lg border border-amber-500/60 bg-black/60 p-5 shadow-[0_0_18px_rgba(245,158,11,0.15)]">
+  <h3 className="mb-3 text-lg font-bold uppercase tracking-wider text-amber-300">
+    🚧 Analytics Roadmap
+  </h3>
+
+  <p className="mb-4 text-sm leading-relaxed text-zinc-300">
+    Current dashboard tracks scheduling, platform mix, engagement, and
+    Pinterest performance.
+  </p>
+
+  <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-cyan-300">
+    Planned Upgrades
+  </p>
+
+  <ul className="space-y-2 text-sm text-zinc-300">
+    <li>• Live platform API integrations</li>
+    <li>• Cross-platform engagement trends</li>
+    <li>• Click-through and conversion reporting</li>
+    <li>• Historical performance over time</li>
+  </ul>
+</div>
 		</div>
 	);
 }

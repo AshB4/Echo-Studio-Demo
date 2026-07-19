@@ -491,54 +491,88 @@ export default function PostCalendar() {
     <div className="min-h-screen bg-black text-pink-500 font-mono p-4">
       <AppTopNav includeLab />
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1.85fr)_minmax(300px,1fr)]">
+      <div className="space-y-4">
         <main className="space-y-4">
-          <aside
-            className="bg-black text-teal-300 p-4 border-2 border-pink-600 shadow-lg rounded cursor-pointer hover:border-teal-400 transition-colors"
-            onClick={() => navigate('/archive')}
-          >
-            <h2 className="text-pink-500 text-2xl mb-4 border-b border-pink-500 pb-1">
-              TODAY'S QUEUE
-            </h2>
-            {upcomingScheduled.length === 0 ? (
-              <p className="text-sm text-teal-500 italic">
-                No upcoming posts. Summon one from the Lab or Composer.
-              </p>
-            ) : (
-              <div className="max-h-[360px] overflow-y-auto pr-1">
-                {upcomingScheduled.map((post) => (
-                  <div key={post.__queueIndex} className="mb-3">
-                    <div className="uppercase">
-                      {new Date(post.__date).toLocaleDateString("en-US", {
-                        weekday: "short",
-                        month: "short",
-                        day: "numeric",
-                      })}
-                    </div>
-                    <div className="pl-2">
-                      {isAffiliatePost(post) && (
-                        <span
-                          className={`mb-1 inline-flex h-6 w-6 items-center justify-center rounded-full border text-[11px] ${getWorkflowPalette(post).badgeClass}`}
-                          aria-label="Affiliate post"
-                          title="Affiliate post"
-                        >
-                          🛒
-                        </span>
-                      )}
-                      <div className="text-pink-300 font-bold">"{post.title}"</div>
-                    </div>
-                    <div className="pl-2 text-sm text-teal-400">
-                      {formatTargetsLabel(post.__targets, post.platforms)}
-                    </div>
-                  </div>
-                ))}
+         <div className="grid grid-cols-1 gap-4 lg:grid-cols-[3fr_1fr] lg:items-stretch">
+  <aside
+    className="bg-black text-teal-300 p-4 border-2 border-pink-600 shadow-lg rounded cursor-pointer hover:border-teal-400 transition-colors"
+    onClick={() => navigate("/archive")}
+  >
+    <h2 className="text-pink-500 text-2xl mb-4 border-b border-pink-500 pb-1">
+      TODAY&apos;S QUEUE
+    </h2>
+
+    {upcomingScheduled.length === 0 ? (
+      <p className="text-sm text-teal-500 italic">
+        No upcoming posts. Summon one from the Lab or Composer.
+      </p>
+    ) : (
+      <div className="max-h-[360px] overflow-y-auto pr-1">
+        {upcomingScheduled.map((post) => (
+          <div key={post.__queueIndex} className="mb-3">
+            <div className="uppercase">
+              {new Date(post.__date).toLocaleDateString("en-US", {
+                weekday: "short",
+                month: "short",
+                day: "numeric",
+              })}
+            </div>
+
+            <div className="pl-2">
+              {isAffiliatePost(post) && (
+                <span
+                  className={`mb-1 inline-flex h-6 w-6 items-center justify-center rounded-full border text-[11px] ${getWorkflowPalette(post).badgeClass}`}
+                  aria-label="Affiliate post"
+                  title="Affiliate post"
+                >
+                  🛒
+                </span>
+              )}
+
+              <div className="text-pink-300 font-bold">
+                &quot;{post.title}&quot;
               </div>
-            )}
-          </aside>
+            </div>
+
+            <div className="pl-2 text-sm text-teal-400">
+              {formatTargetsLabel(post.__targets, post.platforms)}
+            </div>
+          </div>
+        ))}
+      </div>
+    )}
+  </aside>
+
+  <aside className="flex min-h-full items-center justify-center">
+    <div className="flex flex-col items-center justify-center px-6 py-6 text-center">
+  <p className="text-xs uppercase tracking-[0.45em] text-cyan-400/70">
+    Echo Studio
+  </p>
+
+  <h1 className="mt-2 text-3xl font-bold uppercase tracking-wider text-pink-400 md:text-4xl">
+    Create once.
+  </h1>
+
+  <h2 className="text-2xl font-bold uppercase tracking-wider text-cyan-300 md:text-3xl">
+    Publish everywhere.
+  </h2>
+
+  <p className="mt-4 max-w-xs text-sm leading-relaxed text-zinc-400">
+    AI-powered content creation, scheduling, and cross-platform publishing
+    for creators.
+  </p>
+
+  
+  <div className="mt-5 h-px w-40 bg-gradient-to-r from-transparent via-cyan-400 to-transparent opacity-70" />
+ <GuiltDaemon />
+</div>
+  </aside>
+</div>
+    
 
           <section className="border-2 border-pink-600 rounded p-2">
             <h2 className="text-pink-500 text-2xl mb-2 border-b border-pink-500 pb-1">
-              MANUAL PIPELINE
+              CONTENT CALENDAR
             </h2>
             <FullCalendar
               plugins={[dayGridPlugin, interactionPlugin]}
@@ -701,12 +735,15 @@ export default function PostCalendar() {
                 )}
               </button>
 
-              <button
-                type="button"
-                onClick={() => handleViewCharts("pipeline")}
-                className="border border-teal-500 p-3 rounded bg-black text-left hover:border-pink-400 hover:shadow-[0_0_12px_rgba(56,189,248,0.35)] transition md:col-span-2 xl:col-span-4"
-              >
-                <h3 className="text-pink-400 text-lg mb-1">🔋 Content Fuel</h3>
+            <button
+  type="button"
+  onClick={() => handleViewCharts("pipeline")}
+  className="border border-teal-500 p-3 rounded bg-black text-left hover:border-pink-400 hover:shadow-[0_0_12px_rgba(56,189,248,0.35)] transition md:col-span-2 xl:col-span-4"
+>
+                <h3 className="text-pink-400 text-lg mb-1">🔋 Broadcast Meter</h3>
+                <p className="text-xs text-teal-400 mb-3">
+  30-day publishing window
+</p>
                 <div className="bg-gray-800 h-4 w-full rounded overflow-hidden">
                   <div
                     className="bg-teal-400 h-4"
@@ -727,6 +764,9 @@ export default function PostCalendar() {
             <h2 className="text-pink-500 text-2xl mb-4 border-b border-pink-500 pb-1">
               PAST ECHOES
             </h2>
+            <p className="text-xs text-teal-400 mb-3">
+  Recently published content
+</p>
             {pastScheduled.length > 0 ? (
               <ul className="space-y-2 text-xs text-teal-500 max-h-64 overflow-y-auto pr-1">
                 {pastScheduled.map((post) => (
@@ -761,8 +801,6 @@ export default function PostCalendar() {
               <p className="text-sm text-teal-500 italic">No past echoes yet.</p>
             )}
           </section>
-
-          <GuiltDaemon />
         </aside>
       </div>
     </div>

@@ -4,18 +4,18 @@ import logo from "../../assets/InteralAssets/EchoStudio.png";
 const navItems = [
   {
     to: "/echo-studio",
-    label: "Echo Studio",
+    label: "Dashboard",
     baseClass:
       "border-cyan-500 text-cyan-300 hover:bg-cyan-500 hover:text-black",
     activeClass: "border-cyan-400 bg-cyan-500 text-black",
   },
-  {
-    to: "/today",
-    label: "Today Ops",
-    baseClass:
-      "border-amber-500 text-amber-300 hover:bg-amber-500 hover:text-black",
-    activeClass: "border-amber-400 bg-amber-500 text-black",
-  },
+  // {
+  //   to: "/today",
+  //   label: "Today Ops",
+  //   baseClass:
+  //     "border-amber-500 text-amber-300 hover:bg-amber-500 hover:text-black",
+  //   activeClass: "border-amber-400 bg-amber-500 text-black",
+  // },
   {
     to: "/compose",
     label: "Summon Composer",
@@ -23,37 +23,37 @@ const navItems = [
       "border-pink-500 text-pink-300 hover:bg-pink-500 hover:text-black",
     activeClass: "border-pink-400 bg-pink-500 text-black",
   },
-  {
-    to: "/archive",
-    label: "Posted Archive",
-    baseClass:
-      "border-cyan-500 text-cyan-300 hover:bg-cyan-500 hover:text-black",
-    activeClass: "border-cyan-400 bg-cyan-500 text-black",
-  },
-  {
-    to: "/batch",
-    label: "Batch Forge",
-    baseClass:
-      "border-fuchsia-500 text-fuchsia-300 hover:bg-fuchsia-500 hover:text-black",
-    activeClass: "border-fuchsia-400 bg-fuchsia-500 text-black",
-  },
-  {
-    to: "/affiliate",
-    label: "Affiliate Engine",
-    baseClass:
-      "border-orange-400 text-orange-200 hover:bg-orange-400 hover:text-black",
-    activeClass: "border-orange-300 bg-orange-400 text-black",
-  },
+  // {
+  //   to: "/archive",
+  //   label: "Posted Archive",
+  //   baseClass:
+  //     "border-cyan-500 text-cyan-300 hover:bg-cyan-500 hover:text-black",
+  //   activeClass: "border-cyan-400 bg-cyan-500 text-black",
+  // },
+  // {
+  //   to: "/batch",
+  //   label: "Batch Forge",
+  //   baseClass:
+  //     "border-fuchsia-500 text-fuchsia-300 hover:bg-fuchsia-500 hover:text-black",
+  //   activeClass: "border-fuchsia-400 bg-fuchsia-500 text-black",
+  // },
+  // {
+  //   to: "/affiliate",
+  //   label: "Affiliate Engine",
+  //   baseClass:
+  //     "border-orange-400 text-orange-200 hover:bg-orange-400 hover:text-black",
+  //   activeClass: "border-orange-300 bg-orange-400 text-black",
+  // },
   {
     to: "/charts",
-    label: "View Charts",
+    label: "Analytics",
     baseClass:
       "border-violet-500 text-violet-300 hover:bg-violet-500 hover:text-black",
     activeClass: "border-violet-400 bg-violet-500 text-black",
   },
   {
     to: "/setup",
-    label: "Tune Rotation",
+    label: "Scheduler",
     baseClass:
       "border-lime-500 text-lime-300 hover:bg-lime-500 hover:text-black",
     activeClass: "border-lime-400 bg-lime-500 text-black",
@@ -70,13 +70,13 @@ export default function AppTopNav({ includeLab = false }) {
   const items = includeLab
     ? [
         ...navItems,
-        {
-          to: "/lab",
-          label: "Open Scribble Sanctum",
-          baseClass:
-            "border-teal-400 text-teal-300 hover:bg-teal-400 hover:text-black",
-          activeClass: "border-teal-300 bg-teal-400 text-black",
-        },
+        // {
+        //   to: "/lab",
+        //   label: "Open Scribble Sanctum",
+        //   baseClass:
+        //     "border-teal-400 text-teal-300 hover:bg-teal-400 hover:text-black",
+        //   activeClass: "border-teal-300 bg-teal-400 text-black",
+        // },
       ]
     : navItems;
 

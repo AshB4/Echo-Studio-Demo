@@ -260,16 +260,14 @@ export default function SetupPage() {
       <div className="max-w-6xl mx-auto px-6 py-12">
         <AppTopNav />
         <header className="mb-8 border-b border-lime-500 pb-6">
-          <p className="text-sm uppercase tracking-[0.3em] text-lime-500">setup</p>
-          <h1 className="mt-2 text-4xl md:text-5xl text-lime-300 glitchy">Rotation Rituals</h1>
+          <p className="text-sm uppercase tracking-[0.3em] text-lime-500">Echo Studio</p>
+          <h1 className="mt-2 text-4xl md:text-5xl text-lime-300 glitchy">Publishing Scheduler</h1>
           <p className="mt-3 max-w-3xl text-sm text-teal-400">
-            This is the control panel for your one-post-a-day rotation. Set the default cadence,
-            choose which products are live in the mix, and add future products before they have full
-            content batches.
+            Configure your publishing schedule, default cadence, and product rotation. Add future products now so they're ready when new content batches are created.
           </p>
         </header>
 
-        <section className="mb-6 rounded-lg border border-cyan-500 bg-black/60 p-5 shadow-[0_0_20px_rgba(34,211,238,0.14)]">
+        {/* <section className="mb-6 rounded-lg border border-cyan-500 bg-black/60 p-5 shadow-[0_0_20px_rgba(34,211,238,0.14)]">
           <p className="text-sm uppercase tracking-[0.3em] text-cyan-400">Token Health</p>
           <p className="mt-3 max-w-3xl text-sm text-teal-400">
             This is the first place to check when a platform suddenly stops posting. If a token expires,
@@ -319,7 +317,7 @@ export default function SetupPage() {
               })
             )}
           </div>
-        </section>
+        </section> */}
 
         <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
           <section className="rounded-lg border border-lime-500 bg-black/60 p-5 shadow-[0_0_20px_rgba(132,204,22,0.16)]">
@@ -397,7 +395,9 @@ export default function SetupPage() {
           <section className="rounded-lg border border-pink-600 bg-black/60 p-5 shadow-[0_0_20px_rgba(236,72,153,0.14)]">
             <p className="text-sm uppercase tracking-[0.3em] text-pink-500">Why This Exists</p>
             <div className="mt-4 space-y-3 text-sm text-teal-300">
-              <p>You said you are lazy enough to want one post per day. This page locks that in.</p>
+              <p>
+Echo Studio automates long-term publishing by rotating products instead of individual posts.
+</p>
               <p>Write or import one product batch at a time. The library scheduler will still remix them across days using the order saved here.</p>
               <p>When you release more products, add them here first so they are part of the rotation plan before you build their content pile.</p>
             </div>
@@ -407,13 +407,15 @@ export default function SetupPage() {
         <section className="mt-6 rounded-lg border border-teal-500 bg-black/60 p-5 shadow-[0_0_20px_rgba(13,148,136,0.2)]">
           <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
             <div>
-              <p className="text-sm uppercase tracking-[0.3em] text-teal-400">Rotation Order</p>
-              <h2 className="mt-1 text-2xl text-teal-200">Active products in the day-by-day mix</h2>
+              <p className="text-sm uppercase tracking-[0.3em] text-teal-400">Product Rotation</p>
+              <h2 className="mt-1 text-2xl text-teal-200">Products currently included in the publishing rotation</h2>
               <p className="mt-2 text-sm text-teal-400">
                 The library scheduler uses this order first, then round-robins across selected posts.
               </p>
             </div>
-            <p className="text-sm text-lime-300">{(settings.activeProductIds || []).length} active products</p>
+           <p className="text-sm text-lime-300">
+  {(settings.activeProductIds || []).length} Products in Rotation
+</p>
           </div>
 
           <div className="mt-5 space-y-3">
@@ -485,7 +487,7 @@ export default function SetupPage() {
                             onClick={() => toggleActiveProduct(product.id)}
                             className="rounded border border-gray-600 px-3 py-2 text-gray-300 hover:bg-gray-700"
                           >
-                            Keep Off Rotation
+                            Pause Rotation
                           </button>
                         </>
                       ) : null}
@@ -593,7 +595,7 @@ export default function SetupPage() {
             disabled={saving}
             className="rounded border border-lime-500 bg-lime-500 px-5 py-3 text-black transition-colors hover:bg-lime-400 disabled:opacity-50"
           >
-            {saving ? "Saving..." : "Save Rotation Setup"}
+            {saving ? "Saving..." : "Save Scheduler Settings"}
           </button>
         </div>
       </div>
