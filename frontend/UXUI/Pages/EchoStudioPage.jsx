@@ -51,7 +51,7 @@ const DRAFT_SAVE_DEBOUNCE_MS = 700;
 const AI_GENERATION_ENABLED =
 	String(import.meta.env?.VITE_AI_GENERATION_ENABLED ?? import.meta.env?.AI_GENERATION_ENABLED ?? "true").toLowerCase() !==
 	"false";
-const JOURNEY_STAGES = ["Mission", "Knowledge", "Strategy", "Content", "Review", "Schedule", "Publish"];
+const JOURNEY_STAGES = ["Mission", "Knowledge", "Strategy", "Content", "Assets", "Review", "Schedule", "Publish"];
 const KNOWLEDGE_NODE_DEFINITIONS = [
 	{ key: "product", label: "Product", className: "echo-brain-node-top" },
 	{ key: "brand", label: "Brand", className: "echo-brain-node-left-top" },
@@ -512,9 +512,10 @@ function getJourneyIndex({ view, loaderVisible, pipeline }) {
 	if (view === "library") return 0;
 	if (loaderVisible || !pipeline.campaignPlan) return 1;
 	if (view === "content") return 3;
-	if (view === "review") return 4;
-	if (view === "schedule") return 5;
-	if (view === "publish") return 6;
+	if (view === "assets") return 4;
+	if (view === "review") return 5;
+	if (view === "schedule") return 6;
+	if (view === "publish") return 7;
 	return 2;
 }
 
@@ -610,9 +611,26 @@ function normalizeLocalAssetPath(value) {
 	return raw;
 }
 
-function getLocalAssetPreview(post) {
+function getCampaignAssetPreview(post) {
 	const candidates = [post.imageAsset, post.mediaPath, post.image].filter(Boolean);
 	for (const candidate of candidates) {
+		const raw = String(candidate || "").trim();
+		if (/^https?:\/\//i.test(raw) || raw.startsWith("data:")) {
+			return {
+				url: raw,
+				path: raw,
+				filename: raw.split("/").pop() || "Uploaded asset",
+				alt: post.altText || post.title || "Campaign visual",
+			};
+		}
+		if (raw.startsWith("/media/")) {
+			return {
+				url: `${API_BASE}${raw}`,
+				path: raw,
+				filename: raw.split("/").pop() || "Uploaded asset",
+				alt: post.altText || post.title || "Campaign visual",
+			};
+		}
 		const assetPath = normalizeLocalAssetPath(candidate);
 		if (!assetPath.startsWith("frontend/assets/")) continue;
 		const moduleKey = assetPath.replace("frontend/assets/", "../../assets/");
@@ -626,6 +644,15 @@ function getLocalAssetPreview(post) {
 		};
 	}
 	return null;
+}
+
+function readFileAsDataUrl(file) {
+	return new Promise((resolve, reject) => {
+		const reader = new FileReader();
+		reader.onload = (event) => resolve(event.target?.result || "");
+		reader.onerror = reject;
+		reader.readAsDataURL(file);
+	});
 }
 
 function joinForSearch(values = []) {
@@ -841,7 +868,7 @@ function getCampaignDraftStatus({
 	if (Array.isArray(queueResults) && queueResults.length) return "queued";
 	if (currentView === "publish") return "ready_for_publish";
 	if (currentView === "schedule") return "scheduled_draft";
-	if (["content", "review"].includes(currentView) && generatedPosts.length) return "generated";
+	if (["content", "assets", "review"].includes(currentView) && generatedPosts.length) return "generated";
 	return status || "draft";
 }
 
@@ -860,7 +887,7 @@ function getCampaignDraftStatusLabel(status = "") {
 function getRestoredDraftView(draft) {
 	const view = String(draft?.currentView || "").trim();
 	const hasPosts = Array.isArray(draft?.generatedPosts) && draft.generatedPosts.length > 0;
-	if (["content", "review", "schedule", "publish"].includes(view) && hasPosts) return view;
+	if (["content", "assets", "review", "schedule", "publish"].includes(view) && hasPosts) return view;
 	if (view === "strategy" && draft?.campaignPlan) return "strategy";
 	return hasPosts ? "content" : "strategy";
 }
@@ -1066,7 +1093,7 @@ function getScheduleStatus(posts, warnings = []) {
 function JourneyHeader({ activeIndex, onStageClick }) {
 	return (
 		<nav className="rounded-lg border border-gray-800 bg-gray-950/80 p-3" aria-label="Campaign journey">
-			<ol className="grid grid-cols-2 gap-2 text-xs sm:grid-cols-3 lg:grid-cols-7">
+			<ol className="grid grid-cols-2 gap-2 text-xs sm:grid-cols-4 lg:grid-cols-8">
 				{JOURNEY_STAGES.map((stage, index) => {
 					const completed = index < activeIndex;
 					const active = index === activeIndex;
@@ -1133,7 +1160,7 @@ function PromptInspector({ post }) {
 }
 
 function CampaignVisualPreview({ post, compact = false }) {
-	const preview = getLocalAssetPreview(post);
+	const preview = getCampaignAssetPreview(post);
 	if (!preview) return null;
 	return (
 		<figure
@@ -1155,6 +1182,150 @@ function CampaignVisualPreview({ post, compact = false }) {
 				</figcaption>
 			)}
 		</figure>
+	);
+}
+
+function CampaignAssetsStep({
+	posts,
+	onChange,
+	onUpload,
+	onRemove,
+	onCopy,
+	uploadState,
+}) {
+	return (
+		<section className="space-y-5">
+			<div>
+				<p className="text-sm uppercase tracking-[0.28em] text-cyan-300">Campaign Assets</p>
+				<h2 className="mt-2 text-2xl font-semibold text-pink-200">Prepare the visuals for this campaign.</h2>
+				<p className="mt-2 text-sm text-gray-300">
+					Review Echo's visual direction, keep the existing campaign asset, or upload a replacement before final review.
+				</p>
+			</div>
+
+			<div className="rounded-lg border border-gray-800 bg-gray-950/70 p-4">
+				<p className="text-xs uppercase tracking-[0.22em] text-cyan-300">Asset Workflow</p>
+				<div className="mt-3 grid gap-2 text-sm text-gray-300 sm:grid-cols-5">
+					<span>Campaign</span>
+					<span>Visual Prompt</span>
+					<span>Asset</span>
+					<span>Preview</span>
+					<span>Review</span>
+				</div>
+			</div>
+
+			{posts.map((post, index) => {
+				const preview = getCampaignAssetPreview(post);
+				const state = uploadState[post.localId] || {};
+				return (
+					<article key={post.localId} className="rounded-lg border border-pink-600/60 bg-gray-950/80 p-5">
+						<div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+							<div>
+								<p className="text-xs uppercase tracking-[0.22em] text-cyan-300">{post.platform}</p>
+								<h3 className="mt-2 text-xl font-semibold text-pink-200">{post.title}</h3>
+								<p className="mt-2 text-sm text-gray-400">Campaign asset {index + 1}</p>
+							</div>
+							<p className="text-xs text-gray-500">{preview ? "Asset ready" : "Needs asset"}</p>
+						</div>
+
+						<section className="mt-5 rounded border border-gray-800 bg-black/45 p-4">
+							<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+								<div>
+									<p className="text-xs uppercase tracking-[0.2em] text-cyan-300">Visual Prompt</p>
+									<p className="mt-1 text-sm text-gray-400">Use this direction for campaign artwork.</p>
+								</div>
+								<button
+									type="button"
+									className="border border-cyan-500 px-3 py-2 text-sm text-cyan-200 hover:bg-cyan-500 hover:text-black"
+									onClick={() => onCopy(post.imagePrompt || post.imageConcept || "", post.localId)}
+									disabled={!String(post.imagePrompt || post.imageConcept || "").trim()}
+								>
+									{state.copied ? "Prompt Copied" : "Copy Prompt"}
+								</button>
+							</div>
+							<textarea
+								className="mt-4 min-h-28 w-full border border-gray-700 bg-black px-3 py-2 text-white"
+								value={post.imagePrompt || ""}
+								onChange={(event) => onChange(index, "imagePrompt", event.target.value)}
+								placeholder="Echo's visual prompt will appear here."
+							/>
+						</section>
+
+						<section className="mt-5 rounded border border-gray-800 bg-black/45 p-4">
+							<p className="text-xs uppercase tracking-[0.2em] text-cyan-300">Existing Campaign Asset</p>
+							{preview ? (
+								<div className="mt-4 grid gap-4 md:grid-cols-[minmax(0,280px)_1fr] md:items-start">
+									<CampaignVisualPreview post={post} />
+									<div className="space-y-3 text-sm text-gray-300">
+										<div>
+											<p className="text-xs uppercase tracking-[0.18em] text-gray-500">Filename</p>
+											<p className="mt-1 text-gray-100">{preview.filename}</p>
+										</div>
+										<div className="flex flex-wrap gap-3">
+											<label className="inline-flex cursor-pointer items-center border border-cyan-500 px-3 py-2 text-cyan-200 hover:bg-cyan-500 hover:text-black">
+												Replace Asset
+												<input
+													type="file"
+													accept="image/*"
+													className="sr-only"
+													onChange={(event) => onUpload(index, event.target.files?.[0])}
+												/>
+											</label>
+											<button
+												type="button"
+												className="border border-red-500/80 px-3 py-2 text-red-200 hover:bg-red-500 hover:text-black"
+												onClick={() => onRemove(index)}
+											>
+												Remove Asset
+											</button>
+										</div>
+									</div>
+								</div>
+							) : (
+								<div className="mt-4 rounded border border-dashed border-gray-700 bg-black/40 p-4 text-sm text-gray-300">
+									No campaign asset is attached yet.
+								</div>
+							)}
+						</section>
+
+						<section className="mt-5 rounded border border-gray-800 bg-black/45 p-4">
+							<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+								<div>
+									<p className="text-xs uppercase tracking-[0.2em] text-cyan-300">Upload Asset</p>
+									<p className="mt-1 text-sm text-gray-400">Upload an image to replace the current campaign visual.</p>
+								</div>
+								<label className="inline-flex cursor-pointer items-center border border-pink-500 bg-pink-500 px-3 py-2 text-sm font-semibold text-black hover:bg-pink-400">
+									Upload Image
+									<input
+										type="file"
+										accept="image/*"
+										className="sr-only"
+										onChange={(event) => onUpload(index, event.target.files?.[0])}
+									/>
+								</label>
+							</div>
+							{state.uploading ? <p className="mt-3 text-sm text-cyan-200">Uploading image...</p> : null}
+							{state.error ? <p className="mt-3 text-sm text-red-300">{state.error}</p> : null}
+						</section>
+
+						<section className="mt-5 rounded border border-gray-800 bg-black/45 p-4">
+							<p className="text-xs uppercase tracking-[0.2em] text-cyan-300">Generate with OpenAI</p>
+							<p className="mt-2 text-sm text-gray-400">
+								Native GPT image generation will allow users to create campaign artwork directly inside Echo Studio.
+							</p>
+							<button
+								type="button"
+								className="mt-3 cursor-not-allowed border border-gray-700 px-3 py-2 text-sm text-gray-500"
+								disabled
+							>
+								Generate Image
+							</button>
+							<p className="mt-2 text-xs uppercase tracking-[0.18em] text-gray-500">Coming Soon</p>
+						</section>
+					</article>
+				);
+			})}
+		</section>
 	);
 }
 
@@ -1326,6 +1497,7 @@ export default function EchoStudioPage() {
 	const [currentCampaignDraftId, setCurrentCampaignDraftId] = useState(null);
 	const [campaignDrafts, setCampaignDrafts] = useState([]);
 	const [libraryLoading, setLibraryLoading] = useState(false);
+	const [assetUploadState, setAssetUploadState] = useState({});
 	const restoringDraftRef = useRef(false);
 
 	const selectedProduct =
@@ -1380,6 +1552,7 @@ export default function EchoStudioPage() {
 		setQueueResults(Array.isArray(draft.queueResults) ? draft.queueResults : []);
 		setPublishResults(Array.isArray(draft.publishResults) ? draft.publishResults : []);
 		setHandoffStatus(draft.handoffStatus || "");
+		setAssetUploadState({});
 		setView(getRestoredDraftView(draft));
 		window.setTimeout(() => {
 			restoringDraftRef.current = false;
@@ -1396,6 +1569,7 @@ export default function EchoStudioPage() {
 		setQueueResults([]);
 		setPublishResults([]);
 		setHandoffStatus("");
+		setAssetUploadState({});
 		setError("");
 		setView("intake");
 		window.setTimeout(() => {
@@ -1769,9 +1943,10 @@ export default function EchoStudioPage() {
 		if (index === 0) setView("intake");
 		if (index === 2 && pipeline.campaignPlan) setView("strategy");
 		if (index === 3 && campaignPosts.length) setView("content");
-		if (index === 4 && campaignPosts.length) setView("review");
-		if (index === 5 && campaignPosts.length) setView("schedule");
-		if (index === 6 && campaignPosts.length) setView("publish");
+		if (index === 4 && campaignPosts.length) setView("assets");
+		if (index === 5 && campaignPosts.length) setView("review");
+		if (index === 6 && campaignPosts.length) setView("schedule");
+		if (index === 7 && campaignPosts.length) setView("publish");
 	}
 
 	function updateCampaignPost(index, field, value) {
@@ -1782,7 +1957,99 @@ export default function EchoStudioPage() {
 		);
 	}
 
+	function updateCampaignPostFields(index, updates) {
+		setCampaignPosts((current) =>
+			current.map((post, postIndex) =>
+				postIndex === index ? { ...post, ...updates } : post,
+			),
+		);
+	}
+
+	async function uploadCampaignAsset(index, file) {
+		if (!file) return;
+		const post = campaignPosts[index];
+		const stateKey = post?.localId || `post-${index}`;
+		setAssetUploadState((current) => ({
+			...current,
+			[stateKey]: { ...current[stateKey], uploading: true, error: "", copied: false },
+		}));
+		try {
+			const dataUrl = await readFileAsDataUrl(file);
+			const response = await fetch(`${API_BASE}/api/media/upload`, {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({
+					dataUrl,
+					fileName: file.name || "campaign-asset",
+				}),
+			});
+			const payload = await response.json().catch(() => ({}));
+			if (!response.ok) {
+				throw new Error(payload?.detail || payload?.error || `Upload failed: ${response.status}`);
+			}
+			const mediaPath = payload.mediaPath || payload.mediaUrl || "";
+			const mediaUrl = payload.mediaUrl || payload.mediaPath || "";
+			updateCampaignPostFields(index, {
+				image: mediaUrl.startsWith("http") ? mediaUrl : `${API_BASE}${mediaUrl}`,
+				imageAsset: "",
+				mediaPath,
+				mediaType: payload.mediaType || "image",
+				altText: post?.altText || post?.title || "Campaign visual",
+			});
+			setAssetUploadState((current) => ({
+				...current,
+				[stateKey]: { ...current[stateKey], uploading: false, error: "", copied: false },
+			}));
+		} catch (uploadError) {
+			setAssetUploadState((current) => ({
+				...current,
+				[stateKey]: {
+					...current[stateKey],
+					uploading: false,
+					error: uploadError?.message || "Upload failed.",
+					copied: false,
+				},
+			}));
+		}
+	}
+
+	function removeCampaignAsset(index) {
+		updateCampaignPostFields(index, {
+			image: "",
+			imageAsset: "",
+			mediaPath: "",
+			mediaType: "",
+		});
+	}
+
+	async function copyVisualPrompt(text, stateKey) {
+		const value = String(text || "").trim();
+		if (!value) return;
+		try {
+			await navigator.clipboard.writeText(value);
+			setAssetUploadState((current) => ({
+				...current,
+				[stateKey]: { ...current[stateKey], copied: true, error: "" },
+			}));
+			window.setTimeout(() => {
+				setAssetUploadState((current) => ({
+					...current,
+					[stateKey]: { ...current[stateKey], copied: false },
+				}));
+			}, 1600);
+		} catch {
+			setAssetUploadState((current) => ({
+				...current,
+				[stateKey]: { ...current[stateKey], copied: false, error: "Could not copy prompt." },
+			}));
+		}
+	}
+
 	function approveContentForReview() {
+		setView("assets");
+	}
+
+	function approveAssetsForReview() {
 		setView("review");
 	}
 
@@ -2083,7 +2350,7 @@ export default function EchoStudioPage() {
 								<p className="text-sm uppercase tracking-[0.28em] text-cyan-300">Campaign Created</p>
 								<h2 className="mt-2 text-2xl font-semibold text-pink-200">Echo generated {campaignPosts.length} campaign post{campaignPosts.length === 1 ? "" : "s"}.</h2>
 								<p className="mt-2 text-sm text-gray-300">
-									These posts came from the real campaign generation API. Review the content, prompts, and publishing destination before approval.
+									Review the campaign copy first, then confirm the visuals before final approval.
 								</p>
 							</div>
 
@@ -2116,7 +2383,34 @@ export default function EchoStudioPage() {
 								className="border border-pink-500 bg-pink-500 px-4 py-2 font-semibold text-black hover:bg-pink-400"
 								onClick={approveContentForReview}
 							>
-								Continue to Review
+								Continue to Campaign Assets
+								</button>
+							</div>
+						</section>
+					) : view === "assets" && campaignPosts.length ? (
+						<section className="space-y-5">
+							<CampaignAssetsStep
+								posts={campaignPosts}
+								onChange={updateCampaignPost}
+								onUpload={uploadCampaignAsset}
+								onRemove={removeCampaignAsset}
+								onCopy={copyVisualPrompt}
+								uploadState={assetUploadState}
+							/>
+							<div className="flex flex-wrap gap-3">
+								<button
+									type="button"
+									className="border border-cyan-500 px-4 py-2 text-cyan-200 hover:bg-cyan-500 hover:text-black"
+									onClick={() => setView("content")}
+								>
+									Back to Content
+								</button>
+								<button
+									type="button"
+									className="border border-pink-500 bg-pink-500 px-4 py-2 font-semibold text-black hover:bg-pink-400"
+									onClick={approveAssetsForReview}
+								>
+									Continue to Review
 								</button>
 							</div>
 						</section>
@@ -2142,9 +2436,9 @@ export default function EchoStudioPage() {
 								<button
 									type="button"
 								className="border border-cyan-500 px-4 py-2 text-cyan-200 hover:bg-cyan-500 hover:text-black"
-								onClick={() => setView("content")}
+								onClick={() => setView("assets")}
 							>
-								Back to Content
+								Back to Campaign Assets
 							</button>
 							<button
 								type="button"
