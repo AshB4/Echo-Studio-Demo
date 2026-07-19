@@ -40,6 +40,7 @@ import {
 	clearPostedPostsFromQueue,
 	createCampaignDraft,
 	createPost,
+	deleteCampaignDraft,
 	deletePost as deletePostFromDb,
 	getCampaignDraft,
 	readStoreSnapshot,
@@ -317,6 +318,21 @@ app.patch("/api/campaigns/:id", async (req, res) => {
 	} catch (error) {
 		return res.status(500).json({
 			message: "Could not update campaign draft",
+			detail: error?.message || String(error),
+		});
+	}
+});
+
+app.delete("/api/campaigns/:id", async (req, res) => {
+	try {
+		const campaign = await deleteCampaignDraft(req.params.id);
+		if (!campaign) {
+			return res.status(404).json({ message: "Campaign draft not found" });
+		}
+		return res.json({ data: campaign });
+	} catch (error) {
+		return res.status(500).json({
+			message: "Could not delete campaign draft",
 			detail: error?.message || String(error),
 		});
 	}

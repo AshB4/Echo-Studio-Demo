@@ -304,6 +304,13 @@ export async function updateCampaignDraft(id, patch = {}) {
   return next;
 }
 
+export async function deleteCampaignDraft(id) {
+  const existing = await getCampaignDraft(id);
+  if (!existing) return null;
+  getDb().prepare("DELETE FROM campaigns WHERE id = ?").run(id);
+  return existing;
+}
+
 export async function updatePost(id, post) {
   const conn = getDb();
   conn

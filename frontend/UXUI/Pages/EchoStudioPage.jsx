@@ -11,7 +11,7 @@ const DRAFT_SAVE_DEBOUNCE_MS = 700;
 const AI_GENERATION_ENABLED =
 	String(import.meta.env?.VITE_AI_GENERATION_ENABLED ?? import.meta.env?.AI_GENERATION_ENABLED ?? "true").toLowerCase() !==
 	"false";
-const JOURNEY_STAGES = ["Mission", "Knowledge", "Strategy", "Content", "Review", "Schedule", "Publish"];
+const JOURNEY_STAGES = ["Mission", "Campaign Library", "Knowledge", "Strategy", "Content", "Review", "Schedule", "Publish"];
 const KNOWLEDGE_NODE_DEFINITIONS = [
 	{ key: "product", label: "Product", className: "echo-brain-node-top" },
 	{ key: "brand", label: "Brand", className: "echo-brain-node-left-top" },
@@ -179,6 +179,18 @@ async function patchJson(path, payload) {
 		method: "PATCH",
 		headers: { "Content-Type": "application/json" },
 		body: JSON.stringify(payload),
+	});
+	const body = await response.json().catch(() => ({}));
+	if (!response.ok) {
+		const message = body?.message || `Request failed: ${response.status}`;
+		throw new Error(message);
+	}
+	return body.data;
+}
+
+async function deleteJson(path) {
+	const response = await fetch(`${API_BASE}${path}`, {
+		method: "DELETE",
 	});
 	const body = await response.json().catch(() => ({}));
 	if (!response.ok) {
@@ -457,12 +469,13 @@ function buildCampaignStrategy({ campaignPlan, goal, product, platform }) {
 
 function getJourneyIndex({ view, loaderVisible, pipeline }) {
 	if (view === "intake") return 0;
-	if (loaderVisible || !pipeline.campaignPlan) return 1;
-	if (view === "content") return 3;
-	if (view === "review") return 4;
-	if (view === "schedule") return 5;
-	if (view === "publish") return 6;
-	return 2;
+	if (view === "library") return 1;
+	if (loaderVisible || !pipeline.campaignPlan) return 2;
+	if (view === "content") return 4;
+	if (view === "review") return 5;
+	if (view === "schedule") return 6;
+	if (view === "publish") return 7;
+	return 3;
 }
 
 function getDefaultDestination(platform = "") {
@@ -764,12 +777,62 @@ function getCampaignDraftStatus({
 	return status || "draft";
 }
 
+function getCampaignDraftStatusLabel(status = "") {
+	const labels = {
+		draft: "Draft",
+		generated: "Generated",
+		scheduled_draft: "Scheduled",
+		queued: "Queued",
+		ready_for_publish: "Ready for Publish",
+		publish_handoff: "Publish Handoff",
+	};
+	return labels[String(status || "").toLowerCase()] || "Draft";
+}
+
 function getRestoredDraftView(draft) {
 	const view = String(draft?.currentView || "").trim();
 	const hasPosts = Array.isArray(draft?.generatedPosts) && draft.generatedPosts.length > 0;
 	if (["content", "review", "schedule", "publish"].includes(view) && hasPosts) return view;
 	if (view === "strategy" && draft?.campaignPlan) return "strategy";
 	return hasPosts ? "content" : "strategy";
+}
+
+function formatDraftUpdatedDate(value) {
+	if (!value) return "Unknown";
+	const date = new Date(value);
+	if (Number.isNaN(date.getTime())) return "Unknown";
+	return date.toLocaleString(undefined, {
+		month: "short",
+		day: "numeric",
+		year: "numeric",
+		hour: "numeric",
+		minute: "2-digit",
+	});
+}
+
+function getDraftProductName(draft) {
+	return (
+		draft?.form?.productId &&
+			ECHO_PRODUCTS.find((product) => product.id === draft.form.productId)?.label
+	) || draft?.mission?.productName || draft?.mission?.businessName || "Unknown product";
+}
+
+function getDraftPlatform(draft) {
+	return (
+		draft?.generatedPosts?.[0]?.platform ||
+		draft?.form?.primaryPlatform ||
+		draft?.campaignPlan?.primaryPlatform ||
+		draft?.mission?.channels?.[0] ||
+		"Unknown platform"
+	);
+}
+
+function getDraftTitle(draft) {
+	return draft?.title || draft?.mission?.title || draft?.form?.goal || "Untitled campaign";
+}
+
+function getDraftPostCount(draft) {
+	return Array.isArray(draft?.generatedPosts) ? draft.generatedPosts.length : 0;
 }
 
 function getScheduleWarnings(posts) {
@@ -1165,6 +1228,8 @@ export default function EchoStudioPage() {
 	const [handoffStatus, setHandoffStatus] = useState("");
 	const [error, setError] = useState("");
 	const [currentCampaignDraftId, setCurrentCampaignDraftId] = useState(null);
+	const [campaignDrafts, setCampaignDrafts] = useState([]);
+	const [libraryLoading, setLibraryLoading] = useState(false);
 	const restoringDraftRef = useRef(false);
 
 	const selectedProduct =
@@ -1195,6 +1260,7 @@ export default function EchoStudioPage() {
 
 	function applyCampaignDraft(draft) {
 		restoringDraftRef.current = true;
+		setError("");
 		setCurrentCampaignDraftId(draft.id || null);
 		setForm((current) => ({
 			...current,
@@ -1224,6 +1290,63 @@ export default function EchoStudioPage() {
 		}, 0);
 	}
 
+	function resetCampaignWorkspace() {
+		restoringDraftRef.current = true;
+		setCurrentCampaignDraftId(null);
+		setPipeline(emptyPipeline);
+		setBrainSources([]);
+		setCampaignPosts([]);
+		setPinterestBoards({ defaultBoard: "", boards: [], rules: [] });
+		setQueueResults([]);
+		setPublishResults([]);
+		setHandoffStatus("");
+		setError("");
+		setView("intake");
+		window.setTimeout(() => {
+			restoringDraftRef.current = false;
+		}, 0);
+	}
+
+	async function loadCampaignLibrary({ showLibrary = false } = {}) {
+		setLibraryLoading(true);
+		try {
+			const drafts = await getJson("/api/campaigns");
+			const normalizedDrafts = Array.isArray(drafts) ? drafts : [];
+			setCampaignDrafts(normalizedDrafts);
+			if (showLibrary || normalizedDrafts.length) setView("library");
+			return normalizedDrafts;
+		} catch (libraryError) {
+			setError(libraryError.message || "Echo could not load saved campaigns.");
+			return [];
+		} finally {
+			setLibraryLoading(false);
+		}
+	}
+
+	async function openCampaignDraft(id) {
+		setError("");
+		try {
+			const draft = await getJson(`/api/campaigns/${id}`);
+			applyCampaignDraft(draft);
+		} catch (openError) {
+			setError(openError.message || "Echo could not open that campaign.");
+		}
+	}
+
+	async function deleteCampaignDraftFromLibrary(id) {
+		const draft = campaignDrafts.find((item) => item.id === id);
+		const confirmed = window.confirm(`Delete "${getDraftTitle(draft)}"?`);
+		if (!confirmed) return;
+		setError("");
+		try {
+			await deleteJson(`/api/campaigns/${id}`);
+			setCampaignDrafts((current) => current.filter((item) => item.id !== id));
+			if (currentCampaignDraftId === id) resetCampaignWorkspace();
+		} catch (deleteError) {
+			setError(deleteError.message || "Echo could not delete that campaign.");
+		}
+	}
+
 	function buildCurrentDraftPayload(overrides = {}) {
 		return buildCampaignDraftPayload({
 			id: currentCampaignDraftId,
@@ -1242,16 +1365,18 @@ export default function EchoStudioPage() {
 
 	useEffect(() => {
 		let cancelled = false;
-		async function restoreLatestDraft() {
+		async function loadInitialLibrary() {
 			try {
-				const drafts = await getJson("/api/campaigns?limit=1");
-				if (cancelled || !Array.isArray(drafts) || !drafts.length) return;
-				applyCampaignDraft(drafts[0]);
+				const drafts = await getJson("/api/campaigns");
+				if (cancelled) return;
+				const normalizedDrafts = Array.isArray(drafts) ? drafts : [];
+				setCampaignDrafts(normalizedDrafts);
+				if (normalizedDrafts.length) setView("library");
 			} catch (restoreError) {
-				console.warn("No Echo Studio campaign draft restored:", restoreError?.message || restoreError);
+				console.warn("No Echo Studio campaign drafts loaded:", restoreError?.message || restoreError);
 			}
 		}
-		restoreLatestDraft();
+		loadInitialLibrary();
 		return () => {
 			cancelled = true;
 		};
@@ -1526,6 +1651,10 @@ export default function EchoStudioPage() {
 				handoffStatus: "",
 			}));
 			setCurrentCampaignDraftId(savedDraft.id || null);
+			setCampaignDrafts((current) => [
+				savedDraft,
+				...current.filter((draft) => draft.id !== savedDraft.id),
+			]);
 			setPipeline((current) => ({
 				...current,
 				campaignGeneration,
@@ -1542,10 +1671,12 @@ export default function EchoStudioPage() {
 
 	function handleJourneyStageClick(index) {
 		if (index === 0) setView("intake");
-		if (index === 2 && pipeline.campaignPlan) setView("strategy");
-		if (index === 3 && campaignPosts.length) setView("content");
-		if (index === 4 && campaignPosts.length) setView("review");
-		if (index === 5 && campaignPosts.length) setView("schedule");
+		if (index === 1) loadCampaignLibrary({ showLibrary: true });
+		if (index === 3 && pipeline.campaignPlan) setView("strategy");
+		if (index === 4 && campaignPosts.length) setView("content");
+		if (index === 5 && campaignPosts.length) setView("review");
+		if (index === 6 && campaignPosts.length) setView("schedule");
+		if (index === 7 && campaignPosts.length) setView("publish");
 	}
 
 	function updateCampaignPost(index, field, value) {
@@ -1715,8 +1846,121 @@ export default function EchoStudioPage() {
 							<p className="text-sm text-gray-400">
 								Next: Echo Brain reads what it knows and recommends the campaign strategy.
 							</p>
+							<button
+								type="button"
+								className="border border-cyan-500 px-5 py-3 font-semibold text-cyan-200 hover:bg-cyan-500 hover:text-black disabled:cursor-wait disabled:opacity-50"
+								onClick={() => loadCampaignLibrary({ showLibrary: true })}
+								disabled={libraryLoading}
+							>
+								Campaign Library
+							</button>
 						</div>
 					</section>
+					) : view === "library" ? (
+						<section className="space-y-5">
+							<div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+								<div>
+									<p className="text-sm uppercase tracking-[0.28em] text-cyan-300">Campaign Library</p>
+									<h2 className="mt-2 text-2xl font-semibold text-pink-200">Open a saved campaign draft.</h2>
+									<p className="mt-2 text-sm text-gray-300">
+										Saved campaigns restore the existing workflow without regenerating content.
+									</p>
+								</div>
+								<button
+									type="button"
+									className="border border-pink-500 bg-pink-500 px-4 py-2 font-semibold text-black hover:bg-pink-400"
+									onClick={resetCampaignWorkspace}
+								>
+									New Campaign
+								</button>
+							</div>
+
+							{error ? (
+								<div className="rounded border border-red-500/70 bg-red-950/30 p-3 text-sm text-red-200">
+									{error}
+								</div>
+							) : null}
+
+							{libraryLoading ? (
+								<div className="rounded-lg border border-cyan-700/70 bg-gray-950/70 p-5 text-sm text-gray-200">
+									Loading saved campaigns...
+								</div>
+							) : campaignDrafts.length ? (
+								<div className="grid gap-4 md:grid-cols-2">
+									{campaignDrafts.map((draft) => {
+										const accent = getCampaignAccent(draft.id || getDraftTitle(draft));
+										const platform = getDraftPlatform(draft);
+										const postCount = getDraftPostCount(draft);
+										return (
+											<article
+												key={draft.id}
+												className={`rounded-lg border p-5 ${accent.borderClass} ${accent.bgClass} ${accent.shadowClass}`}
+											>
+												<div className="flex items-start gap-3">
+													<span className={`mt-1 h-3 w-3 shrink-0 rounded-full ${accent.dotClass}`} aria-hidden="true" />
+													<div className="min-w-0 flex-1">
+														<p className={`text-xs uppercase tracking-[0.2em] ${accent.mutedTextClass}`}>
+															{getCampaignDraftStatusLabel(draft.status)}
+														</p>
+														<h3 className={`mt-2 truncate text-lg font-semibold ${accent.textClass}`}>
+															{getDraftTitle(draft)}
+														</h3>
+													</div>
+												</div>
+												<div className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
+													<div className="rounded border border-gray-800 bg-black/35 p-3">
+														<p className="text-xs uppercase tracking-[0.16em] text-gray-500">Product</p>
+														<p className="mt-2 text-gray-100">{getDraftProductName(draft)}</p>
+													</div>
+													<div className="rounded border border-gray-800 bg-black/35 p-3">
+														<p className="text-xs uppercase tracking-[0.16em] text-gray-500">Platform</p>
+														<p className="mt-2 text-gray-100">{platform}</p>
+													</div>
+													<div className="rounded border border-gray-800 bg-black/35 p-3">
+														<p className="text-xs uppercase tracking-[0.16em] text-gray-500">Posts</p>
+														<p className="mt-2 text-gray-100">{postCount}</p>
+													</div>
+													<div className="rounded border border-gray-800 bg-black/35 p-3">
+														<p className="text-xs uppercase tracking-[0.16em] text-gray-500">Updated</p>
+														<p className="mt-2 text-gray-100">{formatDraftUpdatedDate(draft.updatedAt)}</p>
+													</div>
+												</div>
+												<div className="mt-4 flex flex-wrap gap-3">
+													<button
+														type="button"
+														className="border border-pink-500 bg-pink-500 px-4 py-2 font-semibold text-black hover:bg-pink-400"
+														onClick={() => openCampaignDraft(draft.id)}
+													>
+														Open
+													</button>
+													<button
+														type="button"
+														className="border border-red-500/80 px-4 py-2 text-red-200 hover:bg-red-500 hover:text-black"
+														onClick={() => deleteCampaignDraftFromLibrary(draft.id)}
+													>
+														Delete
+													</button>
+												</div>
+											</article>
+										);
+									})}
+								</div>
+							) : (
+								<div className="rounded-lg border border-gray-800 bg-gray-950/70 p-6">
+									<p className="text-lg font-semibold text-pink-200">No saved campaigns yet.</p>
+									<p className="mt-2 text-sm text-gray-300">
+										Start a new mission to create the first saved campaign draft.
+									</p>
+									<button
+										type="button"
+										className="mt-4 border border-pink-500 bg-pink-500 px-4 py-2 font-semibold text-black hover:bg-pink-400"
+										onClick={resetCampaignWorkspace}
+									>
+										New Campaign
+									</button>
+								</div>
+							)}
+						</section>
 					) : view === "content" && campaignPosts.length ? (
 						<section className="space-y-5">
 							<div>
