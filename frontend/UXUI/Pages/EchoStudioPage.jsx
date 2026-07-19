@@ -4,14 +4,54 @@ import echoArrow from "../../assets/InteralAssets/EchoArrow.png";
 import { productProfiles } from "../utils/productProfiles";
 
 const API_BASE = import.meta.env?.VITE_API_BASE || "http://localhost:3001";
-const ECHO_PRODUCTS = productProfiles.slice(0, 3);
+const LOCAL_ASSET_URLS = {
+	...import.meta.glob("../../assets/badEnough/*.{png,jpg,jpeg,webp,gif,svg}", {
+		eager: true,
+		query: "?url",
+		import: "default",
+	}),
+	...import.meta.glob("../../assets/buzzingbees/*.{png,jpg,jpeg,webp,gif,svg}", {
+		eager: true,
+		query: "?url",
+		import: "default",
+	}),
+	...import.meta.glob("../../assets/devto/*.{png,jpg,jpeg,webp,gif,svg}", {
+		eager: true,
+		query: "?url",
+		import: "default",
+	}),
+	...import.meta.glob("../../assets/goblinaffs/**/*.{png,jpg,jpeg,webp,gif,svg}", {
+		eager: true,
+		query: "?url",
+		import: "default",
+	}),
+	...import.meta.glob("../../assets/InteralAssets/*.{png,jpg,jpeg,webp,gif,svg}", {
+		eager: true,
+		query: "?url",
+		import: "default",
+	}),
+	...import.meta.glob("../../assets/kawaiiHalloween/*.{png,jpg,jpeg,webp,gif,svg}", {
+		eager: true,
+		query: "?url",
+		import: "default",
+	}),
+	...import.meta.glob("../../assets/TinyKingdoms/*.{png,jpg,jpeg,webp,gif,svg}", {
+		eager: true,
+		query: "?url",
+		import: "default",
+	}),
+};
+const INTERNAL_PRODUCT_PROFILE_IDS = new Set(["postpunk-core", "gumroad-devtools", "reddit-product"]);
+const ECHO_PRODUCTS = productProfiles.filter(
+	(product) => ["live", "in-progress"].includes(product.lifecycleStatus) && !INTERNAL_PRODUCT_PROFILE_IDS.has(product.id),
+);
 const SUPPORTED_PLATFORMS = ["Pinterest", "Facebook", "Dev.to"];
 const DEFAULT_PINTEREST_CAMPAIGN_SIZE = 10;
 const DRAFT_SAVE_DEBOUNCE_MS = 700;
 const AI_GENERATION_ENABLED =
 	String(import.meta.env?.VITE_AI_GENERATION_ENABLED ?? import.meta.env?.AI_GENERATION_ENABLED ?? "true").toLowerCase() !==
 	"false";
-const JOURNEY_STAGES = ["Mission", "Campaign Library", "Knowledge", "Strategy", "Content", "Review", "Schedule", "Publish"];
+const JOURNEY_STAGES = ["Mission", "Knowledge", "Strategy", "Content", "Review", "Schedule", "Publish"];
 const KNOWLEDGE_NODE_DEFINITIONS = [
 	{ key: "product", label: "Product", className: "echo-brain-node-top" },
 	{ key: "brand", label: "Brand", className: "echo-brain-node-left-top" },
@@ -469,13 +509,13 @@ function buildCampaignStrategy({ campaignPlan, goal, product, platform }) {
 
 function getJourneyIndex({ view, loaderVisible, pipeline }) {
 	if (view === "intake") return 0;
-	if (view === "library") return 1;
-	if (loaderVisible || !pipeline.campaignPlan) return 2;
-	if (view === "content") return 4;
-	if (view === "review") return 5;
-	if (view === "schedule") return 6;
-	if (view === "publish") return 7;
-	return 3;
+	if (view === "library") return 0;
+	if (loaderVisible || !pipeline.campaignPlan) return 1;
+	if (view === "content") return 3;
+	if (view === "review") return 4;
+	if (view === "schedule") return 5;
+	if (view === "publish") return 6;
+	return 2;
 }
 
 function getDefaultDestination(platform = "") {
@@ -558,6 +598,34 @@ function normalizeList(value) {
 			.filter(Boolean);
 	}
 	return [];
+}
+
+function normalizeLocalAssetPath(value) {
+	const raw = String(value || "").trim();
+	if (!raw) return "";
+	const assetIndex = raw.indexOf("frontend/assets/");
+	if (assetIndex >= 0) return raw.slice(assetIndex);
+	const shortAssetIndex = raw.indexOf("assets/");
+	if (shortAssetIndex >= 0) return `frontend/${raw.slice(shortAssetIndex)}`;
+	return raw;
+}
+
+function getLocalAssetPreview(post) {
+	const candidates = [post.imageAsset, post.mediaPath, post.image].filter(Boolean);
+	for (const candidate of candidates) {
+		const assetPath = normalizeLocalAssetPath(candidate);
+		if (!assetPath.startsWith("frontend/assets/")) continue;
+		const moduleKey = assetPath.replace("frontend/assets/", "../../assets/");
+		const url = LOCAL_ASSET_URLS[moduleKey];
+		if (!url) continue;
+		return {
+			url,
+			path: assetPath,
+			filename: assetPath.split("/").pop(),
+			alt: post.altText || post.title || "Campaign visual",
+		};
+	}
+	return null;
 }
 
 function joinForSearch(values = []) {
@@ -1049,7 +1117,7 @@ function PromptInspector({ post }) {
 	if (!sections.length) return null;
 	return (
 		<details className="mt-4 rounded border border-gray-800 bg-black/50 p-3">
-			<summary className="cursor-pointer text-sm font-semibold text-cyan-200">AI Prompts</summary>
+			<summary className="cursor-pointer text-sm font-semibold text-cyan-200">AI Generation Details</summary>
 			<div className="mt-3 space-y-3">
 				{sections.map(([label, value]) => (
 					<div key={label}>
@@ -1061,6 +1129,32 @@ function PromptInspector({ post }) {
 				))}
 			</div>
 		</details>
+	);
+}
+
+function CampaignVisualPreview({ post, compact = false }) {
+	const preview = getLocalAssetPreview(post);
+	if (!preview) return null;
+	return (
+		<figure
+			className={[
+				"overflow-hidden rounded-lg border border-cyan-500/40 bg-black/60",
+				compact ? "h-20 w-20 shrink-0" : "mt-5",
+			].join(" ")}
+		>
+			<img
+				src={preview.url}
+				alt={preview.alt}
+				className={compact ? "h-full w-full object-cover" : "max-h-80 w-full object-contain"}
+				loading="lazy"
+				title={preview.path}
+			/>
+			{compact ? null : (
+				<figcaption className="border-t border-gray-800 px-3 py-2 text-xs text-gray-400">
+					Campaign visual: {preview.filename}
+				</figcaption>
+			)}
+		</figure>
 	);
 }
 
@@ -1077,6 +1171,8 @@ function GeneratedPostEditor({ post, index, boards = [], onChange, compact = fal
 				</div>
 				<p className="text-xs text-gray-500">Post {index + 1}</p>
 			</div>
+
+			<CampaignVisualPreview post={post} />
 
 			<div className="mt-5 rounded border border-gray-800 bg-black/60 p-4">
 				<p className="text-xs uppercase tracking-[0.18em] text-cyan-300">Publish Preview</p>
@@ -1106,7 +1202,7 @@ function GeneratedPostEditor({ post, index, boards = [], onChange, compact = fal
 						/>
 					</label>
 					<label className="block text-sm text-gray-300">
-						Board / Page
+						Publishing Destination
 						{normalizePlatformId(post.platform) === "pinterest" && boards.length ? (
 							<select
 								className="mt-2 w-full border border-gray-700 bg-black px-3 py-2 text-white"
@@ -1136,7 +1232,7 @@ function GeneratedPostEditor({ post, index, boards = [], onChange, compact = fal
 						/>
 					</label>
 					<label className="block text-sm text-gray-300 md:col-span-2">
-						Body
+						Generated Content
 						<textarea
 							className="mt-2 min-h-36 w-full border border-gray-700 bg-black px-3 py-2 text-white"
 							value={post.body}
@@ -1144,7 +1240,7 @@ function GeneratedPostEditor({ post, index, boards = [], onChange, compact = fal
 						/>
 					</label>
 					<label className="block text-sm text-gray-300">
-						Hook
+						Title / Hook
 						<input
 							className="mt-2 w-full border border-gray-700 bg-black px-3 py-2 text-white"
 							value={post.hook}
@@ -1152,7 +1248,7 @@ function GeneratedPostEditor({ post, index, boards = [], onChange, compact = fal
 						/>
 					</label>
 					<label className="block text-sm text-gray-300">
-						CTA
+						Recommended Next Step
 						<input
 							className="mt-2 w-full border border-gray-700 bg-black px-3 py-2 text-white"
 							value={post.cta}
@@ -1176,7 +1272,7 @@ function GeneratedPostEditor({ post, index, boards = [], onChange, compact = fal
 						/>
 					</label>
 					<label className="block text-sm text-gray-300 md:col-span-2">
-						Destination URL
+						Link
 						<input
 							className="mt-2 w-full border border-gray-700 bg-black px-3 py-2 text-white"
 							value={post.destinationUrl}
@@ -1184,7 +1280,7 @@ function GeneratedPostEditor({ post, index, boards = [], onChange, compact = fal
 						/>
 					</label>
 					<label className="block text-sm text-gray-300 md:col-span-2">
-						Image Concept
+						Visual Direction
 						<input
 							className="mt-2 w-full border border-gray-700 bg-black px-3 py-2 text-white"
 							value={post.imageConcept}
@@ -1192,7 +1288,7 @@ function GeneratedPostEditor({ post, index, boards = [], onChange, compact = fal
 						/>
 					</label>
 					<label className="block text-sm text-gray-300 md:col-span-2">
-						Image Prompt
+						Visual Instructions
 						<textarea
 							className="mt-2 min-h-24 w-full border border-gray-700 bg-black px-3 py-2 text-white"
 							value={post.imagePrompt}
@@ -1371,7 +1467,6 @@ export default function EchoStudioPage() {
 				if (cancelled) return;
 				const normalizedDrafts = Array.isArray(drafts) ? drafts : [];
 				setCampaignDrafts(normalizedDrafts);
-				if (normalizedDrafts.length) setView("library");
 			} catch (restoreError) {
 				console.warn("No Echo Studio campaign drafts loaded:", restoreError?.message || restoreError);
 			}
@@ -1384,6 +1479,7 @@ export default function EchoStudioPage() {
 
 	useEffect(() => {
 		if (!currentCampaignDraftId || restoringDraftRef.current) return undefined;
+		if (view === "library") return undefined;
 		if (!pipeline.mission && !pipeline.campaignStrategy && campaignPosts.length === 0) return undefined;
 		const timer = window.setTimeout(async () => {
 			try {
@@ -1671,12 +1767,11 @@ export default function EchoStudioPage() {
 
 	function handleJourneyStageClick(index) {
 		if (index === 0) setView("intake");
-		if (index === 1) loadCampaignLibrary({ showLibrary: true });
-		if (index === 3 && pipeline.campaignPlan) setView("strategy");
-		if (index === 4 && campaignPosts.length) setView("content");
-		if (index === 5 && campaignPosts.length) setView("review");
-		if (index === 6 && campaignPosts.length) setView("schedule");
-		if (index === 7 && campaignPosts.length) setView("publish");
+		if (index === 2 && pipeline.campaignPlan) setView("strategy");
+		if (index === 3 && campaignPosts.length) setView("content");
+		if (index === 4 && campaignPosts.length) setView("review");
+		if (index === 5 && campaignPosts.length) setView("schedule");
+		if (index === 6 && campaignPosts.length) setView("publish");
 	}
 
 	function updateCampaignPost(index, field, value) {
@@ -1765,11 +1860,32 @@ export default function EchoStudioPage() {
 			/>
 			<AppTopNav />
 			<div className="mx-auto max-w-6xl space-y-6">
-				<header>
-					<h1 className="text-3xl font-bold text-pink-300">Echo Studio</h1>
+				<header className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+					<div>
+						<h1 className="text-3xl font-bold text-pink-300">Echo Studio</h1>
 						<p className="mt-2 text-sm text-gray-300">
 							AI Marketing Operator for turning a business goal into approved campaign content.
 						</p>
+					</div>
+					<div className="flex flex-wrap gap-3">
+						{view !== "intake" ? (
+							<button
+								type="button"
+								className="border border-pink-500 px-4 py-2 text-sm font-semibold text-pink-200 hover:bg-pink-500 hover:text-black"
+								onClick={resetCampaignWorkspace}
+							>
+								New Mission
+							</button>
+						) : null}
+						<button
+							type="button"
+							className="border border-cyan-500 px-4 py-2 text-sm font-semibold text-cyan-200 hover:bg-cyan-500 hover:text-black disabled:cursor-wait disabled:opacity-50"
+							onClick={() => loadCampaignLibrary({ showLibrary: true })}
+							disabled={libraryLoading}
+						>
+							Campaign Library{campaignDrafts.length ? ` (${campaignDrafts.length})` : ""}
+						</button>
+					</div>
 				</header>
 
 				<JourneyHeader activeIndex={activeJourneyIndex} onStageClick={handleJourneyStageClick} />
@@ -1852,7 +1968,7 @@ export default function EchoStudioPage() {
 								onClick={() => loadCampaignLibrary({ showLibrary: true })}
 								disabled={libraryLoading}
 							>
-								Campaign Library
+								Open Campaign Library{campaignDrafts.length ? ` (${campaignDrafts.length})` : ""}
 							</button>
 						</div>
 					</section>
@@ -2107,10 +2223,15 @@ export default function EchoStudioPage() {
 													<p className={`text-xs uppercase tracking-[0.2em] ${campaignAccent.mutedTextClass}`}>
 														{getShortPostTypeLabel(post.platform)} {originalIndex + 1}
 													</p>
-													<h3 className="mt-2 text-lg font-semibold text-pink-100">{post.title}</h3>
-													<p className="mt-2 text-sm text-gray-400">
-														{post.destination || getDefaultDestination(post.platform)} · {post.campaignPhase || "Launch"}
-													</p>
+													<div className="mt-2 flex gap-3">
+														<CampaignVisualPreview post={post} compact />
+														<div>
+															<h3 className="text-lg font-semibold text-pink-100">{post.title}</h3>
+															<p className="mt-2 text-sm text-gray-400">
+																{post.destination || getDefaultDestination(post.platform)} · {post.campaignPhase || "Launch"}
+															</p>
+														</div>
+													</div>
 												</div>
 												<label className="block text-sm text-gray-300">
 													Scheduled time
@@ -2193,6 +2314,7 @@ export default function EchoStudioPage() {
 											<div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
 												<div className="flex gap-3">
 													<span className={`mt-1 h-3 w-3 shrink-0 rounded-full ${campaignAccent.dotClass}`} aria-hidden="true" />
+													<CampaignVisualPreview post={post} compact />
 													<div>
 														<p className={`text-xs uppercase tracking-[0.2em] ${campaignAccent.mutedTextClass}`}>
 															✓ {getShortPostTypeLabel(post.platform)} {originalIndex + 1}
