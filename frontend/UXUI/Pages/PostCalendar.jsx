@@ -496,7 +496,7 @@ export default function PostCalendar() {
          <div className="grid grid-cols-1 gap-4 lg:grid-cols-[3fr_1fr] lg:items-stretch">
   <aside
     className="bg-black text-teal-300 p-4 border-2 border-pink-600 shadow-lg rounded cursor-pointer hover:border-teal-400 transition-colors"
-    onClick={() => navigate("/archive")}
+    onClick={() => navigate("/charts")}
   >
     <h2 className="text-pink-500 text-2xl mb-4 border-b border-pink-500 pb-1">
       TODAY&apos;S QUEUE
@@ -738,7 +738,8 @@ export default function PostCalendar() {
             <button
   type="button"
   onClick={() => handleViewCharts("pipeline")}
-  className="border border-teal-500 p-3 rounded bg-black text-left hover:border-pink-400 hover:shadow-[0_0_12px_rgba(56,189,248,0.35)] transition md:col-span-2 xl:col-span-4"
+  className="border border-teal-500 p-3 rounded bg-black text-left hover:border-pink-400 
+  hover:shadow-[0_0_12px_rgba(56,189,248,0.35)] transition md:col-span-2 xl:col-span-4"
 >
                 <h3 className="text-pink-400 text-lg mb-1">🔋 Broadcast Meter</h3>
                 <p className="text-xs text-teal-400 mb-3">
@@ -759,7 +760,7 @@ export default function PostCalendar() {
         <aside className="space-y-4 text-teal-300 text-sm">
           <section
             className="bg-black text-teal-300 p-4 border-2 border-pink-600 shadow-lg rounded cursor-pointer hover:border-teal-400 transition-colors"
-            onClick={() => navigate('/archive')}
+            // onClick={() => navigate('/archive')}
           >
             <h2 className="text-pink-500 text-2xl mb-4 border-b border-pink-500 pb-1">
               PAST ECHOES

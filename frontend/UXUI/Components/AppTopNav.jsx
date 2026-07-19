@@ -18,7 +18,7 @@ const navItems = [
   // },
   {
     to: "/compose",
-    label: "Summon Composer",
+    label: "PostComposer",
     baseClass:
       "border-pink-500 text-pink-300 hover:bg-pink-500 hover:text-black",
     activeClass: "border-pink-400 bg-pink-500 text-black",
