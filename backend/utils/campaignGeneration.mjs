@@ -52,8 +52,9 @@ function buildCampaignPlannerPrompt(input, productProfile, platforms, phases, ma
     `Platforms: ${platforms.join(", ")}`,
     `Allowed campaign phases: ${phases.join(", ")}`,
     `Maximum posts to plan: ${maxPosts}`,
+    `Target posts to plan: ${maxPosts}. For single-platform campaigns, create ${maxPosts} distinct planned posts unless a safety rule makes that impossible.`,
     pinterestAware,
-    "Task: plan a compact multi-platform campaign. Choose the most useful combinations only.",
+    "Task: plan a useful campaign. Every planned post must have a distinct hook, angle, keyword focus, and visual direction.",
     `Use this exact JSON shape:
 {
   "campaign_posts": [

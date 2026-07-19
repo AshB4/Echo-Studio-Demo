@@ -6,6 +6,7 @@ import { productProfiles } from "../utils/productProfiles";
 const API_BASE = import.meta.env?.VITE_API_BASE || "http://localhost:3001";
 const ECHO_PRODUCTS = productProfiles.slice(0, 3);
 const SUPPORTED_PLATFORMS = ["Pinterest", "Facebook", "Dev.to"];
+const DEFAULT_PINTEREST_CAMPAIGN_SIZE = 10;
 const JOURNEY_STAGES = ["Mission", "Knowledge", "Strategy", "Content", "Review", "Schedule", "Publish"];
 const KNOWLEDGE_NODE_DEFINITIONS = [
 	{ key: "product", label: "Product", className: "echo-brain-node-top" },
@@ -527,6 +528,10 @@ function humanizePlatformId(platform = "") {
 	return String(platform || "General").trim();
 }
 
+function getDefaultCampaignSize(platform = "") {
+	return normalizePlatformId(platform) === "pinterest" ? DEFAULT_PINTEREST_CAMPAIGN_SIZE : 1;
+}
+
 function normalizeList(value) {
 	if (Array.isArray(value)) return value.map((item) => String(item || "").trim()).filter(Boolean);
 	if (typeof value === "string") {
@@ -731,6 +736,119 @@ function getScheduleWarnings(posts) {
 		if (count > 3) warnings.push("Campaign clustering detected on one platform/day.");
 	}
 	return Array.from(new Set(warnings));
+}
+
+const CAMPAIGN_ACCENTS = [
+	{
+		dotClass: "bg-violet-500",
+		borderClass: "border-violet-500/70",
+		bgClass: "bg-violet-950/10",
+		textClass: "text-violet-200",
+		mutedTextClass: "text-violet-300",
+		shadowClass: "shadow-[0_0_18px_rgba(139,92,246,0.16)]",
+	},
+	{
+		dotClass: "bg-lime-500",
+		borderClass: "border-lime-500/70",
+		bgClass: "bg-lime-950/10",
+		textClass: "text-lime-200",
+		mutedTextClass: "text-lime-300",
+		shadowClass: "shadow-[0_0_18px_rgba(132,204,22,0.16)]",
+	},
+	{
+		dotClass: "bg-orange-500",
+		borderClass: "border-orange-500/70",
+		bgClass: "bg-orange-950/10",
+		textClass: "text-orange-200",
+		mutedTextClass: "text-orange-300",
+		shadowClass: "shadow-[0_0_18px_rgba(249,115,22,0.16)]",
+	},
+	{
+		dotClass: "bg-cyan-500",
+		borderClass: "border-cyan-500/70",
+		bgClass: "bg-cyan-950/10",
+		textClass: "text-cyan-200",
+		mutedTextClass: "text-cyan-300",
+		shadowClass: "shadow-[0_0_18px_rgba(34,211,238,0.16)]",
+	},
+	{
+		dotClass: "bg-fuchsia-500",
+		borderClass: "border-fuchsia-500/70",
+		bgClass: "bg-fuchsia-950/10",
+		textClass: "text-fuchsia-200",
+		mutedTextClass: "text-fuchsia-300",
+		shadowClass: "shadow-[0_0_18px_rgba(217,70,239,0.16)]",
+	},
+];
+
+function getCampaignAccent(seed = "") {
+	const text = String(seed || "echo-studio");
+	const hash = text.split("").reduce((total, character) => total + character.charCodeAt(0), 0);
+	return CAMPAIGN_ACCENTS[hash % CAMPAIGN_ACCENTS.length];
+}
+
+function getCampaignName({ mission, selectedProduct, campaignStrategy }) {
+	return (
+		mission?.title ||
+		campaignStrategy?.primaryHook ||
+		(selectedProduct?.label ? `${selectedProduct.label} Campaign` : "Echo Studio Campaign")
+	);
+}
+
+function getPostTypeLabel(platform = "", count = 1) {
+	const platformId = normalizePlatformId(platform);
+	if (platformId === "pinterest") return count === 1 ? "Pinterest Pin" : "Pinterest Pins";
+	if (platformId === "facebook") return count === 1 ? "Facebook Post" : "Facebook Posts";
+	if (platformId === "devto") return count === 1 ? "Dev.to Article" : "Dev.to Articles";
+	return count === 1 ? "Campaign Post" : "Campaign Posts";
+}
+
+function getShortPostTypeLabel(platform = "") {
+	const platformId = normalizePlatformId(platform);
+	if (platformId === "pinterest") return "Pin";
+	if (platformId === "facebook") return "Post";
+	if (platformId === "devto") return "Article";
+	return "Post";
+}
+
+function getCampaignPostCountLabel(posts, platform = "") {
+	const count = posts.length;
+	return `${count} ${getPostTypeLabel(platform, count)}`;
+}
+
+function getSortedScheduledPosts(posts) {
+	return posts
+		.map((post, originalIndex) => ({ post, originalIndex }))
+		.sort((left, right) =>
+			String(left.post.scheduledAt || "").localeCompare(String(right.post.scheduledAt || "")),
+		);
+}
+
+function formatScheduleDate(iso) {
+	if (!iso) return "Unscheduled";
+	const date = new Date(iso);
+	if (Number.isNaN(date.getTime())) return "Unscheduled";
+	return date.toLocaleDateString(undefined, {
+		month: "long",
+		day: "numeric",
+	});
+}
+
+function formatScheduleTime(iso) {
+	if (!iso) return "";
+	const date = new Date(iso);
+	if (Number.isNaN(date.getTime())) return "";
+	return date.toLocaleTimeString(undefined, {
+		hour: "numeric",
+		minute: "2-digit",
+	});
+}
+
+function getScheduleStatus(posts, warnings = []) {
+	if (!posts.length) return "No posts generated";
+	if (warnings.length) return "Needs schedule review";
+	if (posts.every((post) => post.scheduledAt)) return "Scheduled";
+	return "Partially scheduled";
 }
 
 function JourneyHeader({ activeIndex, onStageClick }) {
@@ -974,6 +1092,14 @@ export default function EchoStudioPage() {
 		[pipeline.campaignPlan, form.primaryPlatform],
 	);
 	const campaignStrategy = pipeline.campaignStrategy;
+	const campaignAccent = getCampaignAccent(selectedProduct?.id || pipeline.mission?.id || form.goal);
+	const campaignName = getCampaignName({
+		mission: pipeline.mission,
+		selectedProduct,
+		campaignStrategy,
+	});
+	const campaignPlatform = campaignPosts[0]?.platform || form.primaryPlatform;
+	const campaignPostCountLabel = getCampaignPostCountLabel(campaignPosts, campaignPlatform);
 	const recommendedAudience = useMemo(
 		() =>
 			campaignStrategy?.audience || getRecommendedAudience({
@@ -1168,7 +1294,7 @@ export default function EchoStudioPage() {
 				campaignPhases: ["launch"],
 				productProfileId: selectedProduct?.id || null,
 				postIntent: pipeline.campaignStrategy.primaryMessage,
-				maxPosts: 1,
+				maxPosts: getDefaultCampaignSize(platformId),
 			};
 			setWorkingStep("Building AI campaign prompts...");
 			const promptPreview = await postRawJson("/api/ai/campaign-generate", {
@@ -1478,12 +1604,37 @@ export default function EchoStudioPage() {
 					) : view === "schedule" ? (
 						<section className="space-y-5">
 							<div>
-								<p className="text-sm uppercase tracking-[0.28em] text-cyan-300">Schedule Review</p>
-								<h2 className="mt-2 text-2xl font-semibold text-pink-200">Review the campaign timeline.</h2>
+								<p className="text-sm uppercase tracking-[0.28em] text-cyan-300">Campaign Schedule</p>
+								<h2 className="mt-2 text-2xl font-semibold text-pink-200">Schedule each generated post.</h2>
 								<p className="mt-2 text-sm text-gray-300">
-									Echo checked spacing, board reuse, hooks, image direction, and campaign clustering before queueing.
+									Each item below becomes its own queue job for the existing publishing worker.
 								</p>
 							</div>
+							<section className={`rounded-lg border p-5 ${campaignAccent.borderClass} ${campaignAccent.bgClass} ${campaignAccent.shadowClass}`}>
+								<div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+									<div className="flex items-start gap-3">
+										<span className={`mt-1 h-4 w-4 shrink-0 rounded-full ${campaignAccent.dotClass}`} aria-hidden="true" />
+										<div>
+											<p className={`text-xs uppercase tracking-[0.24em] ${campaignAccent.mutedTextClass}`}>Campaign</p>
+											<h3 className={`mt-2 text-xl font-semibold ${campaignAccent.textClass}`}>{campaignName}</h3>
+										</div>
+									</div>
+									<div className="grid gap-3 text-sm sm:grid-cols-3 md:min-w-[420px]">
+										<div className="rounded border border-gray-800 bg-black/40 p-3">
+											<p className="text-xs uppercase tracking-[0.18em] text-gray-500">Platform</p>
+											<p className="mt-2 text-gray-100">{campaignPlatform}</p>
+										</div>
+										<div className="rounded border border-gray-800 bg-black/40 p-3">
+											<p className="text-xs uppercase tracking-[0.18em] text-gray-500">Posts</p>
+											<p className="mt-2 text-gray-100">{campaignPostCountLabel}</p>
+										</div>
+										<div className="rounded border border-gray-800 bg-black/40 p-3">
+											<p className="text-xs uppercase tracking-[0.18em] text-gray-500">Status</p>
+											<p className="mt-2 text-gray-100">{getScheduleStatus(campaignPosts, scheduleWarnings)}</p>
+										</div>
+									</div>
+								</div>
+							</section>
 							<div className={`rounded-lg border p-4 ${scheduleWarnings.length ? "border-yellow-500/70 bg-yellow-950/20 text-yellow-100" : "border-cyan-500/70 bg-cyan-950/20 text-cyan-100"}`}>
 								{scheduleWarnings.length ? (
 									<ul className="space-y-2 text-sm">
@@ -1495,34 +1646,47 @@ export default function EchoStudioPage() {
 									<p className="text-sm">✓ Schedule spacing looks healthy.</p>
 								)}
 							</div>
-							<div className="space-y-4">
-								{campaignPosts.map((post, index) => (
-									<section key={post.localId} className="rounded-lg border border-gray-800 bg-gray-950/80 p-4">
-										<div className="grid gap-4 md:grid-cols-2">
-											<StrategyCard title="Platform">
-												<p>{post.platform}</p>
-											</StrategyCard>
-											<StrategyCard title="Destination">
-												<p>{post.destination || getDefaultDestination(post.platform)}</p>
-											</StrategyCard>
-											<StrategyCard title="Product">
-												<p>{selectedProduct?.label || post.product || "Selected product"}</p>
-											</StrategyCard>
-											<StrategyCard title="Campaign Phase">
-												<p>{post.campaignPhase || "Launch"}</p>
-											</StrategyCard>
-										</div>
-										<label className="mt-4 block text-sm text-gray-300">
-											Scheduled time
-											<input
-												type="datetime-local"
-												className="mt-2 w-full border border-gray-700 bg-black px-3 py-2 text-white"
-												value={formatLocalSchedule(post.scheduledAt)}
-												onChange={(event) => updateCampaignPost(index, "scheduledAt", parseLocalSchedule(event.target.value))}
-											/>
-										</label>
-									</section>
-								))}
+							<div className="rounded-lg border border-gray-800 bg-gray-950/70 p-4">
+								<div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+									<div>
+										<p className="text-xs uppercase tracking-[0.22em] text-cyan-300">Timeline</p>
+										<p className="mt-1 text-sm text-gray-400">List view now, structured for a future weekly or monthly calendar.</p>
+									</div>
+									<p className="text-xs text-gray-500">{campaignPostCountLabel}</p>
+								</div>
+								<div className="space-y-3">
+									{getSortedScheduledPosts(campaignPosts).map(({ post, originalIndex }) => (
+										<section key={post.localId} className={`rounded border border-gray-800 bg-black/45 p-4 ${campaignAccent.shadowClass}`}>
+											<div className="grid gap-4 md:grid-cols-[130px_1fr_220px] md:items-center">
+												<div className="flex gap-3 md:block">
+													<span className={`mt-1 inline-block h-3 w-3 shrink-0 rounded-full ${campaignAccent.dotClass} md:mb-3`} aria-hidden="true" />
+													<div>
+														<p className="text-sm font-semibold text-gray-100">{formatScheduleDate(post.scheduledAt)}</p>
+														<p className="text-sm text-gray-400">{formatScheduleTime(post.scheduledAt) || "Choose time"}</p>
+													</div>
+												</div>
+												<div className={`border-l-2 pl-4 ${campaignAccent.borderClass}`}>
+													<p className={`text-xs uppercase tracking-[0.2em] ${campaignAccent.mutedTextClass}`}>
+														{getShortPostTypeLabel(post.platform)} {originalIndex + 1}
+													</p>
+													<h3 className="mt-2 text-lg font-semibold text-pink-100">{post.title}</h3>
+													<p className="mt-2 text-sm text-gray-400">
+														{post.destination || getDefaultDestination(post.platform)} · {post.campaignPhase || "Launch"}
+													</p>
+												</div>
+												<label className="block text-sm text-gray-300">
+													Scheduled time
+													<input
+														type="datetime-local"
+														className="mt-2 w-full border border-gray-700 bg-black px-3 py-2 text-white"
+														value={formatLocalSchedule(post.scheduledAt)}
+														onChange={(event) => updateCampaignPost(originalIndex, "scheduledAt", parseLocalSchedule(event.target.value))}
+													/>
+												</label>
+											</div>
+										</section>
+									))}
+								</div>
 							</div>
 							<div className="flex flex-wrap gap-3">
 								<button
@@ -1546,32 +1710,74 @@ export default function EchoStudioPage() {
 							<div>
 							<p className="text-sm uppercase tracking-[0.28em] text-cyan-300">Campaign Complete</p>
 							<h2 className="mt-2 text-2xl font-semibold text-pink-200">
-								Echo has successfully created your marketing campaign.
+								{campaignPostCountLabel} generated and ready for queueing.
 							</h2>
 							<p className="mt-2 text-sm text-gray-300">
-								This demo prepares the publishing handoff but does not send a live post.
+								Review the campaign queue before sending each post to the existing publisher.
 								</p>
 							</div>
-							{campaignPosts.map((post, index) => (
-								<section key={post.localId} className="rounded-lg border border-pink-600/70 bg-gray-950/80 p-5">
-									<div className="grid gap-4 md:grid-cols-2">
-										<StrategyCard title="Platform">
-											<p>{post.platform}</p>
-										</StrategyCard>
-										<StrategyCard title="Publishing Destination">
-											<p>{post.destination || getDefaultDestination(post.platform)}</p>
-											<p className="mt-2 text-gray-400">Scheduled: {new Date(post.scheduledAt).toLocaleString()}</p>
-										</StrategyCard>
+							<section className={`rounded-lg border p-5 ${campaignAccent.borderClass} ${campaignAccent.bgClass} ${campaignAccent.shadowClass}`}>
+								<div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+									<div className="flex items-start gap-3">
+										<span className={`mt-1 h-4 w-4 shrink-0 rounded-full ${campaignAccent.dotClass}`} aria-hidden="true" />
+										<div>
+											<p className={`text-xs uppercase tracking-[0.24em] ${campaignAccent.mutedTextClass}`}>Campaign Summary</p>
+											<h3 className={`mt-2 text-xl font-semibold ${campaignAccent.textClass}`}>{campaignName}</h3>
+										</div>
 									</div>
-									<div className="mt-4 rounded border border-gray-800 bg-black/60 p-4">
-										<p className="text-xs uppercase tracking-[0.22em] text-cyan-300">Final Content</p>
-										<h3 className="mt-3 text-lg font-semibold text-pink-200">{post.title}</h3>
-										<p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-gray-100">{post.body}</p>
-										<p className="mt-2 text-xs text-gray-400">{post.hashtags.join(" ")}</p>
+									<div className="grid gap-3 text-sm sm:grid-cols-3 md:min-w-[420px]">
+										<div className="rounded border border-gray-800 bg-black/40 p-3">
+											<p className="text-xs uppercase tracking-[0.18em] text-gray-500">Platform</p>
+											<p className="mt-2 text-gray-100">{campaignPlatform}</p>
+										</div>
+										<div className="rounded border border-gray-800 bg-black/40 p-3">
+											<p className="text-xs uppercase tracking-[0.18em] text-gray-500">Posts</p>
+											<p className="mt-2 text-gray-100">{campaignPostCountLabel}</p>
+										</div>
+										<div className="rounded border border-gray-800 bg-black/40 p-3">
+											<p className="text-xs uppercase tracking-[0.18em] text-gray-500">Schedule Status</p>
+											<p className="mt-2 text-gray-100">{getScheduleStatus(campaignPosts, scheduleWarnings)}</p>
+										</div>
 									</div>
-									<p className="mt-3 text-xs text-gray-500">Post {index + 1}</p>
-								</section>
-							))}
+								</div>
+							</section>
+							<section className="rounded-lg border border-gray-800 bg-gray-950/80 p-5">
+								<div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+									<div>
+										<p className="text-xs uppercase tracking-[0.22em] text-cyan-300">Campaign Queue</p>
+										<h3 className="mt-2 text-xl font-semibold text-pink-200">Individual publish jobs</h3>
+									</div>
+									<p className="text-xs text-gray-500">{campaignPostCountLabel}</p>
+								</div>
+								<div className="mt-4 space-y-3">
+									{getSortedScheduledPosts(campaignPosts).map(({ post, originalIndex }) => (
+										<article key={post.localId} className="rounded border border-gray-800 bg-black/45 p-4">
+											<div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+												<div className="flex gap-3">
+													<span className={`mt-1 h-3 w-3 shrink-0 rounded-full ${campaignAccent.dotClass}`} aria-hidden="true" />
+													<div>
+														<p className={`text-xs uppercase tracking-[0.2em] ${campaignAccent.mutedTextClass}`}>
+															✓ {getShortPostTypeLabel(post.platform)} {originalIndex + 1}
+														</p>
+														<h4 className="mt-2 text-lg font-semibold text-pink-100">{post.title}</h4>
+														<p className="mt-2 line-clamp-3 text-sm leading-6 text-gray-200">{post.body}</p>
+														{post.hashtags.length ? (
+															<p className="mt-2 text-xs text-gray-500">{post.hashtags.join(" ")}</p>
+														) : null}
+													</div>
+												</div>
+												<div className="shrink-0 rounded border border-gray-800 bg-gray-950/80 p-3 text-sm text-gray-300 md:w-56">
+													<p className="font-semibold text-cyan-100">Scheduled</p>
+													<p className="mt-2">{formatScheduleDate(post.scheduledAt)}</p>
+													<p>{formatScheduleTime(post.scheduledAt) || "No time selected"}</p>
+													<p className="mt-3 text-xs uppercase tracking-[0.18em] text-gray-500">Destination</p>
+													<p className="mt-1 text-gray-200">{post.destination || getDefaultDestination(post.platform)}</p>
+												</div>
+											</div>
+										</article>
+									))}
+								</div>
+							</section>
 							{handoffStatus ? (
 								<div className="rounded border border-cyan-500/70 bg-cyan-950/20 p-3 text-sm text-cyan-100">
 									{handoffStatus}
@@ -1584,7 +1790,7 @@ export default function EchoStudioPage() {
 							) : null}
 							{queueResults.length || publishResults.length ? (
 								<div className="rounded border border-gray-800 bg-black/50 p-3 text-xs text-gray-300">
-									{queueResults.length ? <p>Queued posts: {queueResults.map((post) => post.id).join(", ")}</p> : null}
+									{queueResults.length ? <p>Queued posts: {queueResults.length}</p> : null}
 									{publishResults.length ? <p>Publish results returned: {publishResults.length}</p> : null}
 								</div>
 							) : null}
