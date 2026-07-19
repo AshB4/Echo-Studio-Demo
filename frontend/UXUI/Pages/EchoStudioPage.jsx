@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import AppTopNav from "../Components/AppTopNav";
 import echoArrow from "../../assets/InteralAssets/EchoArrow.png";
 import { productProfiles } from "../utils/productProfiles";
@@ -7,6 +7,10 @@ const API_BASE = import.meta.env?.VITE_API_BASE || "http://localhost:3001";
 const ECHO_PRODUCTS = productProfiles.slice(0, 3);
 const SUPPORTED_PLATFORMS = ["Pinterest", "Facebook", "Dev.to"];
 const DEFAULT_PINTEREST_CAMPAIGN_SIZE = 10;
+const DRAFT_SAVE_DEBOUNCE_MS = 700;
+const AI_GENERATION_ENABLED =
+	String(import.meta.env?.VITE_AI_GENERATION_ENABLED ?? import.meta.env?.AI_GENERATION_ENABLED ?? "true").toLowerCase() !==
+	"false";
 const JOURNEY_STAGES = ["Mission", "Knowledge", "Strategy", "Content", "Review", "Schedule", "Publish"];
 const KNOWLEDGE_NODE_DEFINITIONS = [
 	{ key: "product", label: "Product", className: "echo-brain-node-top" },
@@ -691,6 +695,83 @@ function buildQueuePayload(post, { mission, campaignStrategy, selectedProduct })
 	};
 }
 
+function buildCampaignDraftPayload({
+	id = null,
+	form,
+	pipeline,
+	brainSources,
+	generatedPosts,
+	pinterestBoards,
+	currentView,
+	queueResults,
+	publishResults,
+	handoffStatus,
+	status = "draft",
+}) {
+	const posts = Array.isArray(generatedPosts) ? generatedPosts : [];
+	const draftStatus = getCampaignDraftStatus({
+		status,
+		currentView,
+		generatedPosts: posts,
+		queueResults,
+		publishResults,
+	});
+	return {
+		...(id ? { id } : {}),
+		status: draftStatus,
+		title: pipeline?.mission?.title || form?.goal || "Echo Studio Campaign",
+		form,
+		currentView,
+		mission: pipeline?.mission || null,
+		knowledgeContext: pipeline?.knowledgeContext || null,
+		campaignStrategy: pipeline?.campaignStrategy || null,
+		campaignPlan: pipeline?.campaignPlan || null,
+		campaignGeneration: pipeline?.campaignGeneration || null,
+		generatedPosts: posts,
+		scheduling: posts.map((post) => ({
+			localId: post.localId,
+			title: post.title,
+			platform: post.platform,
+			scheduledAt: post.scheduledAt || null,
+		})),
+		selectedDestinations: posts.map((post) => ({
+			localId: post.localId,
+			platform: post.platform,
+			destination: post.destination || "",
+			boardRecommendation: post.boardRecommendation || null,
+			destinationUrl: post.destinationUrl || "",
+		})),
+		brainSources,
+		pinterestBoards,
+		queueResults,
+		publishResults,
+		handoffStatus,
+	};
+}
+
+function getCampaignDraftStatus({
+	status,
+	currentView,
+	generatedPosts,
+	queueResults,
+	publishResults,
+}) {
+	if (Array.isArray(publishResults) && publishResults.length) return "publish_handoff";
+	if (Array.isArray(queueResults) && queueResults.length) return "queued";
+	if (currentView === "publish") return "ready_for_publish";
+	if (currentView === "schedule") return "scheduled_draft";
+	if (["content", "review"].includes(currentView) && generatedPosts.length) return "generated";
+	return status || "draft";
+}
+
+function getRestoredDraftView(draft) {
+	const view = String(draft?.currentView || "").trim();
+	const hasPosts = Array.isArray(draft?.generatedPosts) && draft.generatedPosts.length > 0;
+	if (["content", "review", "schedule", "publish"].includes(view) && hasPosts) return view;
+	if (view === "strategy" && draft?.campaignPlan) return "strategy";
+	return hasPosts ? "content" : "strategy";
+}
+
 function getScheduleWarnings(posts) {
 	const warnings = [];
 	const byDayPlatform = new Map();
@@ -1083,6 +1164,8 @@ export default function EchoStudioPage() {
 	const [publishResults, setPublishResults] = useState([]);
 	const [handoffStatus, setHandoffStatus] = useState("");
 	const [error, setError] = useState("");
+	const [currentCampaignDraftId, setCurrentCampaignDraftId] = useState(null);
+	const restoringDraftRef = useRef(false);
 
 	const selectedProduct =
 		ECHO_PRODUCTS.find((product) => product.id === form.productId) || ECHO_PRODUCTS[0];
@@ -1109,6 +1192,94 @@ export default function EchoStudioPage() {
 		[campaignStrategy, pipeline.campaignPlan, form.primaryPlatform, selectedProduct],
 	);
 	const scheduleWarnings = useMemo(() => getScheduleWarnings(campaignPosts), [campaignPosts]);
+
+	function applyCampaignDraft(draft) {
+		restoringDraftRef.current = true;
+		setCurrentCampaignDraftId(draft.id || null);
+		setForm((current) => ({
+			...current,
+			...(draft.form || {}),
+		}));
+		setPipeline({
+			...emptyPipeline,
+			mission: draft.mission || null,
+			knowledgeContext: draft.knowledgeContext || null,
+			campaignPlan: draft.campaignPlan || null,
+			campaignStrategy: draft.campaignStrategy || null,
+			campaignGeneration: draft.campaignGeneration || null,
+		});
+		setBrainSources(Array.isArray(draft.brainSources) ? draft.brainSources : []);
+		setCampaignPosts(Array.isArray(draft.generatedPosts) ? draft.generatedPosts : []);
+		setPinterestBoards({
+			defaultBoard: draft.pinterestBoards?.defaultBoard || "",
+			boards: Array.isArray(draft.pinterestBoards?.boards) ? draft.pinterestBoards.boards : [],
+			rules: Array.isArray(draft.pinterestBoards?.rules) ? draft.pinterestBoards.rules : [],
+		});
+		setQueueResults(Array.isArray(draft.queueResults) ? draft.queueResults : []);
+		setPublishResults(Array.isArray(draft.publishResults) ? draft.publishResults : []);
+		setHandoffStatus(draft.handoffStatus || "");
+		setView(getRestoredDraftView(draft));
+		window.setTimeout(() => {
+			restoringDraftRef.current = false;
+		}, 0);
+	}
+
+	function buildCurrentDraftPayload(overrides = {}) {
+		return buildCampaignDraftPayload({
+			id: currentCampaignDraftId,
+			form,
+			pipeline,
+			brainSources,
+			generatedPosts: campaignPosts,
+			pinterestBoards,
+			currentView: view,
+			queueResults,
+			publishResults,
+			handoffStatus,
+			...overrides,
+		});
+	}
+
+	useEffect(() => {
+		let cancelled = false;
+		async function restoreLatestDraft() {
+			try {
+				const drafts = await getJson("/api/campaigns?limit=1");
+				if (cancelled || !Array.isArray(drafts) || !drafts.length) return;
+				applyCampaignDraft(drafts[0]);
+			} catch (restoreError) {
+				console.warn("No Echo Studio campaign draft restored:", restoreError?.message || restoreError);
+			}
+		}
+		restoreLatestDraft();
+		return () => {
+			cancelled = true;
+		};
+	}, []);
+
+	useEffect(() => {
+		if (!currentCampaignDraftId || restoringDraftRef.current) return undefined;
+		if (!pipeline.mission && !pipeline.campaignStrategy && campaignPosts.length === 0) return undefined;
+		const timer = window.setTimeout(async () => {
+			try {
+				await patchJson(`/api/campaigns/${currentCampaignDraftId}`, buildCurrentDraftPayload());
+			} catch (saveError) {
+				console.warn("Could not autosave Echo Studio campaign draft:", saveError?.message || saveError);
+			}
+		}, DRAFT_SAVE_DEBOUNCE_MS);
+		return () => window.clearTimeout(timer);
+	}, [
+		currentCampaignDraftId,
+		form,
+		pipeline,
+		brainSources,
+		campaignPosts,
+		pinterestBoards,
+		view,
+		queueResults,
+		publishResults,
+		handoffStatus,
+	]);
 
 	function updateField(field, value) {
 		setForm((current) => ({ ...current, [field]: value }));
@@ -1232,6 +1403,7 @@ export default function EchoStudioPage() {
 
 	function continueToBrain() {
 		return runStep("Reading product knowledge...", async () => {
+			setCurrentCampaignDraftId(null);
 			setCompletedNodes([]);
 			const mission = await postJson("/api/missions", {
 				title: form.goal,
@@ -1281,6 +1453,10 @@ export default function EchoStudioPage() {
 
 	function approveStrategyAndGenerateDraft() {
 		if (!pipeline.campaignPlan || !pipeline.campaignStrategy) return null;
+		if (!AI_GENERATION_ENABLED) {
+			setError("AI generation is paused during development. Open an existing campaign to continue testing.");
+			return null;
+		}
 		return runStep("Generating campaign content...", async () => {
 			setCompletedNodes(KNOWLEDGE_NODE_DEFINITIONS.map((node) => node.key));
 			setWorkingStep("Loading publishing destinations...");
@@ -1332,6 +1508,24 @@ export default function EchoStudioPage() {
 					pinterestBoards: boards,
 				}),
 			);
+			const nextPipeline = {
+				...pipeline,
+				campaignGeneration,
+				assetBlueprints: [],
+				campaignAsset: null,
+			};
+			const savedDraft = await postJson("/api/campaigns", buildCampaignDraftPayload({
+				form,
+				pipeline: nextPipeline,
+				brainSources,
+				generatedPosts: normalizedPosts,
+				pinterestBoards: boards,
+				currentView: "content",
+				queueResults: [],
+				publishResults: [],
+				handoffStatus: "",
+			}));
+			setCurrentCampaignDraftId(savedDraft.id || null);
 			setPipeline((current) => ({
 				...current,
 				campaignGeneration,
@@ -1884,21 +2078,28 @@ export default function EchoStudioPage() {
 										{error}
 									</div>
 								) : null}
+								{!AI_GENERATION_ENABLED ? (
+									<div className="rounded border border-cyan-500/70 bg-cyan-950/20 p-3 text-sm text-cyan-100">
+										AI generation is paused during development. Open an existing campaign to continue testing.
+									</div>
+								) : null}
 
 								<div className="flex flex-col gap-3 rounded-lg border border-pink-600/60 bg-pink-950/10 p-4 sm:flex-row sm:items-center sm:justify-between">
 									<div>
 										<p className="font-semibold text-pink-200">Ready for Echo to create content?</p>
 										<p className="mt-1 text-sm text-gray-300">
-											Approving the strategy creates editable content from the selected recommendation.
+											{AI_GENERATION_ENABLED
+												? "Approving the strategy creates editable content from the selected recommendation."
+												: "Generation is disabled so you can keep developing the workflow without spending AI credits."}
 										</p>
 									</div>
 									<button
 										type="button"
 										className="border border-pink-500 bg-pink-500 px-5 py-3 font-semibold text-black hover:bg-pink-400 disabled:cursor-wait disabled:opacity-50"
 										onClick={approveStrategyAndGenerateDraft}
-										disabled={Boolean(workingStep)}
+										disabled={Boolean(workingStep) || !AI_GENERATION_ENABLED}
 									>
-										Approve Strategy & Generate Content
+										{AI_GENERATION_ENABLED ? "Approve Strategy & Generate Content" : "AI Generation Paused"}
 									</button>
 								</div>
 							</>

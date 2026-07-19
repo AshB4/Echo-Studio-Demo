@@ -71,6 +71,13 @@ function getDb() {
       payload TEXT NOT NULL,
       created_at TEXT NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS campaigns (
+      id TEXT PRIMARY KEY,
+      status TEXT NOT NULL,
+      payload TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
   `);
   return db;
 }
@@ -226,6 +233,75 @@ export async function createPost(post) {
     .run(post.id, JSON.stringify(post), post.updatedAt || post.createdAt || new Date().toISOString());
   await syncJsonMirror();
   return post;
+}
+
+export async function listCampaignDrafts({ limit = 50 } = {}) {
+  const safeLimit = Math.max(1, Math.min(Number(limit) || 50, 200));
+  const rows = getDb()
+    .prepare("SELECT id, status, payload, updated_at FROM campaigns ORDER BY updated_at DESC LIMIT ?")
+    .all(safeLimit);
+  return rows
+    .map((row) => {
+      const payload = parseJsonSafely(row.payload, null);
+      if (!payload) return null;
+      return {
+        id: row.id,
+        status: row.status,
+        ...payload,
+        updatedAt: row.updated_at,
+      };
+    })
+    .filter(Boolean);
+}
+
+export async function getCampaignDraft(id) {
+  const row = getDb()
+    .prepare("SELECT id, status, payload, updated_at FROM campaigns WHERE id = ?")
+    .get(id);
+  if (!row) return null;
+  const payload = parseJsonSafely(row.payload, null);
+  if (!payload) return null;
+  return {
+    id: row.id,
+    status: row.status,
+    ...payload,
+    updatedAt: row.updated_at,
+  };
+}
+
+export async function createCampaignDraft(draft = {}) {
+  const now = new Date().toISOString();
+  const id = draft.id || `c_${Date.now()}`;
+  const status = draft.status || "draft";
+  const payload = {
+    ...draft,
+    id,
+    status,
+    createdAt: draft.createdAt || now,
+    updatedAt: now,
+  };
+  getDb()
+    .prepare("INSERT INTO campaigns (id, status, payload, updated_at) VALUES (?, ?, ?, ?)")
+    .run(id, status, JSON.stringify(payload), now);
+  return payload;
+}
+
+export async function updateCampaignDraft(id, patch = {}) {
+  const existing = await getCampaignDraft(id);
+  if (!existing) return null;
+  const now = new Date().toISOString();
+  const next = {
+    ...existing,
+    ...patch,
+    id,
+    status: patch.status || existing.status || "draft",
+    createdAt: existing.createdAt || now,
+    updatedAt: now,
+  };
+  getDb()
+    .prepare("UPDATE campaigns SET status = ?, payload = ?, updated_at = ? WHERE id = ?")
+    .run(next.status, JSON.stringify(next), now, id);
+  return next;
 }
 
 export async function updatePost(id, post) {

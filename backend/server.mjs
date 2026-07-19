@@ -38,18 +38,22 @@ import {
 	appendPostedLogEntry as appendPostedLogToDb,
 	appendPinterestMetricsSnapshot,
 	clearPostedPostsFromQueue,
+	createCampaignDraft,
 	createPost,
 	deletePost as deletePostFromDb,
+	getCampaignDraft,
 	readStoreSnapshot,
 	getRotationSettings,
 	getLocalDbPath,
 	initLocalDb,
+	listCampaignDrafts,
 	getPinterestPinMappings,
 	listPosts,
 	listPinterestMetricsSnapshots,
 	listPostedLog,
 	savePinterestPinMappings,
 	replaceStoreSnapshot,
+	updateCampaignDraft,
 	updatePost as updatePostInDb,
 } from "./utils/localDb.mjs";
 import { 
@@ -83,6 +87,19 @@ app.use("/api/asset-blueprints", assetBlueprintsRouter);
 app.use("/api/ai-generator", aiGeneratorRouter);
 app.use("/api/campaign-assets", campaignAssetsRouter);
 const PORT = process.env.PORT || 3001;
+const AI_GENERATION_PAUSED_MESSAGE =
+	"AI generation is paused during development. Open an existing campaign to continue testing.";
+
+function isAiGenerationEnabled() {
+	return String(process.env.AI_GENERATION_ENABLED ?? process.env.POSTPUNK_AI_GENERATION_ENABLED ?? "true").toLowerCase() !== "false";
+}
+
+function rejectPausedAiGeneration(res) {
+	return res.status(503).json({
+		error: "AI generation paused",
+		detail: AI_GENERATION_PAUSED_MESSAGE,
+	});
+}
 
 function getAiErrorStatus(error) {
 	const status = Number(error?.statusCode || error?.status || 500);
@@ -242,6 +259,66 @@ app.get("/api/accounts", async (_req, res) => {
 		res.json(accounts);
 	} catch (error) {
 		res.status(500).json({ error: "Failed to load accounts", detail: error?.message });
+	}
+});
+
+// ---- API: Echo Studio campaign drafts
+app.get("/api/campaigns", async (req, res) => {
+	try {
+		const limit = req.query.limit ? Number(req.query.limit) : 50;
+		return res.json({ data: await listCampaignDrafts({ limit }) });
+	} catch (error) {
+		return res.status(500).json({
+			message: "Could not load campaign drafts",
+			detail: error?.message || String(error),
+		});
+	}
+});
+
+app.get("/api/campaigns/:id", async (req, res) => {
+	try {
+		const campaign = await getCampaignDraft(req.params.id);
+		if (!campaign) {
+			return res.status(404).json({ message: "Campaign draft not found" });
+		}
+		return res.json({ data: campaign });
+	} catch (error) {
+		return res.status(500).json({
+			message: "Could not load campaign draft",
+			detail: error?.message || String(error),
+		});
+	}
+});
+
+app.post("/api/campaigns", async (req, res) => {
+	try {
+		const draft = req.body ?? {};
+		if (!draft.mission && !draft.campaignStrategy && !Array.isArray(draft.generatedPosts)) {
+			return res.status(400).json({
+				message: "Campaign draft requires mission, campaignStrategy, or generatedPosts",
+			});
+		}
+		return res.status(201).json({ data: await createCampaignDraft(draft) });
+	} catch (error) {
+		return res.status(500).json({
+			message: "Could not save campaign draft",
+			detail: error?.message || String(error),
+		});
+	}
+});
+
+app.patch("/api/campaigns/:id", async (req, res) => {
+	try {
+		const campaign = await updateCampaignDraft(req.params.id, req.body ?? {});
+		if (!campaign) {
+			return res.status(404).json({ message: "Campaign draft not found" });
+		}
+		return res.json({ data: campaign });
+	} catch (error) {
+		return res.status(500).json({
+			message: "Could not update campaign draft",
+			detail: error?.message || String(error),
+		});
 	}
 });
 
@@ -755,6 +832,7 @@ app.put("/api/analytics/pinterest/mappings", async (req, res) => {
 });
 
 app.post("/api/ai/seo-generate", async (req, res) => {
+	if (!isAiGenerationEnabled()) return rejectPausedAiGeneration(res);
 	try {
 		const {
 			productName,
@@ -804,6 +882,7 @@ app.post("/api/ai/seo-generate", async (req, res) => {
 });
 
 app.post("/api/ai/campaign-generate", async (req, res) => {
+	if (!isAiGenerationEnabled()) return rejectPausedAiGeneration(res);
 	try {
 		const {
 			productName,
