@@ -1,4 +1,4 @@
-# 📜 PostPunk / N8tiveFlow – License Info
+# 📜 Echo Studio – License Info
 
 This product is **not open source**.
 
