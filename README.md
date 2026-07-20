@@ -1,139 +1,434 @@
-# 🧃 PostPunk aka N8tiveFlow
+# Echo Studio
 
-## PostPunk is not open source. 
-It is licensed under BSD 2-Clause for private, non-commercial use only. Commercial use requires a paid license.
+# **Build once. Market everywhere.**
 
-PostPunk is a discoverability-oriented publishing operations system. It manages workflows, metadata intelligence, lifecycle tracking, syndication decisions, and evergreen resurfacing while Astro remains the canonical publishing layer for rendering, SEO presentation, and archive structure.
+### AI-assisted marketing operations for creators.
 
-For the guiding product boundary and discoverability operating model, see [PostPunk Core Vision](./Docs/PostPunk_Core_Vision.md).
+Echo Studio is designed for creators who would rather spend time building products than juggling marketing tools.
 
----
-
-## 🚀 What It Does
-| Feature                     | Purpose                                                |
-|----------------------------|--------------------------------------------------------|
-| 🧭 Lifecycle Tracking       | Model content as seed, fragment, note, experiment, article, syndicated, refreshed, archived |
-| 🧠 Metadata Intelligence    | Track discoverability metadata, canonical source, related content, and repurpose priority |
-| 🔁 Syndication Operations   | Coordinate platform-aware derivatives without confusing them with canonical ownership |
-| ♻️ Evergreen Systems        | Support resurfacing, refresh reminders, and content decay awareness |
-| 🧩 Platform-Aware Lanes     | Treat Pinterest, Reddit, Dev.to, Facebook, Ko-fi, and similar lanes by behavior, not as interchangeable outputs |
-| 📊 Operational Analytics    | Review queue health, campaign metrics, and tracked funnel events |
-| 🖼️ Media + Asset Support    | Store supporting assets, alt text, and platform-specific payload metadata |
-| 🧾 Astro Export Readiness   | Generate Astro-compatible markdown/frontmatter from PostPunk content records |
-| 🧠 Local First Design       | Runs from terminal or always-on service (launchd/systemd) |
+> Turn a single business goal into a complete marketing workflow from planning and AI generation to scheduling and publishing.
 
 ---
 
-## 📦 Tech Stack
-| Tech                | Purpose                          | License  |
-|---------------------|----------------------------------|----------|
-| React + Zustand     | Frontend UI + lightweight state  | MIT      |
-| Tailwind + Vite     | Fast, styled build system        | MIT      |
-| Playwright + launchd/systemd | Browser automation + scheduled worker | Apache / OS built-in |
-| JSON-based analytics | Funnel and campaign summaries   | Built-in |
+![React](https://img.shields.io/badge/React-Frontend-61DAFB?logo=react)
+![Node](https://img.shields.io/badge/Node.js-Backend-339933?logo=node.js)
+![OpenAI](https://img.shields.io/badge/OpenAI-AI-412991)
+![License](https://img.shields.io/badge/Status-Build%20Week-success)
 
 ---
 
-## 🧠 Core Concepts
-### Responsibility Split
-Astro owns canonical publishing, rendering, SEO presentation, and archive structure.
+## Demo
 
-PostPunk owns workflows, metadata intelligence, lifecycle tracking, syndication, publishing operations, and discoverability systems.
+**Live Application**
 
-### Queue Rules
-Only posts with `"status": "approved"` in the `postQueue.json` are eligible for publishing.
-- Platforms must match `active_platforms` in `settings.json`
-- After posting, system updates `status` to `"posted"`
-- Posts can be rejected or recycled via logs
+> *(Add deployment URL)*
 
-Publishing `status` is not the same thing as content `lifecycleState`.
-`status` answers "can this target publish now?"
-`lifecycleState` answers "what stage of evolution is this content artifact in?"
+**Demo Video**
+
+▶️ **[Watch the 3-minute Echo Studio Demo](https://youtu.be/Fzf0d1O7TAY)**
+
+> **Build Week Prototype:** Some AI features are disabled in the public demo to avoid unnecessary API costs. The workflow and publishing architecture remain fully demonstrated.
 
 ---
 
-## 🔐 Account Secrets
-Keep platform credentials in environment variables, not in tracked JSON.
+# Why I Built Echo Studio
 
-1. Copy `backend/config/accounts.template.json` to `backend/config/accounts.json`
-2. Set the referenced env vars in your local `.env`
-3. Start backend normally; account placeholders like `${X_API_KEY}` are resolved at runtime
+I love building things.
 
-## 📘 Operations Guide
-For full runbooks (macOS launchd, Linux systemd, queue/worker ops, backups, health checks), see:
+I've written books, created coloring books, built software, and designed digital products. Every time I finished something, I ran into the same problem:
 
-- [`README-OPERATIONS.md`](./README-OPERATIONS.md)
+## Nobody knew they existed.
+
+Whenever I physically showed someone one of my products, people bought it.
+
+The products weren't the problem.
+
+**The visibility was.**
+
+Marketing became harder than building.
+
+Every campaign required jumping between AI tools, spreadsheets, image generators, social media dashboards, notes, and scheduling platforms just to stay organized.
+
+Even when I finished writing content, I'd lose drafts, forget what had already been published, or simply run out of time.
+
+I realized I didn't need another AI chatbot.
+
+I needed a system.
+
+A place where strategy, content, assets, scheduling, and publishing lived together.
+
+That's why I built **Echo Studio**.
+
+---
+# Build Week Progress
+
+Echo Studio existed before OpenAI Build Week as an internal content publishing prototype.
+
+During Build Week, I substantially expanded and redesigned the project using Codex and GPT-5.6.
+
+## Before Build Week
+
+- Basic content publishing prototype
+- Hardcoded workflows
+- Early posting automation
+- Internal tooling focused on my own workflow
+
+## Built During OpenAI Build Week
+
+- Complete Home / Mission Intake experience
+- Echo Brain campaign planning workflow
+- Redesigned Dashboard with publishing calendar
+- Performance Signals analytics dashboard
+- Publishing Scheduler with product rotation
+- Product profile management
+- Campaign library workflow
+- AI-assisted Post Composer improvements
+- Cross-platform workflow refinements
+- Navigation and UX redesign
+- Architecture documentation
+- Complete README and project documentation
+
+# Building with Codex & GPT-5.6
+
+During OpenAI Build Week I used Codex as my implementation partner.
+
+Codex accelerated frontend development, UI iteration, component refactoring, backend integration, routing, documentation, and debugging.
+
+I remained responsible for the overall product vision, UX decisions, marketing workflow, architecture, and feature prioritization.
+
+GPT-5.6 was used to help generate and refine prompts, marketing workflows, documentation, and AI-assisted content generation inside Echo Studio itself.
 
 ---
 
-## AI Tooling Workflows
-Phase 1 adoption docs for PostPunk AI tooling:
+# What is Echo Studio?
 
-- [Manual Content Workflow](./Docs/workflows/manual-content-workflow.md)
-- [Style Training Prep](./content/style/README.md)
-- [Stop Slop Integration Plan](./Docs/tooling/stop-slop-integration.md)
-- [Remotion MVP Roadmap](./Docs/roadmap/remotion-mvp.md)
+Echo Studio is an AI-assisted marketing workspace that helps creators transform a single business objective into a complete marketing campaign.
 
----
+Instead of asking:
 
-## 🧠 Discoverability Model
-PostPunk is not:
-- a generic social media scheduler
-- a giant CMS
-- an AI spam engine
-- a productivity app
-- an all-platform autoposter
+> **"What should I post today?"**
 
-PostPunk is:
-- discoverability infrastructure
-- metadata-aware publishing operations
-- evergreen content workflow tooling
-- canonical-aware syndication infrastructure
-- operational publishing intelligence
+Echo Studio asks:
 
-See [PostPunk Core Vision](./Docs/PostPunk_Core_Vision.md) for the full operating model.
+> **"What are you trying to accomplish?"**
+
+From there it guides creators through a structured workflow that combines planning, strategy, AI assistance, content creation, asset management, scheduling, and publishing.
 
 ---
 
-## 🧾 Licensing
-This system is licensed under **BSD 2-Clause** for **personal use only**. 
+# The Workflow
 
-You **may not**:
-- Resell this system
-- Sublicense or publicly post modified versions
-
-To obtain a commercial license or team edition:
-📬 Contact: `fleurdeviefarmsllc@gmail.com`
-
-Includes third-party libraries under MIT, BSD, and Apache 2.0 — see [Licenses.txt](./Docs/Licenses.txt)
-
----
-
-## 🧃 Run It Like a Ghost
-```bash
-cd backend && npm install
-cd ../frontend && npm install
-
-# terminal 1
-cd backend && npm run start
-
-# terminal 2
-cd frontend && npm run dev
-
-# run worker manually (or via launchd/systemd timer)
-cd backend && npm run worker
+```text
+Business Goal
+      ↓
+Campaign Planning
+      ↓
+Echo Brain
+      ↓
+Marketing Strategy
+      ↓
+Content Workflow
+      ↓
+Asset Management
+      ↓
+Review
+      ↓
+Scheduling
+      ↓
+Publishing
 ```
----
 
-## 🛠 Roadmap Highlights
-- [ ] Replace file-backed analytics with a persistent metrics store
-- [ ] Add richer posting/API integration tests
-- [ ] Expand credential health checks into preflight UI warnings
-- [ ] Add revenue-source integrations for conversion reporting
+Instead of generating isolated pieces of content, Echo Studio builds an organized campaign from beginning to end.
 
 ---
 
-🧃 _Post like a ghost. Track like a boss.  Remix like an automation nerd with a thing for good buttons._
+# Why Not Just Use ChatGPT?
 
-🛒 Want to license PostPunk for your team or product?
-Email fleurdeviefarmsllc@gmail.com to get early access + pricing.
+AI helps create content.
+
+But marketing doesn't stop after the AI writes a paragraph.
+
+Creators still have to:
+
+- organize ideas
+- manage assets
+- customize content for each platform
+- keep campaigns consistent
+- schedule posts
+- publish
+- remember what has already been posted
+
+Echo Studio fills that gap.
+
+**ChatGPT helps you write.**
+
+**Echo Studio helps you ship.**
+
+---
+
+# Features
+
+## Campaign Builder
+
+Start with a business objective instead of a prompt.
+
+Echo Studio guides users through an end-to-end campaign planning workflow before generating any content.
+
+---
+
+## Echo Brain
+
+Echo Brain assembles structured marketing knowledge before content generation.
+
+It combines:
+
+- Product knowledge
+- Brand voice
+- Platform best practices
+- Marketing playbooks
+- Campaign history
+- SEO guidance
+
+Rather than relying on a single prompt, Echo Studio builds context first.
+
+---
+
+## Strategy First
+
+Every campaign develops:
+
+- audience
+- campaign angle
+- messaging
+- positioning
+- hooks
+- calls-to-action
+- SEO direction
+
+before content is generated.
+
+---
+
+## Multi-Platform Content
+
+Generate coordinated content for multiple destinations from one campaign.
+
+Current prototype includes workflows for:
+
+- Pinterest
+- Facebook
+- Dev.to
+
+The architecture supports expanding to additional publishing platforms.
+
+---
+
+## Campaign Assets
+
+Keep everything together.
+
+- Images
+- Uploads
+- AI prompts
+- Creative assets
+- Supporting files
+
+No more hunting across folders.
+
+---
+
+## Review Workspace
+
+Review generated campaigns before publishing.
+
+Adjust messaging, strategy, and assets without leaving the workspace.
+
+---
+
+## Scheduling & Publishing
+
+Move from planning to publishing inside the same application.
+
+The Build Week prototype publishes using my connected creator accounts to demonstrate a complete end-to-end workflow.
+
+---
+
+# Screenshots
+
+## Home
+
+The starting point for every campaign. Enter a business goal and let Echo Studio build a structured marketing workflow.
+
+![Echo Studio Home](frontend/assets/InternalAssets/Homescreen.png)
+
+---
+
+## Dashboard
+
+View scheduled content, campaign calendar, and publishing activity at a glance.
+
+![Echo Studio Dashboard](frontend/assets/InternalAssets/Dashboard.png)
+
+---
+
+## Post Composer
+
+Plan, edit, optimize, and prepare content for publishing across multiple platforms.
+
+![Echo Studio Post Composer](frontend/assets/InternalAssets/PostComposer.png)
+
+---
+
+## Publishing Scheduler
+
+Configure publishing cadence, product rotation, and scheduling defaults.
+
+![Echo Studio Publishing Scheduler](frontend/assets/InternalAssets/Scheduler.png)
+
+---
+
+## Analytics
+
+Track publishing activity, platform mix, and campaign performance.
+
+![Echo Studio Analytics](frontend/assets/InternalAssets/PerformanceCHart.png)
+
+---
+
+## Analytics
+
+Track publishing activity, platform mix, and campaign performance.
+
+![Echo Studio Architecture](frontend/assets/InternalAssets/PerformanceChart.png)
+
+---
+
+# Architecture
+
+![Echo Studio architecture diagram](frontend/assets/InternalAssets/Diagram.png)
+
+---
+
+# Tech Stack
+
+## Frontend
+
+- React
+- Vite
+- Tailwind CSS
+
+## Backend
+
+- Node.js
+- Express
+- REST API
+
+## AI
+
+- OpenAI API
+- OpenAI Codex
+- GPT-5.6
+- Structured Prompt Pipeline
+- Knowledge-Aware Generation
+
+## Automation & Testing
+
+- Playwright
+
+## Publishing
+
+- Facebook
+- Pinterest
+- Dev.to
+
+---
+
+# What Makes Echo Studio Different?
+
+Most AI tools answer questions.
+
+Echo Studio manages workflows.
+
+It treats marketing as a connected process instead of isolated prompts.
+
+Rather than asking:
+
+> "Write me a Facebook post."
+
+Echo Studio begins with:
+
+> "What's your goal?"
+
+Everything that follows stays connected to that objective.
+
+---
+
+# Roadmap
+
+Future plans include:
+
+- Multi-user workspaces
+- OAuth-based account onboarding
+- Team collaboration
+- Expanded analytics and reporting
+- Additional publishing platforms
+- AI image generation
+- Campaign templates
+- Shared knowledge libraries
+
+---
+
+# Lessons Learned
+
+Building Echo Studio changed how I think about AI.
+
+The hardest part of marketing isn't generating content anymore.
+
+It's organizing everything that happens after the content exists.
+
+By reducing context switching and keeping campaigns in one place, I discovered workflow design can be just as valuable as AI itself.
+
+---
+
+# Built With
+
+- React
+- Node.js
+- Express
+- OpenAI
+- Tailwind CSS
+- GitHub
+- Vite
+
+---
+# Current Prototype
+
+The Build Week prototype demonstrates:
+
+✅ Campaign planning
+
+✅ Marketing metadata
+
+✅ AI-assisted campaign generation
+
+✅ Product rotation scheduling
+
+✅ Cross-platform publishing architecture
+
+🚧 Analytics expansion
+
+🚧 OAuth onboarding
+
+🚧 Multi-user workspaces
+
+# About
+
+Echo Studio began as a personal solution to my own marketing challenges.
+
+It grew into a platform designed to help creators spend less time juggling tools and more time sharing the things they build.
+
+---
+
+# License
+
+Copyright © 2026 Ashley Broussard. All rights reserved.
