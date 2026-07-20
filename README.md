@@ -21,7 +21,7 @@ Echo Studio is designed for creators who would rather spend time building produc
 
 **Live Application**
 
-> *(Add deployment URL)*
+[> *(deployment URL)*](https://echo-studio-hackathon-demo.vercel.app/)
 
 **Demo Video**
 
