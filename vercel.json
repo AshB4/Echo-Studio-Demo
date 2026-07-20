@@ -1,0 +1,8 @@
+Do not modify application code. Confirm that:
+- frontend is served at /
+- backend is served at /api
+- frontend uses Vite
+- backend uses Express
+- SPA routes fall back to frontend/index.html where appropriate
+
+Commit and push only vercel.json.
